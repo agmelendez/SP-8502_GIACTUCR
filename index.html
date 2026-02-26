@@ -605,6 +605,156 @@
     /* ─── ACTIVE NAV ─────────────────────────────────────────────────── */
     .sprint-block { opacity: 0; transform: translateX(-16px); transition: opacity 0.5s, transform 0.5s; }
     .sprint-block.visible { opacity: 1; transform: translateX(0); }
+
+    /* ─── CALENDARIO SEMANAL ─────────────────────────────────────────── */
+    #calendario { background: var(--ocean-deep); }
+
+    .cal-container { margin-top: 2.5rem; }
+
+    .cal-sprint-group {
+      margin-bottom: 2rem;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .cal-sprint-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.2rem 1.6rem;
+      background: var(--ocean-surface);
+    }
+    .cal-sprint-header.s1 { border-left: 4px solid var(--teal-bright); }
+    .cal-sprint-header.s2 { border-left: 4px solid var(--coral); }
+    .cal-sprint-header.s3 { border-left: 4px solid #7ab3f0; }
+    .cal-sprint-header.s4 { border-left: 4px solid #b07af0; }
+    .cal-sprint-header.s5 { border-left: 4px solid #80d86e; }
+
+    .sph-marker {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem; font-weight: 500;
+      flex-shrink: 0;
+    }
+    .s1 .sph-marker { background: #0a3a5c; border: 2px solid var(--teal-bright); color: var(--teal-bright); }
+    .s2 .sph-marker { background: #2a1a0a; border: 2px solid var(--coral); color: var(--coral); }
+    .s3 .sph-marker { background: #0a1a3a; border: 2px solid #7ab3f0; color: #7ab3f0; }
+    .s4 .sph-marker { background: #1a0a3a; border: 2px solid #b07af0; color: #b07af0; }
+    .s5 .sph-marker { background: #1a3a0a; border: 2px solid #80d86e; color: #80d86e; }
+
+    .cal-sprint-header h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.05rem;
+      margin-bottom: 0.2rem;
+    }
+    .sph-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--slate);
+      letter-spacing: 0.08em;
+    }
+
+    .cal-week { border-top: 1px solid rgba(255,255,255,0.04); }
+
+    .cal-week-btn {
+      width: 100%;
+      background: rgba(10,37,64,0.6);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.85rem 1.6rem;
+      text-align: left;
+      color: var(--white);
+      transition: background 0.18s;
+      flex-wrap: wrap;
+    }
+    .cal-week-btn:hover { background: rgba(0,201,177,0.08); }
+    .cal-week-btn.active { background: rgba(0,201,177,0.06); }
+
+    .cal-week-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--teal-bright);
+      min-width: 72px;
+      flex-shrink: 0;
+    }
+    .cal-week-dates {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--slate);
+      min-width: 148px;
+      flex-shrink: 0;
+    }
+    .cal-week-topic {
+      font-size: 0.88rem;
+      color: var(--sand);
+      flex: 1;
+    }
+    .cal-week-icon {
+      font-size: 1rem;
+      color: var(--teal-bright);
+      transition: transform 0.25s;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+    .cal-week-btn.active .cal-week-icon { transform: rotate(90deg); }
+
+    .cal-week-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.38s ease;
+    }
+    .cal-week-body.open { max-height: 900px; }
+
+    .cal-days {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: rgba(255,255,255,0.04);
+    }
+    @media (max-width: 720px) { .cal-days { grid-template-columns: 1fr; } }
+
+    .cal-day {
+      background: var(--ocean-mid);
+      padding: 1.1rem 1.3rem;
+    }
+    .cal-day-header {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--slate);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .cal-day-badge {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      padding: 0.18em 0.7em;
+      border-radius: 20px;
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.04em;
+    }
+    .badge-auto     { background: rgba(0,201,177,0.12); color: var(--teal-bright); }
+    .badge-pres     { background: rgba(224,123,84,0.15); color: var(--coral); }
+    .badge-followup { background: rgba(122,179,240,0.12); color: #7ab3f0; }
+
+    .cal-day ul { list-style: none; margin: 0; padding: 0; }
+    .cal-day ul li {
+      font-size: 0.82rem;
+      color: var(--sand);
+      padding: 0.22rem 0 0.22rem 1rem;
+      position: relative;
+      line-height: 1.45;
+    }
+    .cal-day ul li::before { content: '›'; position: absolute; left: 0; color: var(--teal-bright); }
+    .cal-day ul li.entrega { color: var(--coral); font-weight: 600; }
+    .cal-day ul li.entrega::before { color: var(--coral); }
   </style>
 </head>
 <body>
@@ -658,6 +808,7 @@
     <li><a href="#overview">Descripción</a></li>
     <li><a href="#ecosystem">Ecosistema IA</a></li>
     <li><a href="#sprints">Sprints</a></li>
+    <li><a href="#calendario">Calendario</a></li>
     <li><a href="#github">GitHub</a></li>
     <li><a href="#evaluacion">Evaluación</a></li>
     <li><a href="#politica">Política IA</a></li>
@@ -909,6 +1060,19 @@
     </div>
 
   </div><!-- /timeline -->
+</section>
+
+<!-- ═══ CALENDARIO SEMANAL ════════════════════════════════════════════════ -->
+<section id="calendario">
+  <div class="section-label">Actividades · Semana a Semana</div>
+  <h2 class="section-title">Calendario <em>Semanal</em><br>Detallado de Actividades</h2>
+  <p style="max-width:680px;color:var(--sand);margin-bottom:0.5rem;">
+    Cada semana se organiza en tres momentos: <strong style="color:var(--teal-bright)">estudio autónomo</strong> (NotebookLM + R),
+    <strong style="color:var(--coral)">sesión presencial</strong> (CIMAR/CIOdD) y
+    <strong style="color:#7ab3f0">seguimiento</strong> (tareas y entregables).
+    Haga clic en cualquier semana para ver el detalle.
+  </p>
+  <div id="cal-root"></div>
 </section>
 
 <!-- ═══ GITHUB ═════════════════════════════════════════════════════════════ -->
@@ -1213,6 +1377,442 @@
     });
   }, { threshold: 0.3 });
   sections.forEach(s => navObserver.observe(s));
+
+  // ═══ CALENDARIO SEMANAL DETALLADO ═══════════════════════════════════════
+
+  /**
+   * toggleCalWeek(id)
+   * Abre o cierra el cuerpo de una semana en el calendario acordeón.
+   * @param {string} id - ID del elemento .cal-week-body a alternar
+   */
+  function toggleCalWeek(id) {
+    const body = document.getElementById(id);
+    const btn  = document.getElementById(id + '-btn');
+    const open = body.classList.contains('open');
+    body.classList.toggle('open', !open);
+    btn.classList.toggle('active', !open);
+  }
+
+  /**
+   * buildWeeklyCalendar()
+   * Genera dinámicamente el calendario semanal completo de las 16 semanas
+   * del curso SP-8502 y lo inserta en el contenedor #cal-root.
+   * Cada semana incluye tres columnas de actividades:
+   *   1. Estudio Autónomo (antes de la sesión)
+   *   2. Sesión Presencial (CIMAR / CIOdD)
+   *   3. Seguimiento (tareas / entregables post-clase)
+   */
+  function buildWeeklyCalendar() {
+    const sprints = [
+      {
+        id: 's1',
+        label: 'Sprint 1: Diseño y Fundamentos de Datos',
+        range: 'Semanas 1–4 &nbsp;·&nbsp; 9 Mar – 3 Abr 2026',
+        peso: '20%',
+        weeks: [
+          {
+            num: 1, dates: '9–13 Mar 2026',
+            topic: 'Presentación y Ecosistema Digital',
+            pre: [
+              '📚 NotebookLM: Diseños Mixtos de Investigación',
+              '📚 NotebookLM: Ética IA (R-469-2025)',
+              '🔑 Ingresar a Google Classroom y NotebookLM'
+            ],
+            pres: [
+              'Presentación del programa y metodología del curso',
+              'Taller: Prompt Engineering básico con Claude / GPT',
+              '💻 Instalación y configuración de R, RStudio y GitHub'
+            ],
+            post: [
+              'Clonar repositorio del curso desde GitHub',
+              'Crear subcarpeta con su carné en sprint-1/entregas/',
+              'Abrir primera entrada en la Bitácora de IA (Anexo A)'
+            ]
+          },
+          {
+            num: 2, dates: '16–20 Mar 2026',
+            topic: 'Lógica Mixta y Planteamiento del Problema',
+            pre: [
+              '📚 NotebookLM: Diseño cuantitativo vs. cualitativo',
+              '📚 NotebookLM: Lógica de investigación mixta',
+              '✍ Borrador del planteamiento del problema propio'
+            ],
+            pres: [
+              'Taller: Matrices metodológicas en R (tibble, data.frame)',
+              'Revisión del planteamiento del problema en pares',
+              '💻 Ejercicio guiado: Data Wrangling básico con dplyr'
+            ],
+            post: [
+              'Completar matriz metodológica del proyecto propio',
+              'Documentar uso del Tutor IA en la Bitácora',
+              'Practicar filter(), mutate(), select() con datos costeros'
+            ]
+          },
+          {
+            num: 3, dates: '23–27 Mar 2026',
+            topic: 'R Básico, Tidyverse y Data Wrangling',
+            pre: [
+              '📚 NotebookLM: R Básico y sintaxis esencial',
+              '📚 NotebookLM: Tidyverse – dplyr, tidyr, readr',
+              '💻 Ejecutar script 00_setup_ambiente.R del repositorio'
+            ],
+            pres: [
+              'Taller práctico: Limpieza de datos reales con tidyr',
+              'Diagnóstico de calidad: valores faltantes y outliers',
+              '💻 Uso del Tutor IA para depurar código R en vivo'
+            ],
+            post: [
+              'Construir script de limpieza de datos del proyecto',
+              'Practicar pivot_longer / pivot_wider con tidyr',
+              'Registrar en Bitácora: ¿Qué ayuda pediste a la IA?'
+            ]
+          },
+          {
+            num: 4, dates: '30 Mar – 3 Abr 2026',
+            topic: 'Cierre Sprint 1: Revisión y Entrega',
+            pre: [
+              'Finalizar Reporte de Diseño Metodológico (PDF)',
+              'Revisar y comentar Script de Limpieza de Datos (.R)',
+              'Cerrar y exportar Bitácora IA Sprint 1 (.xlsx)'
+            ],
+            pres: [
+              'Revisión entre pares: retroalimentación del diseño metodológico',
+              'Presentación rápida de cada proyecto (5 min por estudiante)',
+              '✅ Resolución de dudas antes de la entrega formal'
+            ],
+            post: [
+              '⚠ ENTREGA Sprint 1: reporte_diseño.pdf · script_limpieza.R · bitacora_ia_s1.xlsx',
+              'Ruta: sp-8502-giact-2026/sprint-1/entregas/[carné]/',
+              'Verificar que el script corre sin errores antes de subir'
+            ]
+          }
+        ]
+      },
+      {
+        id: 's2',
+        label: 'Sprint 2: Trabajo de Campo y Muestreo',
+        range: 'Semanas 5–8 &nbsp;·&nbsp; 6 Abr – 1 May 2026',
+        peso: '20%',
+        weeks: [
+          {
+            num: 5, dates: '6–10 Abr 2026',
+            topic: 'Fundamentos de Muestreo Estadístico',
+            pre: [
+              '📚 NotebookLM: Muestreo probabilístico vs. no probabilístico',
+              '📚 NotebookLM: Muestreo sistemático, estratificado y por conglomerados',
+              '📐 Revisar fórmulas de cálculo de n'
+            ],
+            pres: [
+              'Introducción al diseño muestral en contextos costeros',
+              '💻 Cálculo de tamaños muestrales en R (power.t.test)',
+              'Comparación de estrategias para poblaciones móviles/costeras'
+            ],
+            post: [
+              'Calcular n óptimo para el proyecto propio',
+              'Justificar elección de estrategia muestral en el reporte',
+              'Documentar consultas al Tutor IA en Bitácora Sprint 2'
+            ]
+          },
+          {
+            num: 6, dates: '13–17 Abr 2026',
+            topic: 'Respondent-Driven Sampling (RDS)',
+            pre: [
+              '📚 NotebookLM: Respondent-Driven Sampling – teoría y aplicación',
+              '📚 NotebookLM: Poblaciones ocultas y de difícil acceso',
+              '💻 Instalar paquete RDS en R: install.packages("RDS")'
+            ],
+            pres: [
+              'Simulación de cadenas de referencia RDS en R',
+              'Estimadores de Volz-Heckathorn y sesgos de muestreo',
+              '💻 Explorar datos de una red RDS simulada en vivo'
+            ],
+            post: [
+              'Evaluar si el proyecto puede usar RDS u otro método',
+              'Explorar RDS::makeChains() con datos simulados',
+              'Registrar decisión metodológica en la Bitácora'
+            ]
+          },
+          {
+            num: 7, dates: '20–24 Abr 2026',
+            topic: 'Diseño de Instrumentos y Recolección de Datos',
+            pre: [
+              '📚 NotebookLM: Diseño de encuestas – validez y confiabilidad',
+              '📚 NotebookLM: Cálculo del error de muestreo',
+              '✍ Borrador del instrumento de recolección del proyecto'
+            ],
+            pres: [
+              'Revisión de instrumentos del proyecto (encuestas/guías)',
+              'Piloto de 5 preguntas: identificar problemas de comprensión',
+              '💻 Técnicas de anonimización de datos en R'
+            ],
+            post: [
+              'Revisar instrumento con Tutor IA y documentar cambios',
+              'Aplicar prueba piloto y anotar observaciones en campo',
+              'Preparar base de datos preliminar (simulada o real)'
+            ]
+          },
+          {
+            num: 8, dates: '27 Abr – 1 May 2026',
+            topic: 'Cierre Sprint 2: Validación y Entrega',
+            pre: [
+              'Finalizar Estrategia de Muestreo Validada (PDF)',
+              'Preparar Base de Datos anonimizada (.csv)',
+              'Cerrar Bitácora IA Sprint 2 (.xlsx)'
+            ],
+            pres: [
+              'Retroalimentación: revisión de estrategias muestrales',
+              'Validación colectiva de bases de datos y anonimización',
+              '✅ Resolución de dudas antes de la entrega formal'
+            ],
+            post: [
+              '⚠ ENTREGA Sprint 2: estrategia_muestreo.pdf · base_datos.csv (anonimizada) · bitacora_ia_s2.xlsx',
+              'Ruta: sp-8502-giact-2026/sprint-2/entregas/[carné]/',
+              'Confirmar que los datos cumplen R-469-2025 (sin información sensible)'
+            ]
+          }
+        ]
+      },
+      {
+        id: 's3',
+        label: 'Sprint 3: Análisis Profundo y Modelado',
+        range: 'Semanas 9–12 &nbsp;·&nbsp; 4 May – 29 May 2026',
+        peso: '25%',
+        weeks: [
+          {
+            num: 9, dates: '4–8 May 2026',
+            topic: 'Regresión Lineal y Diagnóstico de Supuestos',
+            pre: [
+              '📚 NotebookLM: Regresión lineal – teoría y supuestos',
+              '📚 NotebookLM: Diagnóstico gráfico: residuales, Q-Q plot',
+              '💻 Revisar funciones lm(), summary(), plot() en R'
+            ],
+            pres: [
+              'Ajuste de modelos de regresión lineal con datos costeros',
+              '💻 Diagnóstico gráfico: homocedasticidad y normalidad',
+              'Interpretación de coeficientes y p-valores en contexto'
+            ],
+            post: [
+              'Ajustar modelo de regresión lineal al dataset del proyecto',
+              'Generar gráficos de diagnóstico y documentar hallazgos',
+              'Describir decisiones analíticas en la Bitácora'
+            ]
+          },
+          {
+            num: 10, dates: '11–15 May 2026',
+            topic: 'Regresión Logística y Clínica de Código',
+            pre: [
+              '📚 NotebookLM: Regresión logística – odds ratios, ROC/AUC',
+              '📚 NotebookLM: Análisis Multivariado',
+              '💻 Preparar código con errores para la Clínica de Código'
+            ],
+            pres: [
+              '🔬 "Clínica de Código": depuración de errores en vivo',
+              'Regresión logística en R: glm(family = binomial)',
+              '💻 Curvas ROC y cálculo de AUC con pROC'
+            ],
+            post: [
+              'Ajustar modelo logístico si aplica al proyecto',
+              'Corregir errores identificados en la Clínica de Código',
+              'Documentar proceso de depuración en la Bitácora'
+            ]
+          },
+          {
+            num: 11, dates: '18–22 May 2026',
+            topic: 'Análisis Cualitativo y Triangulación Mixta',
+            pre: [
+              '📚 NotebookLM: Codificación cualitativa y análisis temático',
+              '📚 NotebookLM: Triangulación en investigación mixta',
+              '✍ Preparar material cualitativo del proyecto (transcripciones)'
+            ],
+            pres: [
+              'Taller de codificación cualitativa asistida en R',
+              'Triangulación: cruzar patrones estadísticos con categorías',
+              '💻 Visualización de redes de categorías con ggraph'
+            ],
+            post: [
+              'Codificar al menos 3 entrevistas/documentos del proyecto',
+              'Redactar sección de hallazgos cualitativos',
+              'Comparar con resultados cuantitativos: ¿coinciden?'
+            ]
+          },
+          {
+            num: 12, dates: '25–29 May 2026',
+            topic: 'Simulación Bootstrap y Cierre Sprint 3',
+            pre: [
+              '📚 NotebookLM: Bootstrap, Monte Carlo e inferencia por simulación',
+              'Finalizar Informe de Hallazgos (PDF)',
+              'Finalizar Script de Análisis Reproducible (.R)'
+            ],
+            pres: [
+              'Bootstrap en R para intervalos de confianza robustos',
+              'Revisión de supuestos estadísticos finales',
+              '✅ Revisión colectiva del informe de hallazgos'
+            ],
+            post: [
+              '⚠ ENTREGA Sprint 3: informe_hallazgos.pdf · script_analisis.R · README_reproducibilidad.md · bitacora_ia_s3.xlsx',
+              'Ruta: sp-8502-giact-2026/sprint-3/entregas/[carné]/',
+              'Verificar reproducibilidad: ¿el script corre desde cero?'
+            ]
+          }
+        ]
+      },
+      {
+        id: 's4',
+        label: 'Sprint 4: Comunicación y Toma de Decisiones',
+        range: 'Semanas 13–15 &nbsp;·&nbsp; 1 Jun – 19 Jun 2026',
+        peso: '20%',
+        weeks: [
+          {
+            num: 13, dates: '1–5 Jun 2026',
+            topic: 'Visualización Efectiva con ggplot2 y sf',
+            pre: [
+              '📚 NotebookLM: Principios de visualización de datos',
+              '📚 NotebookLM: ggplot2 avanzado y sf para datos espaciales',
+              '💻 Instalar/actualizar paquetes sf, tmap, ggplot2'
+            ],
+            pres: [
+              'Taller: Visualización efectiva – capas, temas y escalas',
+              '🗺 Mapas costeros interactivos con sf y tmap',
+              '💻 Revisar ejemplos en sprint-4/ejemplos-viz/ del repositorio'
+            ],
+            post: [
+              'Crear 3+ visualizaciones para el proyecto (ggplot2 / sf)',
+              'Verificar que cada figura es autoexplicativa',
+              'Usar Tutor IA para pulir el código estético (documentar)'
+            ]
+          },
+          {
+            num: 14, dates: '8–12 Jun 2026',
+            topic: 'Storytelling con Datos y Policy Briefs',
+            pre: [
+              '📚 NotebookLM: Storytelling con datos – narrativa visual',
+              '📚 NotebookLM: Redacción de Policy Briefs para gestión costera',
+              '✍ Borrador del Policy Brief (problema, hallazgos, recomendaciones)'
+            ],
+            pres: [
+              'Revisión de borradores de Policy Brief entre pares',
+              '💻 Integración de visualizaciones en el informe ejecutivo',
+              'Taller: Redacción científica orientada a tomadores de decisión'
+            ],
+            post: [
+              'Completar borrador del Policy Brief con apoyo del Tutor IA',
+              'Integrar las 3 mejores visualizaciones al informe',
+              'Solicitar retroalimentación al profesor vía Google Classroom'
+            ]
+          },
+          {
+            num: 15, dates: '15–19 Jun 2026',
+            topic: 'Cierre Sprint 4 y Preparación de la Defensa',
+            pre: [
+              'Finalizar Policy Brief Final (PDF)',
+              'Completar Presentación Ejecutiva (PDF/PPTX)',
+              'Cerrar Bitácora IA Sprint 4 (entrega final)'
+            ],
+            pres: [
+              'Ensayo de presentaciones ejecutivas (10 min por estudiante)',
+              'Retroalimentación entre pares: claridad y evidencia',
+              '⚠ Instrucciones para la Defensa Final: formato y criterios'
+            ],
+            post: [
+              '⚠ ENTREGA Sprint 4: policy_brief.pdf · presentacion_ejecutiva.pdf · visualizaciones/ · bitacora_ia_s4.xlsx',
+              'Ruta: sp-8502-giact-2026/sprint-4/entregas/[carné]/',
+              'Iniciar preparación de la demostración en R en vivo (sin IA)'
+            ]
+          }
+        ]
+      },
+      {
+        id: 's5',
+        label: 'Defensa Final y Demo en Vivo',
+        range: 'Semana 16 &nbsp;·&nbsp; 22–27 Jun 2026',
+        peso: '15%',
+        weeks: [
+          {
+            num: 16, dates: '22–27 Jun 2026',
+            topic: 'Defensa Final y Demostración en R en Vivo',
+            pre: [
+              'Practicar la demo en R sin asistencia de IA en tiempo real',
+              'Revisar script_demo.R: debe estar comentado y funcional',
+              'Preparar resumen ejecutivo de una sola página'
+            ],
+            pres: [
+              '🎓 DEFENSA FINAL: Presentación (10 min) ante pares y profesor',
+              '🖥 Demo en vivo en R sin IA en tiempo real (autonomía analítica)',
+              '💬 Preguntas del tribunal: justificación metodológica'
+            ],
+            post: [
+              '⚠ SUBIR: presentacion_final.pdf · script_demo.R · resumen_ejecutivo_1p.pdf',
+              'Ruta: sp-8502-giact-2026/defensa-final/presentaciones/[carné]/',
+              '🏁 ¡Fin del curso – Felicidades!'
+            ]
+          }
+        ]
+      }
+    ];
+
+    const markerLabel = { s1: 'S1', s2: 'S2', s3: 'S3', s4: 'S4', s5: '🎓' };
+
+    let html = '<div class="cal-container">';
+
+    sprints.forEach(sprint => {
+      html += `
+        <div class="cal-sprint-group">
+          <div class="cal-sprint-header ${sprint.id}">
+            <div class="sph-marker">${markerLabel[sprint.id]}</div>
+            <div>
+              <h3>${sprint.label}</h3>
+              <div class="sph-meta">${sprint.range} &nbsp;·&nbsp; ${sprint.peso}</div>
+            </div>
+          </div>`;
+
+      sprint.weeks.forEach(week => {
+        const wId = `cal-${sprint.id}-w${week.num}`;
+
+        const renderItems = (items) =>
+          items.map(a => {
+            const isEntrega = a.startsWith('⚠') || a.startsWith('🎓') || a.startsWith('🏁');
+            return `<li${isEntrega ? ' class="entrega"' : ''}>${a}</li>`;
+          }).join('');
+
+        html += `
+          <div class="cal-week">
+            <button class="cal-week-btn" id="${wId}-btn" onclick="toggleCalWeek('${wId}')">
+              <span class="cal-week-num">Semana ${week.num}</span>
+              <span class="cal-week-dates">${week.dates}</span>
+              <span class="cal-week-topic">${week.topic}</span>
+              <span class="cal-week-icon">›</span>
+            </button>
+            <div class="cal-week-body" id="${wId}">
+              <div class="cal-days">
+                <div class="cal-day">
+                  <div class="cal-day-header">📖 Antes de la sesión</div>
+                  <span class="cal-day-badge badge-auto">Estudio Autónomo</span>
+                  <ul>${renderItems(week.pre)}</ul>
+                </div>
+                <div class="cal-day">
+                  <div class="cal-day-header">🏫 Sesión Presencial</div>
+                  <span class="cal-day-badge badge-pres">Presencial · CIMAR / CIOdD</span>
+                  <ul>${renderItems(week.pres)}</ul>
+                </div>
+                <div class="cal-day">
+                  <div class="cal-day-header">💻 Después de la sesión</div>
+                  <span class="cal-day-badge badge-followup">Tarea / Seguimiento</span>
+                  <ul>${renderItems(week.post)}</ul>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      });
+
+      html += '</div>'; // close cal-sprint-group
+    });
+
+    html += '</div>'; // close cal-container
+    document.getElementById('cal-root').innerHTML = html;
+  }
+
+  // Inicializar calendario al cargar la página
+  buildWeeklyCalendar();
 </script>
 
 </body>
