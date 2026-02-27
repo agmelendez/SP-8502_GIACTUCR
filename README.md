@@ -16,18 +16,17 @@
 
 2. **Descarga los materiales de tu Sprint actual** desde la carpeta `sp-8502-giact-2026/sprint-X/materiales/`
 
-3. **Sube tus entregables** a `sp-8502-giact-2026/sprint-X/entregas/[TU-CARNÉ]/`
+3. **Sube tus entregables** a tu carpeta personal: `sp-8502-giact-2026/estudiantes/[TU-NOMBRE]/sprint-X/`
    ```bash
-   # Ejemplo para el Sprint 1:
-   mkdir sp-8502-giact-2026/sprint-1/entregas/B12345
-   cp mi_reporte.pdf sp-8502-giact-2026/sprint-1/entregas/B12345/
+   # Ejemplo para el Sprint 1 (Carolina Martín Rivas):
+   cp mi_reporte.pdf sp-8502-giact-2026/estudiantes/CAROLINA-MARTIN-RIVAS/sprint-1/
    git add .
-   git commit -m "Sprint 1 - Entrega [Tu Nombre]"
+   git commit -m "Sprint 1 - Entrega Carolina Martín Rivas"
    git push
    ```
 
 4. **Convención de nombres de archivos:**
-   `sprint1_reporte_[carné].pdf` / `sprint1_script_[carné].R` / `sprint1_bitacora_[carné].xlsx`
+   `sprint1_reporte_[nombre].pdf` / `sprint1_script_[nombre].R` / `sprint1_bitacora_[nombre].xlsx`
 
 ---
 
@@ -53,33 +52,41 @@ SP-8502_GIACTUCR/                       ← raíz del repositorio (al clonar)
     │
     ├── sprint-1/   (Semanas 1–4 · 20%)
     │   ├── materiales/
-    │   ├── datasets/
-    │   └── entregas/
-    │       └── [su-carné]/                 ← ⬆ SUBIR AQUÍ
+    │   └── datasets/
     │
     ├── sprint-2/   (Semanas 5–8 · 20%)
     │   ├── materiales/
-    │   ├── datasets/
-    │   └── entregas/
-    │       └── [su-carné]/
+    │   └── datasets/
     │
     ├── sprint-3/   (Semanas 9–12 · 25%)
     │   ├── materiales/
-    │   ├── datasets/
-    │   └── entregas/
-    │       └── [su-carné]/
+    │   └── datasets/
     │
     ├── sprint-4/   (Semanas 13–15 · 20%)
     │   ├── materiales/
-    │   ├── ejemplos-viz/
-    │   └── entregas/
-    │       └── [su-carné]/
+    │   └── ejemplos-viz/
     │
-    └── defensa-final/   (Semana 16 · 15%)
-        ├── rubrica_defensa.pdf
-        ├── calendario_presentaciones.pdf
-        └── presentaciones/
-            └── [su-carné]/
+    ├── defensa-final/   (Semana 16 · 15%)
+    │   ├── rubrica_defensa.pdf
+    │   └── calendario_presentaciones.pdf
+    │
+    └── estudiantes/                    ← Carpetas personales de cada estudiante
+        ├── ANA-GABRIELA-SOLANO-ARAUZ/
+        │   ├── sprint-1/               ← ⬆ Entregables Sprint 1
+        │   ├── sprint-2/               ← ⬆ Entregables Sprint 2
+        │   ├── sprint-3/               ← ⬆ Entregables Sprint 3
+        │   ├── sprint-4/               ← ⬆ Entregables Sprint 4
+        │   └── defensa-final/          ← ⬆ Presentación final
+        ├── ANA-KIYOMI-MEUNIER/
+        ├── CAROLINA-MARTIN-RIVAS/
+        ├── CHRYS-HAMED-MONTIEL-JIMENEZ/
+        ├── GABRIELA-MARIA-ESPINOZA-RAMOS/
+        ├── GASPARD-JANIER-DUBRY/
+        ├── JOCELYN-GILBERT-GARCIA/
+        ├── JUSTINE-MATHILDE-LAPRIE/
+        ├── LOUANNE-GERVAIS/
+        └── RIWAN-IDRISSI/
+            (cada una con: sprint-1/ sprint-2/ sprint-3/ sprint-4/ defensa-final/)
 ```
 
 ---
