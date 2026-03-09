@@ -152,6 +152,40 @@
     }
     .btn-ghost:hover { border-color: var(--teal-bright); color: var(--teal-bright); transform: translateY(-2px); }
 
+    /* ─── DROPDOWN PLANTILLAS ────────────────────────────────────────── */
+    .btn-dropdown-wrap { position: relative; display: inline-block; }
+    .btn-dropdown { display: inline-flex; align-items: center; gap: 0.5em; border: none; background: transparent; }
+    .btn-dropdown::after { content: '▾'; font-size: 0.78em; transition: transform 0.2s; }
+    .btn-dropdown.open::after { transform: rotate(180deg); }
+    .dropdown-menu {
+      position: absolute; top: calc(100% + 6px); left: 0;
+      background: var(--ocean-surface);
+      border: 1px solid rgba(0,201,177,0.25);
+      border-radius: 6px;
+      padding: 0.4rem 0;
+      min-width: 230px;
+      opacity: 0; pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 200;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.45);
+    }
+    .dropdown-menu.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.55rem 1.1rem;
+      text-decoration: none;
+      color: var(--sand);
+      font-family: 'Barlow', sans-serif; font-size: 0.84rem;
+      transition: background 0.15s, color 0.15s;
+    }
+    .dropdown-item:hover { background: rgba(0,201,177,0.1); color: var(--teal-bright); }
+    .dropdown-item .di-ext {
+      margin-left: auto;
+      font-family: 'DM Mono', monospace; font-size: 0.68rem;
+      color: var(--teal-muted); letter-spacing: 0.04em;
+    }
+
     .scroll-hint {
       position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
       z-index: 1; text-align: center;
@@ -877,7 +911,23 @@
       </div>
     </div>
     <div class="cta-row">
-      <a href="sp-8502-giact-2026/recursos/documentos/programa_curso.pdf" class="btn btn-primary" download>⬇ Descargar Programa</a>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;align-items:flex-start;">
+        <a href="sp-8502-giact-2026/recursos/documentos/programa_curso.pdf" class="btn btn-primary" download>⬇ Descargar Programa</a>
+        <div class="btn-dropdown-wrap">
+          <button class="btn btn-ghost btn-dropdown" id="tpl-btn" onclick="togglePlantillasDropdown()">⬇ Descargar Plantillas</button>
+          <div class="dropdown-menu" id="tpl-menu">
+            <a href="sp-8502-giact-2026/recursos/documentos/bitacora_ia_template.xlsx" class="dropdown-item" download>
+              📊 Bitácora de IA<span class="di-ext">.xlsx</span>
+            </a>
+            <a href="sp-8502-giact-2026/recursos/scripts-base/00_setup_ambiente.R" class="dropdown-item" download>
+              💻 Script Setup R<span class="di-ext">.R</span>
+            </a>
+            <a href="Short_Course_on_Multivariate_Analysis_PCA.ipynb" class="dropdown-item" download>
+              📓 Análisis PCA<span class="di-ext">.ipynb</span>
+            </a>
+          </div>
+        </div>
+      </div>
       <a href="#sprints" class="btn btn-ghost">Ver Sprints →</a>
       <a href="#github" class="btn btn-ghost">Repositorio GitHub →</a>
     </div>
@@ -1956,6 +2006,23 @@
 
   // Inicializar calendario al cargar la página
   buildWeeklyCalendar();
+
+  // ─── DROPDOWN PLANTILLAS ─────────────────────────────────────────────────
+  function togglePlantillasDropdown() {
+    const menu = document.getElementById('tpl-menu');
+    const btn  = document.getElementById('tpl-btn');
+    const isOpen = menu.classList.contains('open');
+    menu.classList.toggle('open', !isOpen);
+    btn.classList.toggle('open', !isOpen);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.btn-dropdown-wrap')) {
+      const menu = document.getElementById('tpl-menu');
+      const btn  = document.getElementById('tpl-btn');
+      if (menu) { menu.classList.remove('open'); btn.classList.remove('open'); }
+    }
+  });
 </script>
 
 </body>
