@@ -158,17 +158,17 @@
     .btn-dropdown::after { content: '▾'; font-size: 0.78em; transition: transform 0.2s; }
     .btn-dropdown.open::after { transform: rotate(180deg); }
     .dropdown-menu {
-      position: absolute; top: calc(100% + 6px); left: 0;
+      position: absolute; bottom: calc(100% + 6px); top: auto; left: 0;
       background: var(--ocean-surface);
       border: 1px solid rgba(0,201,177,0.25);
       border-radius: 6px;
       padding: 0.4rem 0;
       min-width: 230px;
       opacity: 0; pointer-events: none;
-      transform: translateY(-6px);
+      transform: translateY(6px);
       transition: opacity 0.18s ease, transform 0.18s ease;
       z-index: 200;
-      box-shadow: 0 14px 36px rgba(0,0,0,0.45);
+      box-shadow: 0 -8px 36px rgba(0,0,0,0.45);
     }
     .dropdown-menu.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
     .dropdown-item {
@@ -202,7 +202,86 @@
     }
     @keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(5px)} }
 
-    /* ─── NAV ────────────────────────────────────────────────────────── */
+    /* ─── SIDEBAR NAV ────────────────────────────────────────────────── */
+    #sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 220px; height: 100vh;
+      background: rgba(5,16,30,0.98);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(0,201,177,0.15);
+      z-index: 300;
+      display: flex; flex-direction: column;
+      overflow-y: auto; overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0,201,177,0.2) transparent;
+      transition: transform 0.25s ease;
+    }
+    #sidebar-logo {
+      padding: 1.5rem 1.3rem 1.2rem;
+      border-bottom: 1px solid rgba(0,201,177,0.12);
+      flex-shrink: 0;
+    }
+    #sidebar-logo .sb-course {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--teal-bright);
+    }
+    #sidebar-logo .sb-title {
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.78rem; font-weight: 600;
+      color: var(--white); margin-top: 0.35rem;
+      line-height: 1.35;
+    }
+    #sidebar ul { list-style: none; padding: 0.6rem 0; flex: 1; }
+    #sidebar ul li a {
+      display: flex; align-items: center; gap: 0.65rem;
+      padding: 0.62rem 1.3rem;
+      text-decoration: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.71rem; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--slate);
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    #sidebar ul li a .sb-icon { font-size: 0.85rem; flex-shrink: 0; }
+    #sidebar ul li a:hover,
+    #sidebar ul li a.active {
+      color: var(--teal-bright);
+      border-left-color: var(--teal-bright);
+      background: rgba(0,201,177,0.06);
+    }
+    #sidebar-toggle {
+      display: none;
+      position: fixed; top: 0.75rem; left: 0.75rem;
+      z-index: 400;
+      background: rgba(7,26,46,0.92);
+      border: 1px solid rgba(0,201,177,0.3);
+      border-radius: 4px;
+      padding: 0.45rem 0.65rem;
+      cursor: pointer; color: var(--teal-bright);
+      font-size: 1.1rem; line-height: 1;
+      transition: background 0.15s;
+    }
+    #sidebar-toggle:hover { background: rgba(0,201,177,0.12); }
+    #sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 250;
+    }
+    @media (min-width: 901px) {
+      body { padding-left: 220px; }
+      nav  { display: none; }
+    }
+    @media (max-width: 900px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      #sidebar-overlay.open { display: block; }
+      #sidebar-toggle { display: block; }
+    }
+
+    /* ─── NAV (visible solo en móvil) ───────────────────────────────── */
     nav {
       position: sticky; top: 0; z-index: 100;
       background: rgba(7,26,46,0.93);
@@ -876,6 +955,29 @@
   </style>
 </head>
 <body>
+
+<!-- ═══ SIDEBAR NAV ══════════════════════════════════════════════════════ -->
+<button id="sidebar-toggle" onclick="toggleSidebar()" aria-label="Abrir navegación">☰</button>
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<aside id="sidebar">
+  <div id="sidebar-logo">
+    <div class="sb-course">SP-8502 · GIACT</div>
+    <div class="sb-title">Métodos Cuanti-Cuali<br>con IA Responsable</div>
+  </div>
+  <ul>
+    <li><a href="#inicio"><span class="sb-icon">🏠</span>Inicio</a></li>
+    <li><a href="#overview"><span class="sb-icon">📖</span>Descripción</a></li>
+    <li><a href="#ecosystem"><span class="sb-icon">🧬</span>Ecosistema IA</a></li>
+    <li><a href="#sprints"><span class="sb-icon">⚡</span>Sprints</a></li>
+    <li><a href="#calendario"><span class="sb-icon">📅</span>Calendario</a></li>
+    <li><a href="#github"><span class="sb-icon">🐙</span>GitHub</a></li>
+    <li><a href="#evaluacion"><span class="sb-icon">📊</span>Evaluación</a></li>
+    <li><a href="#politica"><span class="sb-icon">🛡️</span>Política IA</a></li>
+    <li><a href="#recursos"><span class="sb-icon">📚</span>Recursos</a></li>
+    <li><a href="#python-recursos"><span class="sb-icon">🐍</span>Python</a></li>
+    <li><a href="#youtube"><span class="sb-icon">🎬</span>Videos</a></li>
+  </ul>
+</aside>
 
 <!-- ═══ HEADER ═══════════════════════════════════════════════════════════ -->
 <header id="inicio">
@@ -1560,9 +1662,9 @@
 
   document.querySelectorAll('.fade-in, .sprint-block').forEach(el => observer.observe(el));
 
-  // Active nav link
+  // Active nav link (top nav + sidebar)
   const sections = document.querySelectorAll('section[id], header[id]');
-  const navLinks = document.querySelectorAll('nav a');
+  const navLinks = document.querySelectorAll('nav a, #sidebar ul li a');
   const navObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -1573,6 +1675,16 @@
     });
   }, { threshold: 0.3 });
   sections.forEach(s => navObserver.observe(s));
+
+  // Cerrar sidebar al hacer clic en un enlace (móvil)
+  document.querySelectorAll('#sidebar ul li a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('open');
+      }
+    });
+  });
 
   // ═══ CALENDARIO SEMANAL DETALLADO ═══════════════════════════════════════
 
@@ -2009,6 +2121,12 @@
 
   // Inicializar calendario al cargar la página
   buildWeeklyCalendar();
+
+  // ─── SIDEBAR TOGGLE (móvil) ──────────────────────────────────────────────
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('open');
+  }
 
   // ─── DROPDOWN PLANTILLAS ─────────────────────────────────────────────────
   function togglePlantillasDropdown() {
