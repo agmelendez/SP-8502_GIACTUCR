@@ -539,6 +539,90 @@
     /* ─── RECURSOS ───────────────────────────────────────────────────── */
     #recursos { background: var(--ocean-mid); }
 
+    /* ─── PYTHON RECURSOS ────────────────────────────────────────────── */
+    #python-recursos { background: var(--ocean-deep); }
+    .py-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: var(--grid-gap);
+      margin-top: 2rem;
+    }
+    .py-card {
+      background: linear-gradient(135deg, #0d3557 0%, #0a2540 100%);
+      border: 1px solid rgba(0,201,177,0.18);
+      border-radius: 10px;
+      padding: 1.6rem;
+      text-decoration: none;
+      transition: all 0.22s;
+      display: block;
+    }
+    .py-card:hover {
+      border-color: var(--teal-bright);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,201,177,0.15);
+    }
+    .py-card .py-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+    .py-card h3 { font-size: 1rem; color: var(--white); margin-bottom: 0.4rem; }
+    .py-card p { font-size: 0.82rem; color: var(--slate); line-height: 1.5; }
+    .py-card .py-badge {
+      display: inline-block; margin-top: 0.9rem;
+      background: rgba(0,201,177,0.12); border: 1px solid rgba(0,201,177,0.3);
+      border-radius: 4px; padding: 0.2rem 0.6rem;
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      color: var(--teal-bright); letter-spacing: 0.05em;
+    }
+    .py-note {
+      margin-top: 2rem;
+      padding: 1rem 1.4rem;
+      background: rgba(0,201,177,0.07);
+      border-left: 3px solid var(--teal-muted);
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+      color: var(--slate);
+    }
+
+    /* ─── YOUTUBE ─────────────────────────────────────────────────────── */
+    #youtube { background: var(--ocean-mid); }
+    .yt-container {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .yt-embed-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    }
+    .yt-embed-wrap iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .yt-info {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+    .yt-info p { color: var(--slate); font-size: 0.9rem; flex: 1; min-width: 220px; }
+    .yt-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: #ff0000; color: #fff;
+      padding: 0.65rem 1.4rem;
+      border-radius: 6px; text-decoration: none;
+      font-weight: 600; font-size: 0.9rem;
+      transition: background 0.2s, transform 0.2s;
+      white-space: nowrap;
+    }
+    .yt-btn:hover { background: #cc0000; transform: translateY(-2px); }
+
     .rec-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -813,6 +897,8 @@
     <li><a href="#evaluacion">Evaluación</a></li>
     <li><a href="#politica">Política IA</a></li>
     <li><a href="#recursos">Recursos</a></li>
+    <li><a href="#python-recursos">Python</a></li>
+    <li><a href="#youtube">Videos</a></li>
   </ul>
 </nav>
 
@@ -864,7 +950,7 @@
       <h3 style="color:#7ab3f0">🎓 Google Classroom</h3>
       <div class="eco-role">Columna vertebral organizativa</div>
       <p>Gestión de Sprints, rúbricas, foros de discusión, calendario y entrega de bitácoras de IA. Calificaciones ponderadas por Sprint.</p>
-      <a href="https://classroom.google.com" target="_blank" rel="noopener" class="btn btn-ghost">Abrir Classroom →</a>
+      <a href="https://gemini.google.com/share/d18cf17de05d" target="_blank" rel="noopener" class="btn btn-ghost">Abrir Classroom →</a>
     </div>
     <div class="eco-card notebooklm fade-in">
       <h3 style="color:#fbbc04">📚 NotebookLM</h3>
@@ -1326,6 +1412,63 @@
       <p>Arquitectura del ecosistema digital: Sprints + NotebookLM + Tutor IA en Classroom.</p>
       <span class="rec-link">⬇ guia_classroom.pdf</span>
     </a>
+  </div>
+</section>
+
+<!-- ═══ PYTHON RECURSOS ════════════════════════════════════════════════════ -->
+<section id="python-recursos">
+  <div class="section-label">Google Colab · Notebooks Interactivos</div>
+  <h2 class="section-title">Recursos en <em>Python</em></h2>
+  <p style="color:var(--slate);max-width:680px;margin-top:0.5rem">Colección de cuadernos completos y funcionales con ejemplos y técnicas de análisis. Diseñados para ejecutarse directamente en Google Colab — no requieren instalación.</p>
+
+  <div class="py-grid">
+    <a href="sp-8502-giact-2026/Python/" class="py-card fade-in" download>
+      <div class="py-icon">🐍</div>
+      <h3>Carpeta Completa de Recursos Python</h3>
+      <p>Scripts y notebooks con ejemplos de análisis cuantitativo y cualitativo asistidos por IA. Listos para abrir en Google Colab.</p>
+      <span class="py-badge">⬇ Descargar carpeta</span>
+    </a>
+    <a href="Short_Course_on_Multivariate_Analysis_PCA.ipynb" class="py-card fade-in" download>
+      <div class="py-icon">📊</div>
+      <h3>Análisis Multivariado · PCA</h3>
+      <p>Notebook del curso corto sobre Análisis de Componentes Principales (PCA) con ejemplos aplicados a datos costeros.</p>
+      <span class="py-badge">⬇ .ipynb · Google Colab</span>
+    </a>
+    <a href="https://gemini.google.com/share/d18cf17de05d" class="py-card fade-in" target="_blank" rel="noopener">
+      <div class="py-icon">🎓</div>
+      <h3>Acceso vía Google Classroom</h3>
+      <p>Todos los recursos Python también están disponibles y organizados en el ecosistema de Google Classroom del curso.</p>
+      <span class="py-badge">↗ Abrir Classroom</span>
+    </a>
+  </div>
+
+  <div class="py-note">
+    <strong style="color:var(--teal-bright)">¿Cómo usar estos recursos?</strong> &nbsp;Descargue el notebook (.ipynb) → Vaya a <a href="https://colab.research.google.com" target="_blank" rel="noopener" style="color:var(--teal-bright)">colab.research.google.com</a> → Suba el archivo o ábralo desde GitHub. Los códigos son autónomos: incluyen instalación de dependencias y datos de ejemplo.
+  </div>
+</section>
+
+<!-- ═══ YOUTUBE ═════════════════════════════════════════════════════════════ -->
+<section id="youtube">
+  <div class="section-label">Canal Audiovisual del Curso</div>
+  <h2 class="section-title">Videos en <em>YouTube</em></h2>
+  <p style="color:var(--slate);max-width:680px;margin-top:0.5rem">Lista de reproducción oficial del curso con contenidos audiovisuales que los estudiantes pueden revisar y analizar como material de apoyo teórico y práctico.</p>
+
+  <div class="yt-container">
+    <div class="yt-embed-wrap">
+      <iframe
+        src="https://www.youtube.com/embed/videoseries?list=PL3coKUi7WzZ7rIYLNIfAOvve3T1UE_Vza"
+        title="SP-8502 · Lista de reproducción del curso"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+    </div>
+    <div class="yt-info">
+      <p>Acceda a todos los videos del canal del curso: demostraciones, tutoriales y análisis de casos aplicados a la gestión costera con IA responsable.</p>
+      <a href="https://www.youtube.com/playlist?list=PL3coKUi7WzZ7rIYLNIfAOvve3T1UE_Vza" target="_blank" rel="noopener" class="yt-btn">
+        ▶ Ver lista completa en YouTube
+      </a>
+    </div>
   </div>
 </section>
 
