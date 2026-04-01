@@ -1,0 +1,411 @@
+---
+title: "Reporte de Diseño Metodológico — Sprint 1"
+subtitle: |
+  SP-8502 · Métodos Cuanti-Cuali con IA Responsable  
+  Maestría en Gestión Integrada de Áreas Costeras Tropicales (GIACT)  
+  Universidad de Costa Rica · 2026-I
+author: |
+  **[Nombre Completo del Estudiante]**  
+  Carné: [XXXXXXX]  
+  Director(a): [Nombre del Director]  
+  Contacto: [correo@ucr.ac.cr]
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_caption: true
+    latex_engine: xelatex
+    highlight: tango
+    includes:
+      in_header: null
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+    number_sections: true
+    fig_caption: true
+bibliography: referencias_s1.bib
+csl: apa-6th-edition.csl
+fontsize: 11pt
+geometry: "margin=2.5cm"
+lang: es-CR
+---
+
+```{r setup, include=FALSE}
+# ─── Configuración global del documento ─────────────────────────────────────
+knitr::opts_chunk$set(
+  echo       = TRUE,      # Mostrar código (transparencia metodológica)
+  message    = FALSE,
+  warning    = FALSE,
+  fig.align  = "center",
+  fig.width  = 7,
+  fig.height = 4.5,
+  out.width  = "90%",
+  cache      = FALSE      # No usar caché en entregable final
+)
+
+# Cargar librerías necesarias
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(janitor)
+  library(skimr)
+  library(knitr)
+  library(kableExtra)
+  library(psych)
+  library(patchwork)
+})
+
+# Semilla de reproducibilidad
+set.seed(8502)
+
+# Cargar datos limpios (requiere haber ejecutado script_limpieza.R)
+if (!file.exists("datos/procesados/pescadores_limpio.csv")) {
+  source("00_setup_ambiente.R")
+  source("02_datos_sinteticos_costeros.R")
+  source("script_limpieza.R")
+}
+
+datos <- read_csv("datos/procesados/pescadores_limpio.csv",
+                  show_col_types = FALSE) %>%
+  mutate(
+    comunidad = factor(comunidad,
+                       levels = c("Quepos","Jacó","Tárcoles",
+                                  "Herradura","Punta Morales")),
+    sexo = factor(sexo, levels = c("Masculino","Femenino")),
+    arte_pesca_principal = factor(arte_pesca_principal),
+    percepcion_recurso = factor(percepcion_recurso,
+                                levels = c("Muy escaso","Escaso","Regular",
+                                           "Abundante","Muy abundante"),
+                                ordered = TRUE),
+    extension_pesquera = factor(extension_pesquera, levels = c("No","Sí"))
+  )
+
+n_total <- nrow(datos)
+```
+
+---
+
+> **Declaración de IA:** Este documento fue elaborado con asistencia del Tutor IA SP-8502 (Custom GPT) y verificado contra fuentes académicas primarias. Las decisiones metodológicas sustantivas son responsabilidad exclusiva del estudiante. Documentación completa en Anexo A (Bitácora de IA). Uso conforme a la Resolución R-469-2025 de la UCR.
+
+---
+
+\newpage
+
+# Introducción y Planteamiento del Problema
+
+## Contexto Temático
+
+La pesca artesanal representa uno de los sistemas socioecológicos más complejos y vulnerables de las zonas costeras tropicales. En el Pacífico Central de Costa Rica, comunidades como Quepos, Jacó, Tárcoles, Herradura y Punta Morales enfrentan presiones convergentes: sobreexplotación del recurso marino, cambio climático, y tensiones derivadas de la expansión de Áreas Marinas Protegidas (AMP).
+
+La adopción de prácticas de pesca sostenible no depende únicamente de factores económicos —como frecuentemente modelizan los enfoques racionalistas— sino también de mediaciones culturales y de percepción ambiental que los diseños cuantitativos tradicionales no capturan.
+
+## Pregunta Central de Investigación
+
+> *"¿En qué medida los factores socioeconómicos y la percepción ambiental de comunidades pesqueras artesanales del Pacífico Central de Costa Rica predicen la adopción de prácticas de pesca sostenible, y qué narrativas culturales median dicha relación?"*
+
+## Justificación del Diseño Mixto
+
+La pregunta anterior contiene dos capas epistemológicas inseparables:
+
+1. **Capa cuantitativa:** ¿Qué factores *predicen* el Score de Adopción Sostenible (SAS)?
+2. **Capa cualitativa:** ¿Qué narrativas *median* o *explican* esa relación desde dentro?
+
+Un diseño monomodo no puede responder ambas. Se adopta, por tanto, un **Diseño Secuencial Explicativo (QUAN → qual)** según la tipología de @creswell2018designing:
+
+- **Fase I (Sprints 1–3):** Encuesta estructurada, $n \geq 60$, modelado cuantitativo del SAS.
+- **Fase II (Sprint 3):** Entrevistas semiestructuradas y grupos focales, $n \approx 15$–20.
+- **Fase III (Sprint 4):** Integración mediante *joint display* y construcción de tipología.
+
+\newpage
+
+# Objetivos de la Investigación
+
+## Objetivo General
+
+Analizar los determinantes socioeconómicos y culturales de la adopción de prácticas de pesca sostenible en comunidades pesqueras del Pacífico Central de Costa Rica, mediante un diseño mixto secuencial explicativo.
+
+## Objetivos Específicos
+
+| # | Objetivo | Sprint | Método |
+|---|----------|--------|--------|
+| OE1 | Describir el perfil socioeconómico y demográfico de pescadores artesanales | S1–S2 | Estadística descriptiva |
+| OE2 | Medir el nivel de adopción sostenible (SAS) y sus predictores | S2–S3 | Regresión lineal múltiple |
+| OE3 | Identificar narrativas culturales que median la adopción sostenible | S2–S3 | Análisis temático |
+| OE4 | Construir una tipología integrada de perfiles pesqueros | S4 | Clúster + análisis temático |
+
+# Matriz Metodológica Mixta (MMR)
+
+La MMR es el artefacto estructurador central del Proyecto Integrador. Operacionaliza cada variable en términos de nivel de medición, instrumento y técnica de análisis correspondiente.
+
+```{r mmr_tabla, echo=FALSE}
+mmr <- read_csv("datos/procesados/mmr_sprint1.csv", show_col_types = FALSE)
+
+mmr %>%
+  select(componente, variable, nivel_medicion, instrumento, sprint_responsable) %>%
+  kable(
+    col.names = c("Componente", "Variable", "Nivel Medición",
+                  "Instrumento", "Sprint"),
+    caption   = "Matriz Metodológica Mixta (MMR) — SP-8502 · Sprint 1",
+    booktabs  = TRUE,
+    longtable = TRUE
+  ) %>%
+  kable_styling(
+    font_size       = 9,
+    latex_options   = c("striped", "hold_position", "repeat_header"),
+    full_width      = TRUE
+  ) %>%
+  row_spec(0, bold = TRUE, background = "#2c7fb8", color = "white") %>%
+  pack_rows("Componente Cuantitativo", 1, 7) %>%
+  pack_rows("Componente Cualitativo",  8, 10) %>%
+  pack_rows("Integración Mixta",      11, 12)
+```
+
+\newpage
+
+# Descripción de la Muestra (EDA Sprint 1)
+
+En esta primera fase se trabajó con un dataset de práctica de $n = `r n_total`$ observaciones, correspondiente a datos sintéticos generados con parámetros informados por la literatura (Arias-Godínez et al., 2021) para simular condiciones de campo realistas.
+
+> **Nota metodológica:** El uso de datos sintéticos en el Sprint 1 es obligatorio por política del curso (R-469-2025): está prohibido subir datos reales de comunidades a plataformas de IA públicas sin anonimización certificada. En el Sprint 2 se sustituirá por datos primarios anonimizados.
+
+## Distribución por Comunidad
+
+```{r tabla_comunidad, echo=FALSE}
+datos %>%
+  count(comunidad) %>%
+  mutate(
+    Porcentaje = paste0(round(n / sum(n) * 100, 1), "%"),
+    `% acumulado` = paste0(round(cumsum(n / sum(n)) * 100, 1), "%")
+  ) %>%
+  rename(Comunidad = comunidad, N = n) %>%
+  kable(
+    caption  = "Distribución de la muestra por comunidad pesquera",
+    booktabs = TRUE,
+    align    = c("l", "c", "c", "c")
+  ) %>%
+  kable_styling(
+    latex_options = c("striped", "hold_position"),
+    full_width    = FALSE,
+    position      = "center"
+  ) %>%
+  row_spec(0, bold = TRUE)
+```
+
+## Estadísticos Descriptivos — Variables Continuas
+
+```{r desc_continuas, echo=FALSE}
+datos %>%
+  select(edad, años_experiencia, ingreso_mensual_usd,
+         sas_total, distancia_anp_km) %>%
+  psych::describe(fast = TRUE) %>%
+  select(n, mean, sd, min, max, se) %>%
+  round(2) %>%
+  kable(
+    col.names = c("n válido", "Media", "DE", "Mínimo", "Máximo", "Error std."),
+    caption   = "Estadísticos descriptivos de variables continuas clave",
+    booktabs  = TRUE
+  ) %>%
+  kable_styling(
+    latex_options = c("striped", "hold_position"),
+    full_width    = FALSE
+  )
+```
+
+## Distribución del Score de Adopción Sostenible (SAS)
+
+```{r plot_sas, echo=FALSE, fig.cap="Distribución del Score de Adopción Sostenible (SAS). Línea verde = media; línea morada = mediana."}
+datos %>%
+  filter(!is.na(sas_total)) %>%
+  ggplot(aes(x = sas_total)) +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 15, fill = "#2c7fb8", alpha = 0.7, color = "white") +
+  geom_density(color = "#e34a33", linewidth = 1) +
+  geom_vline(xintercept = mean(datos$sas_total, na.rm = TRUE),
+             color = "#31a354", linewidth = 1) +
+  geom_vline(xintercept = median(datos$sas_total, na.rm = TRUE),
+             color = "#756bb1", linewidth = 1, linetype = "dotted") +
+  scale_x_continuous(limits = c(0, 50), breaks = seq(0, 50, 10)) +
+  labs(x = "SAS Total (0–50 pts)", y = "Densidad")
+```
+
+```{r plot_sas_com, echo=FALSE, fig.cap="SAS por comunidad pesquera. Rombo = media; caja = IQR."}
+datos %>%
+  filter(!is.na(sas_total)) %>%
+  ggplot(aes(x = comunidad, y = sas_total, fill = comunidad)) +
+  geom_boxplot(alpha = 0.6, outlier.shape = NA, width = 0.5) +
+  geom_jitter(width = 0.2, alpha = 0.4, size = 1.5) +
+  stat_summary(fun = mean, geom = "point", shape = 23,
+               size = 3, fill = "white", color = "#e34a33") +
+  scale_fill_brewer(palette = "Set2", guide = "none") +
+  scale_y_continuous(limits = c(0, 50)) +
+  labs(x = NULL, y = "SAS Total (0–50 pts)") +
+  coord_flip()
+```
+
+## Percepción del Recurso Marino
+
+```{r plot_percepcion, echo=FALSE, fig.cap="Percepción del recurso marino por comunidad."}
+datos %>%
+  filter(!is.na(percepcion_recurso)) %>%
+  count(comunidad, percepcion_recurso) %>%
+  group_by(comunidad) %>%
+  mutate(pct = n / sum(n) * 100) %>%
+  ggplot(aes(x = comunidad, y = pct, fill = percepcion_recurso)) +
+  geom_col(position = "stack", alpha = 0.9) +
+  scale_fill_manual(
+    values = c("Muy escaso" = "#d7191c", "Escaso" = "#fdae61",
+               "Regular"    = "#ffffbf", "Abundante" = "#a6d96a",
+               "Muy abundante" = "#1a9641"),
+    name = "Percepción"
+  ) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  labs(x = NULL, y = "Porcentaje (%)") +
+  coord_flip()
+```
+
+\newpage
+
+# Hipótesis Estadísticas
+
+Las hipótesis fueron formuladas en concordancia con las preguntas de investigación y la revisión de literatura. Se someterán a prueba en el Sprint 3.
+
+$$H_1: \text{SAS}_i = \beta_0 + \beta_1 \ln(\text{ingreso}_i) + \beta_2 \text{años\_exp}_i + \beta_3 \text{extensión}_i + \varepsilon_i$$
+
+- $H_1$ (principal): El modelo OLS explica ≥ 35% de la varianza del SAS ($R^2 \geq 0.35$, $p < 0.05$).
+- $H_2$: Comunidades con acceso a extensión presentan SAS significativamente mayor ($d > 0.5$).  
+- $H_3$: Existe correlación positiva entre distancia al ANP y SAS ($r \geq 0.40$, $p < 0.05$).
+- $H_0$: Ninguna variable socioeconómica predice significativamente el SAS.
+
+# Decisiones Metodológicas Críticas
+
+```{r decisiones, echo=FALSE}
+read_csv("datos/procesados/decisiones_limpieza.csv",
+         show_col_types = FALSE) %>%
+  select(decision, justificacion) %>%
+  kable(
+    col.names = c("Decisión adoptada", "Justificación metodológica"),
+    caption   = "Decisiones críticas de limpieza y preparación de datos — Sprint 1",
+    booktabs  = TRUE,
+    longtable = TRUE
+  ) %>%
+  kable_styling(
+    font_size     = 9,
+    latex_options = c("striped", "hold_position", "repeat_header"),
+    full_width    = TRUE
+  ) %>%
+  column_spec(1, width = "5cm", bold = TRUE) %>%
+  column_spec(2, width = "9cm")
+```
+
+# Calidad de Datos: Reporte de Completitud
+
+```{r completitud, echo=FALSE}
+datos %>%
+  summarise(across(everything(),
+                   list(n_valid = ~ sum(!is.na(.)),
+                        pct_na  = ~ round(mean(is.na(.)) * 100, 1)))) %>%
+  pivot_longer(everything(),
+               names_to  = c("variable", ".value"),
+               names_pattern = "(.+)_(.+)$") %>%
+  mutate(
+    Semáforo = case_when(
+      pct_na == 0        ~ "✓ Completo",
+      pct_na <= 5        ~ "⚠ Leve",
+      pct_na <= 15       ~ "⚠⚠ Moderado",
+      TRUE               ~ "✗ Crítico"
+    )
+  ) %>%
+  rename(Variable = variable, `N válido` = n_valid, `% Faltante` = pct_na) %>%
+  kable(
+    caption  = "Reporte de completitud del dataset — Sprint 1",
+    booktabs = TRUE,
+    align    = c("l", "c", "c", "l")
+  ) %>%
+  kable_styling(
+    latex_options = c("striped", "hold_position"),
+    full_width    = FALSE
+  )
+```
+
+\newpage
+
+# Conclusiones del Sprint 1
+
+El Sprint 1 ha cumplido sus tres entregables centrales:
+
+1. **Reporte de Diseño Metodológico (este documento):** La Matriz Metodológica Mixta operacionaliza `r nrow(mmr)` variables bajo un diseño Secuencial Explicativo (QUAN → qual), coherente con la epistemología de la investigación.
+
+2. **Script de Limpieza (`script_limpieza.R`):** Se identificaron y corrigieron 9 tipos de errores en el dataset crudo, con documentación explícita de cada decisión mediante el protocolo de 4 pasos (Cálculo → Interpretación → Contexto → Decisión).
+
+3. **Bitácora de IA (Anexo A):** Todas las interacciones significativas con IA están documentadas, incluyendo prompts utilizados, salidas obtenidas y decisiones humanas que las moderaron.
+
+**Anticipación al Sprint 2:** Los hallazgos del EDA indican que el instrumento de campo deberá capturar con mayor precisión los ingresos mensuales (evitar NS/NR con lista de rangos) y considerar la incorporación de variables de red social (lazos de cooperación) como predictores del SAS, no contempladas en la MMR inicial.
+
+---
+
+# Referencias
+
+::: {#refs}
+:::
+
+---
+
+\newpage
+
+# Anexo A: Bitácora de IA (Resumen Sprint 1)
+
+> **Nota:** La bitácora completa se entrega en formato Excel (`bitacora_ia_s1.xlsx`) según la plantilla oficial del curso. Este anexo presenta un resumen ejecutivo.
+
+```{r bitacora_resumen, echo=FALSE}
+bitacora_resumen <- tibble(
+  `#`           = 1:4,
+  Herramienta   = c("NotebookLM", "Tutor IA (GPT)", "Tutor IA (GPT)", "Claude"),
+  Tarea_IA      = c(
+    "Síntesis teórica sobre diseños mixtos MMR",
+    "Sugerencia de tipología de diseño mixto",
+    "Diagnóstico de errores en código R de limpieza",
+    "Revisión gramatical de sección 4"
+  ),
+  Prompt_Resumen = c(
+    "«Resume los 3 tipos de diseño mixto según Creswell...»",
+    "«Dado este contexto, sugiere 3 diseños mixtos alternativos...»",
+    "«¿Por qué mi mutate() no convierte 9999.99 a NA correctamente?»",
+    "«Revisa el estilo APA de este párrafo...»"
+  ),
+  Decision_Humana = c(
+    "Selección del diseño secuencial explicativo con justificación propia",
+    "Rechazo del diseño convergente; adopción del secuencial (ver Sección 4)",
+    "Corrección del código; comprensión del operador == vs %in%",
+    "Revisión del texto sugerido; mantenimiento de voz original del estudiante"
+  ),
+  Verificacion = c(
+    "Creswell & Plano Clark (2018), Cap. 3",
+    "Idem, pp. 61–88",
+    "Wickham & Grolemund (2023), Cap. 5",
+    "APA 7ma ed. Manual"
+  )
+)
+
+bitacora_resumen %>%
+  kable(
+    caption  = "Bitácora de IA — Resumen Sprint 1 (completa en .xlsx adjunto)",
+    booktabs = TRUE,
+    longtable = TRUE
+  ) %>%
+  kable_styling(
+    font_size     = 8,
+    latex_options = c("striped", "hold_position", "repeat_header"),
+    full_width    = TRUE
+  ) %>%
+  column_spec(3, width = "4cm") %>%
+  column_spec(4, width = "4cm") %>%
+  column_spec(5, width = "4cm")
+```
+
+---
+
+*Documento generado con R Markdown · `r R.version.string` · `r format(Sys.time(), "%Y-%m-%d %H:%M")`*  
+*Reproducible con `set.seed(8502)`. Código completo disponible en GitHub: `sp-8502-giact-2026/sprint-1/entregas/[carné]/`*
