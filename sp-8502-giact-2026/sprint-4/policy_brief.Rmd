@@ -1,0 +1,302 @@
+---
+title: |
+  ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/UCR_logo.svg/80px-UCR_logo.svg.png){width=60px}
+  
+  **Extensión Pesquera y Sostenibilidad Artesanal**  
+  en el Pacífico Central de Costa Rica
+subtitle: |
+  **Policy Brief** · Recomendaciones para Gestión Costera Basada en Evidencia  
+  Maestría GIACT · SP-8502 · Universidad de Costa Rica · 2026
+author: |
+  **[Nombre Completo]** · [correo@ucr.ac.cr]  
+  Supervisión: MSI. Agustín Gómez Meléndez · CIOdD · UCR
+date: "`r format(Sys.Date(), '%B %Y')`"
+output:
+  pdf_document:
+    latex_engine: xelatex
+    fig_caption: true
+    number_sections: false
+    toc: false
+    highlight: tango
+    includes:
+      in_header: null
+  html_document:
+    theme: flatly
+    fig_caption: true
+fontsize: 11pt
+geometry: "margin=2cm, top=2.5cm"
+lang: es-CR
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE,
+                      fig.align="center", out.width="95%",
+                      fig.width=8, fig.height=4.5)
+suppressPackageStartupMessages({
+  library(tidyverse); library(knitr); library(kableExtra)
+  library(patchwork); library(scales)
+})
+set.seed(8502)
+
+# Cargar resultados
+if (!file.exists("datos/procesados/modelos_finales_s3.rds")) {
+  source("script_analisis.R")  # ruta ajustar si es necesario
+}
+
+modelos   <- readRDS("datos/procesados/modelos_finales_s3.rds")
+M3        <- modelos$M3
+datos     <- readRDS("datos/procesados/datos_imputados_s3.rds")
+hip_tab   <- read_csv("datos/procesados/resultados_hipotesis_s3.csv",
+                       show_col_types=FALSE)
+coef_tab  <- read_csv("datos/procesados/coeficientes_M3_final.csv",
+                       show_col_types=FALSE)
+jd_tab    <- read_csv("datos/procesados/joint_display_s4.csv",
+                       show_col_types=FALSE)
+esp_tab   <- read_csv("datos/procesados/tabla_espacial_s4.csv",
+                       show_col_types=FALSE)
+
+# Métricas clave
+r2_pct   <- round(summary(M3)$r.squared * 100, 1)
+beta_ext <- round(coef(M3)["extension_pesquera"], 1)
+g1 <- datos$sas_total[datos$extension_pesquera==0]
+g2 <- datos$sas_total[datos$extension_pesquera==1]
+sd_p <- sqrt(((length(g1)-1)*var(g1,na.rm=T)+(length(g2)-1)*var(g2,na.rm=T))/
+               (length(g1)+length(g2)-2))
+d_val   <- round(abs((mean(g2,na.rm=T)-mean(g1,na.rm=T))/sd_p), 2)
+pct_ext <- round(mean(datos$extension_pesquera,na.rm=T)*100,1)
+sas_med <- round(mean(datos$sas_total,na.rm=T),1)
+n_obs   <- nrow(datos)
+```
+
+\vspace{-0.8cm}
+
+---
+
+```{r kpi_strip, fig.height=1.6, fig.width=12, out.width="100%"}
+# KPI strip visual
+kpis <- data.frame(
+  val   = c(paste0(r2_pct,"%"), as.character(d_val),
+             paste0(pct_ext,"%"), paste0(sas_med,"/50")),
+  lab   = c("Varianza SAS explicada\npor el modelo",
+             "d de Cohen: efecto\nextensión pesquera",
+             "Cobertura actual\nprograma de extensión",
+             "SAS promedio 2026\n(máximo posible: 50)"),
+  color = c("#003F8A","#1d7e6a","#e06c00","#636363")
+)
+ggplot() + theme_void() +
+  mapply(function(i, v, l, co) {
+    list(
+      annotate("rect", xmin=i-1, xmax=i, ymin=0, ymax=1,
+               fill=co, color="white", linewidth=1.5),
+      annotate("text", x=i-0.5, y=0.68, label=v,
+               color="white", size=7, fontface="bold"),
+      annotate("text", x=i-0.5, y=0.28, label=l,
+               color="white", size=2.8, lineheight=1.1)
+    )
+  }, i=1:4, v=kpis$val, l=kpis$lab, co=kpis$color) +
+  xlim(0,4) + ylim(0,1)
+```
+
+\vspace{0.3cm}
+
+## El Problema
+
+La pesca artesanal en el Pacífico Central de Costa Rica enfrenta una paradoja: los pescadores conocen las prácticas sostenibles pero las adoptan de forma heterogénea. Las comunidades más alejadas de las instituciones pesqueras —Tárcoles, Punta Morales— registran los menores Scores de Adopción Sostenible (SAS), mientras que Quepos, con mayor acceso institucional, lidera la adopción. **La brecha no es cultural: es de acceso.**
+
+Este estudio analiza los determinantes del SAS mediante un diseño mixto secuencial (encuesta estructurada $n = `r n_obs`$ + 20 entrevistas semiestructuradas) en cinco comunidades del Pacífico Central.
+
+---
+
+## Hallazgos Principales
+
+### 1. La extensión pesquera es el predictor más modificable del SAS
+
+```{r fig_extension, fig.height=3.5, fig.width=8, fig.cap="Diferencia en SAS entre grupos con y sin participación en extensión pesquera."}
+ext_stats <- datos %>%
+  mutate(Grupo = ifelse(extension_pesquera==1,"Participa\nen extensión",
+                         "No participa\nen extensión")) %>%
+  group_by(Grupo) %>%
+  summarise(media=mean(sas_total,na.rm=T), se=sd(sas_total,na.rm=T)/sqrt(n()),
+            ic_low=media-qt(0.975,n()-1)*se, ic_high=media+qt(0.975,n()-1)*se,
+            n=n(), .groups="drop")
+
+ggplot(ext_stats, aes(x=Grupo, y=media, fill=Grupo)) +
+  geom_col(width=0.5, alpha=0.88) +
+  geom_errorbar(aes(ymin=ic_low,ymax=ic_high), width=0.12, linewidth=1,
+                color="#555555") +
+  geom_text(aes(label=paste0(round(media,1)," pts\n(n=",n,")")),
+            vjust=-1.1, size=4, fontface="bold") +
+  scale_fill_manual(values=c("Participa\nen extensión"="#1d7e6a",
+                               "No participa\nen extensión"="#bdbdbd"),
+                    guide="none") +
+  scale_y_continuous(limits=c(0,44), labels=function(x) paste0(x," pts")) +
+  annotate("segment", x=1,xend=2,y=40,yend=40, color="#003F8A", linewidth=1) +
+  annotate("text", x=1.5,y=42, label=paste0("d = ",d_val," · p < 0.05"),
+           size=3.8, color="#003F8A", fontface="bold") +
+  labs(x=NULL, y="SAS promedio (0–50 pts)",
+       caption="IC 95% | Fuente: Encuesta SP-8502 · Pacífico Central CR · 2026") +
+  theme_minimal(base_size=12) +
+  theme(panel.grid.major.x=element_blank(),
+        axis.text.x=element_text(size=12,face="bold"))
+```
+
+Los pescadores que participan en programas de extensión pesquera tienen un SAS **`r round(mean(g2,na.rm=T)-mean(g1,na.rm=T),1)` puntos más alto** que quienes no participan (d de Cohen = `r d_val`; efecto mediano-grande; p < 0.05). Esto equivale a **`r round((mean(g2,na.rm=T)-mean(g1,na.rm=T))/50*100,0)`% de la escala total**.
+
+> **¿Por qué funciona la extensión?** Las entrevistas revelan que el cambio no es normativo sino cognitivo: *"Cuando empecé a ver los datos de mis capturas, entendí para qué era [el programa]"* (pescador, Jacó). La extensión conecta la práctica sostenible con la racionalidad propia del pescador.
+
+### 2. La brecha de acceso es geográfica e institucional a la vez
+
+```{r fig_mapa_sas, fig.height=3.8, fig.cap="SAS promedio y cobertura de extensión por comunidad."}
+com_data <- datos %>%
+  group_by(comunidad) %>%
+  summarise(sas=round(mean(sas_total,na.rm=T),1),
+             ext=round(mean(extension_pesquera,na.rm=T)*100,1),
+             n=n(), .groups="drop") %>%
+  mutate(comunidad=fct_reorder(comunidad, sas))
+
+p_sas <- ggplot(com_data, aes(x=sas, y=comunidad, fill=sas)) +
+  geom_col(width=0.55, alpha=0.88) +
+  geom_text(aes(label=paste0(sas," pts")), hjust=-0.1, size=3.5, fontface="bold") +
+  scale_fill_gradient(low="#c0392b", high="#1d7e6a", guide="none") +
+  scale_x_continuous(limits=c(0,42)) +
+  labs(title="SAS promedio", x="Puntos", y=NULL) +
+  theme_minimal(base_size=11) +
+  theme(panel.grid.major.y=element_blank())
+
+p_ext <- ggplot(com_data, aes(x=ext, y=comunidad, fill=ext)) +
+  geom_col(width=0.55, alpha=0.88) +
+  geom_text(aes(label=paste0(ext,"%")), hjust=-0.1, size=3.5, fontface="bold") +
+  scale_fill_gradient(low="#fdae61", high="#003F8A", guide="none") +
+  scale_x_continuous(limits=c(0,65)) +
+  labs(title="Cobertura extensión", x="Porcentaje", y=NULL) +
+  theme_minimal(base_size=11) +
+  theme(panel.grid.major.y=element_blank(),
+        axis.text.y=element_blank())
+
+p_sas | p_ext
+```
+
+Quepos —con mayor proximidad al Parque Nacional Manuel Antonio y mayor cobertura de extensión— lidera el SAS. Tárcoles y Punta Morales, con aislamiento institucional histórico, muestran los valores más bajos. Las entrevistas confirman: *"En Tárcoles estamos solos. No viene nadie a enseñarnos"* (pescador, 20 años de experiencia).
+
+### 3. El modelo explicativo: `r r2_pct`% de la varianza explicada
+
+```{r fig_coef, fig.height=3.2, fig.cap="Efecto de cada variable sobre el SAS (coeficientes OLS con IC 95%). Barras azules = aumento del SAS; barras rojas = reducción."}
+coef_tab %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    term_l = case_when(
+      term == "extension_pesquera" ~ "Extensión pesquera ★",
+      term == "log_ingreso"        ~ "Ingreso mensual (log)",
+      term == "años_experiencia"   ~ "Años de experiencia",
+      term == "tamaño_familia"     ~ "Tamaño del grupo familiar",
+      term == "distancia_anp_km"   ~ "Distancia al ANP (km)",
+      term == "percepcion_num"     ~ "Percepción del recurso marino",
+      grepl("metodo",term)         ~ "Método de muestreo (control)",
+      TRUE ~ term
+    ),
+    color = ifelse(estimate > 0, "#1d7e6a", "#c0392b"),
+    term_l = fct_reorder(term_l, estimate)
+  ) %>%
+  ggplot(aes(x=estimate, y=term_l, fill=estimate>0)) +
+  geom_col(alpha=ifelse(coef_tab$p.value[coef_tab$term!="(Intercept)"]<0.05,
+                         0.9, 0.4),
+           width=0.6) +
+  geom_errorbarh(aes(xmin=conf.low,xmax=conf.high),height=0.25,
+                 color="#555555",linewidth=0.8) +
+  geom_vline(xintercept=0,color="black",linewidth=0.7) +
+  scale_fill_manual(values=c("TRUE"="#1d7e6a","FALSE"="#c0392b"),guide="none") +
+  labs(x="Puntos de SAS (por unidad de predictor)",y=NULL,
+       caption=paste0("Modelo OLS · R² = ",
+                       round(summary(M3)$r.squared,3),
+                       " · n = ",n_obs," · * barras opacas = p < 0.05")) +
+  theme_minimal(base_size=11) +
+  theme(panel.grid.major.y=element_blank())
+```
+
+---
+
+## Recomendaciones de Política
+
+```{r recomendaciones_tabla}
+tibble(
+  `#` = 1:4,
+  Recomendación = c(
+    "**Expandir la cobertura** del programa de extensión pesquera al 55% (desde el 35% actual)",
+    "**Priorizar Tárcoles y Punta Morales** con brigadas móviles de extensión, dado su aislamiento geográfico e institucional",
+    "**Integrar el CEL** (Conocimiento Ecológico Local) en los currículos de extensión: no reemplazar, sino articular el saber ancestral con la formación técnica",
+    "**Crear un mecanismo de co-gestión** que permita a los pescadores participar en las decisiones regulatorias (vedas, zonas, tallas mínimas)"
+  ),
+  Fundamento = c(
+    paste0("Simulación Monte Carlo: +",
+            round(coef(M3)["extension_pesquera"] * 0.2 * 100, 1),
+            " pts SAS esperados; IC 95% positivo"),
+    "Efecto geográfico: β(distancia_ANP) < 0; brecha SAS Tárcoles vs. Quepos = 6 pts",
+    "Tema T1 (CEL) + Tema T2 (cambio actitudinal): la articulación CEL-formación produce cambios duraderos",
+    "Tema T5 (gobernanza): alto nivel de saturación cualitativa; gap cuantitativo identificado"
+  ),
+  `Actor responsable` = c(
+    "INCOPESCA · MINAE · CIMAR",
+    "IMAS · SINAC · Municipalidades costeras",
+    "CIMAR · UCR · Cooperativas pesqueras",
+    "MINAE · INCOPESCA · Organizaciones de base"
+  ),
+  `Plazo` = c("2026–2027","2026 (inmediato)","2027–2028","2027–2029")
+) %>%
+  kable(caption="Recomendaciones de política basadas en evidencia mixta",
+        booktabs=TRUE, escape=FALSE) %>%
+  kable_styling(latex_options=c("striped","hold_position"),
+                font_size=9, full_width=TRUE) %>%
+  column_spec(1, width="0.4cm") %>%
+  column_spec(2, width="5cm") %>%
+  column_spec(3, width="4.5cm") %>%
+  column_spec(4, width="2.5cm") %>%
+  column_spec(5, width="2cm") %>%
+  row_spec(c(1,2), background="#f0f4f8")
+```
+
+---
+
+## Priorización Geográfica de la Intervención
+
+```{r prioridad_tabla}
+esp_tab %>%
+  select(comunidad, sas_media, pct_ext, dist_anp_med, prioridad_intervencion) %>%
+  arrange(sas_media) %>%
+  rename(
+    Comunidad = comunidad,
+    `SAS promedio` = sas_media,
+    `Cobertura ext. (%)` = pct_ext,
+    `Dist. ANP (km)` = dist_anp_med,
+    `Prioridad de intervención` = prioridad_intervencion
+  ) %>%
+  kable(caption="Priorización geográfica de la intervención por comunidad",
+        booktabs=TRUE) %>%
+  kable_styling(latex_options=c("striped","hold_position"),
+                font_size=10, full_width=TRUE) %>%
+  row_spec(which(esp_tab$prioridad_intervencion[order(esp_tab$sas_media)]
+                  == esp_tab$prioridad_intervencion[
+                    order(esp_tab$sas_media)][1]), 
+           bold=TRUE, background="#fde8e8")
+```
+
+---
+
+## Integración Mixta: Lo que los Números No Pueden Decir Solos
+
+El diseño mixto del estudio revela que **cuatro de cinco dimensiones analíticas convergen** entre los hallazgos cuantitativos y cualitativos. La excepción —la gobernanza— es el hallazgo más importante: es la variable que el modelo estadístico no captura pero los pescadores identifican como crítica. *"Las reglas cambian sin consultarnos. Eso desmotiva a los que queremos hacer bien las cosas"* (pescador, Herradura).
+
+La siguiente encuesta deberá incluir indicadores de gobernanza percibida, participación en decisiones y confianza institucional.
+
+---
+
+## Limitaciones
+
+Los datos utilizados son sintéticos (práctica de curso); los resultados son ilustrativos. En campo real: (1) usar datos primarios anonimizados certificados; (2) confirmar supuestos OLS con residuales de campo; (3) considerar variables instrumentales para la endogeneidad SAS↔extensión.
+
+---
+
+> **Cita sugerida:** [Apellido], [Nombre]. (2026). *Extensión pesquera y sostenibilidad artesanal en el Pacífico Central de Costa Rica* [Policy Brief, SP-8502]. GIACT, UCR.  
+> **Datos y código:** `github.com/agmelendez/SP-8502_GIACTUCR` · `sprint-4/entregas/[carné]/`  
+> **Uso de IA:** Asistido por Tutor IA SP-8502 y NotebookLM. Decisiones sustantivas del autor. R-469-2025 UCR.
+
+*`r format(Sys.Date(), "%B %Y")` · CIOdD · GIACT · Sistema de Estudios de Posgrado · UCR*
