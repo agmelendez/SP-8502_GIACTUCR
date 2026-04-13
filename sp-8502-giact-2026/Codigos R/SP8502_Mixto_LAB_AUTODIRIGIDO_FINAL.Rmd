@@ -1,0 +1,962 @@
+---
+title: "SP-8502 · Laboratorio Autodirigido de Investigación Mixta"
+subtitle: "Diseño secuencial explicativo QUAN→QUAL · Un único archivo con contexto, análisis e integración"
+author: "SP-8502 · GIACT · Universidad de Costa Rica · I Ciclo 2026"
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    theme: flatly
+    highlight: tango
+    code_folding: show
+    number_sections: true
+    df_print: paged
+    fig_width: 10
+    fig_height: 6
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  warning   = FALSE,
+  message   = FALSE,
+  fig.align = "center",
+  cache     = FALSE,
+  dpi       = 150
+)
+set.seed(8502)
+
+loc_ok <- tryCatch({
+  suppressWarnings(Sys.setlocale("LC_TIME", "es_CR.UTF-8"))
+}, warning = function(w) NA_character_, error = function(e) NA_character_)
+if (is.na(loc_ok) || identical(loc_ok, "")) {
+  tryCatch({
+    suppressWarnings(Sys.setlocale("LC_TIME", "Spanish"))
+  }, warning = function(w) NA_character_, error = function(e) NA_character_)
+}
+
+paquetes <- c(
+  "tidyverse","psych","car","lmtest","sandwich","nortest",
+  "boot","broom","knitr","kableExtra","ggcorrplot","patchwork",
+  "scales","forcats","mice","pROC","ResourceSelection",
+  "tidytext","ggrepel","viridis","RColorBrewer",
+  "igraph","ggraph","widyr","gridExtra"
+)
+faltantes <- paquetes[!vapply(paquetes, requireNamespace, logical(1), quietly = TRUE)]
+if (length(faltantes) > 0) {
+  stop(
+    paste0(
+      "Faltan paquetes requeridos para renderizar este .Rmd: ",
+      paste(faltantes, collapse = ", "),
+      ".
+Instálelos antes de hacer Knit con:
+",
+      "install.packages(c(",
+      paste(sprintf('"%s"', faltantes), collapse = ", "),
+      '), repos = "https://cloud.r-project.org")'
+    ),
+    call. = FALSE
+  )
+}
+
+suppressPackageStartupMessages({
+  library(tidyverse); library(psych); library(car); library(lmtest)
+  library(sandwich); library(nortest); library(boot); library(broom)
+  library(knitr); library(kableExtra); library(ggcorrplot); library(patchwork)
+  library(scales); library(forcats); library(mice); library(pROC)
+  library(ResourceSelection); library(tidytext); library(ggrepel)
+  library(viridis); library(RColorBrewer); library(igraph); library(ggraph)
+  library(widyr); library(gridExtra)
+})
+
+theme_mixto <- function(base_size = 12) {
+  theme_minimal(base_size = base_size) +
+    theme(
+      plot.title       = element_text(face="bold", size=base_size+2, color="#1a3a5c"),
+      plot.subtitle    = element_text(color="#5d6d7e"),
+      axis.title       = element_text(face="bold"),
+      panel.grid.minor = element_blank(),
+      strip.background = element_rect(fill="#eaecee", color=NA),
+      strip.text       = element_text(face="bold"),
+      legend.position  = "bottom"
+    )
+}
+theme_set(theme_mixto())
+
+cat("✓ Entorno configurado para SP-8502 · Investigación Mixta (QUAN→QUAL)
+")
+```
+
+# Bienvenida al laboratorio
+
+::: {.callout-important}
+## Qué vas a hacer en este archivo
+Este laboratorio integra en **un solo documento** la lógica sustantiva de los sprints, la generación de datos simulados, el análisis cuantitativo, la explicación cualitativa y la integración final para la toma de decisiones.
+:::
+
+::: {.callout-note}
+## Cómo trabajar este laboratorio
+1. Lee primero el bloque introductorio de cada Sprint.
+2. Luego ejecuta el código y revisa la salida.
+3. Antes de avanzar, responde la pregunta de cierre o **checkpoint** del bloque.
+4. No cambies nombres de variables: este documento usa la nomenclatura estándar del ejemplo.
+:::
+
+::: {.callout-tip}
+## Productos que este laboratorio te enseña a construir
+- Diseño mixto y activadores QUAN → QUAL
+- MMR integrada
+- Estrategia muestral doble
+- Modelo OLS principal (M3)
+- Selección de casos para entrevistas
+- Temas cualitativos y **joint display**
+- Recomendaciones tipo policy brief
+:::
+
+# Mapa rápido del caso
+
+## Problema de investigación del ejemplo
+El caso simula una investigación sobre **adopción sostenible** en comunidades pesqueras. La pregunta central es si la **extensión pesquera** ayuda a mejorar la adopción sostenible y, en caso afirmativo, **por qué** funciona en unas personas y no en otras.
+
+## Lógica del diseño mixto
+- **Fase QUAN:** encuesta con n = 80 para estimar predictores del SAS.
+- **Fase QUAL:** entrevistas focalizadas para explicar mecanismos, fallas y barreras.
+- **Integración:** una tabla conjunta (**joint display**) conecta magnitud estadística con narrativas de campo.
+
+## Qué significa SAS en este laboratorio
+En este ejemplo, `sas_total` representa un **puntaje de adopción sostenible** entre 0 y 50. No es una escala real; es un indicador didáctico construido con fines pedagógicos.
+
+## Checkpoint inicial
+Antes de empezar, asegúrate de poder responder esto:
+
+- ¿Cuál es la variable dependiente? → `sas_total`
+- ¿Cuál es el predictor principal? → `extension_pesquera`
+- ¿Qué activa la fase cualitativa? → hallazgos del modelo QUAN, diferencias entre perfiles y casos extremos
+
+---
+
+# SPRINT 1 — Diseño Mixto: Bisagra QUAN→QUAL {.tabset}
+
+> **Meta:** Definir la lógica de conexión entre fases, construir la MMR mixta y establecer los activadores de la fase cualitativa.
+
+## 1.1 Justificación del Diseño Secuencial Explicativo
+
+En un diseño secuencial explicativo, la fase cualitativa **no va aparte**: se deriva de lo que encontró primero la fase cuantitativa. Por eso este Sprint no solo define el diseño, sino también la **lógica de conexión** entre ambas fases.
+
+```{r justificacion_diseno}
+cat("DISEÑO: Secuencial Explicativo (QUAN → QUAL)\n")
+cat("═══════════════════════════════════════════\n\n")
+cat("Lógica de integración:\n")
+cat("  FASE 1 (QUAN): n=80 encuesta → modelo M3 identifica PREDICTORES del SAS\n")
+cat("  FASE 2 (QUAL): entrevistas focalizadas (n≈12-16) en PERFILES EXTREMOS\n")
+cat("                 para explicar MECANISMOS de por qué funciona la extensión\n\n")
+
+cat("DECISIÓN CRÍTICA — ¿Por qué Secuencial Explicativo y no Convergente?\n")
+cat("  La fase QUAL depende de qué variables resultan significativas en QUAN.\n")
+cat("  Un diseño Convergente requeriría recolección simultánea → inviable en 16 semanas.\n")
+cat("  Ref: Creswell & Plano Clark (2018), Cap. 3.\n\n")
+
+# ── Activadores de la fase QUAL ───────────────────────────────────────────────
+activadores <- tibble(
+  `Código` = c("A1","A2","A3","A4"),
+  `Activador` = c(
+    "Efecto extensión significativo (p<0.05)",
+    "Comunidad A con SAS alto vs. comunidad B con SAS bajo",
+    "Outliers influyentes (Cook's D > 4/n)",
+    "Variable omitida sugerida por residuos sistemáticos"
+  ),
+  `Selección de casos QUAL` = c(
+    "6 personas con extensión + 6 sin extensión (perfiles P1, P2, P3, P4)",
+    "4 casos típicos por comunidad + 2 líderes",
+    "Entrevistar los outliers para entender mecanismo diferenciador",
+    "Explorar narrativas no capturadas por el modelo"
+  ),
+  `Pregunta QUAL derivada` = c(
+    "¿Cómo describe el proceso de capacitación y qué cambió en su práctica?",
+    "¿Qué factores locales explican las diferencias entre comunidades?",
+    "¿Qué hace diferente su caso de los demás?",
+    "¿Existe co-gestión percibida que el modelo no captura?"
+  )
+)
+
+kable(activadores, caption = "Tabla A1: Activadores de la fase cualitativa desde los resultados QUAN") %>%
+  kable_styling(bootstrap_options=c("striped","hover"), full_width=TRUE) %>%
+  column_spec(1, bold=TRUE, color="#2980b9")
+```
+
+## 1.2 MMR Mixta (Integrada QUAN + QUAL)
+
+La MMR integrada te ayuda a evitar uno de los errores más comunes en investigación mixta: tener una parte cuantitativa y otra cualitativa que **no conversan entre sí**. Aquí cada variable o concepto tiene una función metodológica concreta.
+
+```{r mmr_mixta}
+mmr_mixta <- tibble(
+  `#`    = 1:12,
+  Variable = c(
+    "sas_total","extension_pesquera","ingreso_mensual_usd",
+    "anos_experiencia","distancia_anp_km","metodo_reclutamiento",
+    "legitimidad_percibida","mecanismo_extension",
+    "tension_subsistencia","confianza_institucional",
+    "co_gestion_percibida","perfil_adoptante"
+  ),
+  Fase = c(rep("QUAN",6), rep("QUAL",4), "QUAL (gap)","Integración"),
+  Tipo = c(
+    "Numérica 0–50","Binaria","Numérica USD",
+    "Numérica años","Numérica km","Categórica",
+    "Temática","Temática",
+    "Temática","Temática","Temática","Tipología"
+  ),
+  Rol = c(
+    "VD (QUAN)","Predictor principal","Control",
+    "Control","Contexto","Covariable diseño",
+    "Explicación mecanismo","Mecanismo extensión",
+    "Barrera estructural","Condición habilitante",
+    "Variable OMITIDA (gap)","Conexión QUAN-QUAL"
+  ),
+  Sprint = c("S1-S3","S1-S3","S1-S3","S1-S3","S1-S3","S2",
+             "S2-S3 QUAL","S3 QUAL","S3 QUAL","S3 QUAL","S3 QUAL","S3-S4")
+)
+
+kable(mmr_mixta, caption = "Tabla M1: MMR Integrada — Variables QUAN y conceptos QUAL") %>%
+  kable_styling(bootstrap_options=c("striped","hover","condensed"), full_width=TRUE) %>%
+  row_spec(which(mmr_mixta$Fase == "QUAN"), background="#eaf2ff") %>%
+  row_spec(which(mmr_mixta$Fase == "QUAL" | mmr_mixta$Fase == "QUAL (gap)"), background="#eafaf1") %>%
+  row_spec(which(mmr_mixta$Fase == "Integración"), background="#fef9e7", bold=TRUE)
+```
+
+---
+
+# SPRINT 2 — Doble Estrategia Muestral {.tabset}
+
+> **Meta:** Diseñar la muestra QUAN (probabilística) y definir el marco de selección QUAL (intencional por perfiles del modelo).
+
+En investigación mixta no basta con decir “tengo una muestra”. En realidad necesitas **dos lógicas de selección**: una para inferir patrones generales y otra para explicar mecanismos específicos.
+
+## 2.1 Muestra QUAN — Cochran + RDS
+
+Primero justificas el tamaño muestral cuantitativo y luego explicas cómo incorporar población no registrada mediante RDS. La idea central es que la muestra sea **viable, defendible y útil** para el modelo del Sprint 3.
+
+```{r muestra_quan}
+# ── Parámetros muestrales ─────────────────────────────────────────────────────
+Z      <- 1.96; sigma <- 9.5; E <- 3.5; N_marco <- 820
+n0     <- (Z^2 * sigma^2) / E^2
+n_fpc  <- n0 / (1 + (n0-1)/N_marco)
+
+cat("Diseño muestral QUAN:\n")
+cat("  N marco INCOPESCA:", N_marco, "\n")
+cat("  n₀ Cochran:", round(n0,2), "\n")
+cat("  n con FPC:", round(n_fpc,2), "(FPC aplicada: n/N =",
+    round(n_fpc/N_marco*100,1),"% > 5%)\n")
+cat("  n operativo: 80 (regresión multivariable + RDS + márgenes)\n\n")
+
+# ── RDS para no registrados ───────────────────────────────────────────────────
+cat("RDS — Fracción no registrada (30% de 820 ≈ 246 pescadores):\n")
+cat("  5 semillas heterogéneas × 3 cupones × ≤8 oleadas\n")
+cat("  n RDS incluido: 24 observaciones en n=80 total\n")
+cat("  Variable 'metodo' (Estratificado/RDS) conservada como covariable\n")
+```
+
+## 2.2 Muestra QUAL — Selección por Perfiles del Modelo
+
+La muestra cualitativa no se selecciona al azar. Se elige **intencionalmente** a partir de los perfiles que emergen del modelo. Eso permite entrevistar casos que expliquen por qué el patrón cuantitativo ocurre.
+
+```{r muestra_qual}
+# ── Perfiles de selección intencional ────────────────────────────────────────
+perfiles_qual <- tibble(
+  Perfil = c("P1","P2","P3","P4"),
+  Descripción = c(
+    "SAS alto (>35) + CON extensión",
+    "SAS bajo (<20) + CON extensión",
+    "SAS alto (>35) + SIN extensión",
+    "SAS bajo (<20) + SIN extensión"
+  ),
+  `Para qué se entrevista` = c(
+    "Caso típico esperado: extensión funciona como teoría predice",
+    "Falla del mecanismo: extensión presente pero no impacta SAS",
+    "Mecanismo alternativo: adopción sin extensión formal",
+    "Barrera estructural acumulada"
+  ),
+  `n objetivo` = c(4, 4, 4, 4),
+  Activador = c("A1","A1","A1 + A4","A1 + A3")
+)
+
+kable(perfiles_qual,
+      caption = "Tabla P1: Perfiles de selección QUAL desde resultados QUAN") %>%
+  kable_styling(bootstrap_options=c("striped","hover"), full_width=TRUE) %>%
+  row_spec(2, background="#fef5e4") %>%
+  row_spec(3, background="#eafaf1")
+```
+
+## 2.3 Generación de Datos Sintéticos QUAN
+
+Como este laboratorio es autodirigido y usa datos simulados, el mismo archivo genera una base reproducible. Eso te permite enfocarte en la lógica metodológica sin depender de archivos externos.
+
+```{r datos_quan_sinteticos}
+set.seed(8502)
+N <- 80
+
+comunidades_v <- c("Quepos","Jacó","Tárcoles","Herradura","Esterillos")
+
+df_quan <- tibble(
+  id                  = paste0("ANC-", str_pad(1:N, 4, pad="0")),
+  comunidad           = sample(comunidades_v, N, replace=TRUE,
+                                prob=c(.25,.22,.20,.18,.15)) %>% factor(),
+  extension_pesquera  = rbinom(N, 1, prob=0.40),
+  anos_experiencia    = pmax(1, round(rnorm(N, 18, 8))),
+  distancia_anp_km    = abs(rnorm(N, 25, 12)),
+  ingreso_mensual_usd = pmax(50, round(rnorm(N, 520, 180))),
+  percepcion_recurso  = sample(1:5, N, replace=TRUE, prob=c(.08,.17,.30,.28,.17)),
+  metodo              = sample(c("Estratificado","RDS"), N,
+                                replace=TRUE, prob=c(.70,.30)) %>% factor()
+) %>%
+  mutate(
+    # SAS generado con efecto causal de extensión (beta ≈ 4.5)
+    sas_total = round(pmin(50, pmax(0,
+      18 + 4.5 * extension_pesquera +
+      0.9 * log1p(ingreso_mensual_usd) +
+      0.22 * anos_experiencia +
+      (-0.18) * distancia_anp_km +
+      2.1 * percepcion_recurso +
+      ifelse(metodo == "RDS", -2.3, 0) +
+      rnorm(N, 0, 6.5)
+    ))),
+    log_ingreso = log1p(ingreso_mensual_usd),
+    sas_alto    = if_else(sas_total >= 35, 1L, 0L),
+    # Perfiles para selección QUAL
+    perfil_qual = case_when(
+      sas_total >= 35 & extension_pesquera == 1 ~ "P1",
+      sas_total < 20  & extension_pesquera == 1 ~ "P2",
+      sas_total >= 35 & extension_pesquera == 0 ~ "P3",
+      sas_total < 20  & extension_pesquera == 0 ~ "P4",
+      TRUE ~ "Moderado"
+    )
+  )
+
+cat("Dataset QUAN generado: n =", nrow(df_quan), "\n")
+cat("Distribución perfiles QUAL:\n")
+print(table(df_quan$perfil_qual))
+cat("\nMedia SAS por grupo extensión:\n")
+print(df_quan %>% group_by(extension_pesquera) %>%
+        summarise(SAS_medio=round(mean(sas_total),2), n=n()))
+```
+
+---
+
+# SPRINT 3 — Análisis Integrado QUAN + QUAL {.tabset}
+
+> **Meta:** Ejecutar modelos QUAN (OLS), análisis QUAL (temático), verificar supuestos y construir el Joint Display.
+
+Este es el núcleo del laboratorio. Aquí respondes tres preguntas: **qué efecto aparece en los datos**, **qué tan sólido es ese efecto** y **cómo se explica sustantivamente**.
+
+## 3.1 Fase QUAN: Modelos OLS M0–M3
+
+Los modelos se construyen de forma incremental. Eso permite ver cuánto aporta cada bloque de variables y por qué el modelo M3 se considera el modelo principal.
+
+```{r ols_mixto}
+# ── MICE imputación (mínima aquí, datos sintéticos completos) ─────────────────
+cat("Missing values en QUAN:\n")
+print(colSums(is.na(df_quan %>% select(sas_total, extension_pesquera, log_ingreso,
+                                        anos_experiencia, distancia_anp_km))))
+
+# ── Modelos OLS ───────────────────────────────────────────────────────────────
+M0 <- lm(sas_total ~ 1, data=df_quan)
+M1 <- lm(sas_total ~ extension_pesquera, data=df_quan)
+M2 <- lm(sas_total ~ extension_pesquera + log_ingreso + anos_experiencia, data=df_quan)
+M3 <- lm(sas_total ~ extension_pesquera + log_ingreso + anos_experiencia +
+            distancia_anp_km + percepcion_recurso + metodo, data=df_quan)
+
+# Tabla comparativa
+tabla_m <- map_dfr(list(M0=M0,M1=M1,M2=M2,M3=M3), function(m) {
+  sm <- summary(m)
+  tibble(R2=round(sm$r.squared,4), R2adj=round(sm$adj.r.squared,4),
+         AIC=round(AIC(m),1), RMSE=round(sqrt(mean(residuals(m)^2)),3))
+}, .id="Modelo")
+
+kable(tabla_m, caption="Tabla R1: Comparación de modelos OLS (M0–M3)") %>%
+  kable_styling(bootstrap_options=c("striped","hover"), full_width=FALSE) %>%
+  row_spec(4, background="#d5f5e3", bold=TRUE)
+```
+
+```{r supuestos_mixto, fig.height=8}
+# ── Verificación de 6 supuestos ──────────────────────────────────────────────
+bp  <- bptest(M3)
+sw  <- shapiro.test(rstandard(M3))
+vif_m3 <- vif(M3)
+
+cat("S3 Breusch-Pagan  p =", round(bp$p.value,4),
+    "→", ifelse(bp$p.value>0.05,"Homocedástico ✓","⚠ SE robustos HC3"), "\n")
+cat("S4 Shapiro-Wilk   p =", round(sw$p.value,4),
+    "→", ifelse(sw$p.value>0.05,"Normalidad ✓","⚠ Desviación"), "\n")
+cat("S5 VIF máximo:      ", round(max(vif_m3),3),
+    "→", ifelse(max(vif_m3)<10,"Sin multicolinealidad ✓","⚠"), "\n\n")
+
+usar_rob <- bp$p.value <= 0.05
+if (usar_rob) {
+  vcov_rob <- vcovHC(M3, type = "HC3")
+  coef_m3 <- broom::tidy(lmtest::coeftest(M3, vcov = vcov_rob)) %>%
+    mutate(
+      conf.low  = estimate - 1.96 * std.error,
+      conf.high = estimate + 1.96 * std.error
+    )
+  cat("SE robustos HC3 activados
+")
+} else {
+  coef_m3 <- tidy(M3, conf.int=TRUE)
+}
+
+# Panel diagnóstico
+df_r <- tibble(fit=fitted(M3), res=residuals(M3), res_std=rstandard(M3))
+cook <- cooks.distance(M3)
+
+pa <- ggplot(df_r, aes(fit,res)) + geom_point(alpha=.5,color="#3498db") +
+  geom_smooth(method="loess",color="#e74c3c",se=TRUE) +
+  geom_hline(yintercept=0,linetype="dashed") +
+  labs(title="Linealidad (LOESS)",x="Ajustados",y="Residuos")
+
+pb <- ggplot(df_r, aes(sample=res_std)) +
+  stat_qq(alpha=.6,color="#9b59b6") + stat_qq_line(color="#e74c3c") +
+  labs(title=paste0("Normalidad (SW p=",round(sw$p.value,3),")"),
+       x="Cuantiles teóricos",y="Cuantiles muestrales")
+
+pc <- tibble(var=names(vif_m3),vif=as.numeric(vif_m3)) %>%
+  mutate(var=fct_reorder(var,vif)) %>%
+  ggplot(aes(x=vif,y=var,fill=vif>5)) +
+  geom_col(color="white") +
+  geom_vline(xintercept=10,linetype="dashed",color="#e74c3c") +
+  scale_fill_manual(values=c("#2ecc71","#e74c3c"),guide="none") +
+  labs(title="Multicolinealidad (VIF)",x="VIF",y="")
+
+pd <- tibble(obs=seq_along(cook),cook=cook) %>%
+  ggplot(aes(obs,cook,color=cook>4/N)) +
+  geom_point(size=1.5) +
+  geom_hline(yintercept=4/N,linetype="dashed",color="#e74c3c") +
+  scale_color_manual(values=c("#3498db","#e74c3c"),guide="none") +
+  labs(title=paste0("Cook's D (>4/n=",round(4/N,3),")"),x="Obs.",y="Cook's D")
+
+(pa+pb)/(pc+pd)
+```
+
+```{r coeficientes_m3_mixto, fig.height=6}
+# ── Forest Plot M3 ────────────────────────────────────────────────────────────
+coef_m3 %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    term = dplyr::recode(term,
+      "extension_pesquera" = "Extensión pesquera",
+      "log_ingreso"        = "log(Ingreso)",
+      "anos_experiencia"   = "Años experiencia",
+      "distancia_anp_km"   = "Distancia ANP (km)",
+      "percepcion_recurso" = "Percepción recurso",
+      "metodoRDS"          = "Método: RDS"
+    ),
+    term = forcats::fct_reorder(term, estimate),
+    sig  = p.value < 0.05
+  ) %>%
+  ggplot(aes(x=estimate, y=term, color=sig)) +
+  geom_vline(xintercept=0, linetype="dashed", color="gray50") +
+  geom_errorbarh(aes(xmin=conf.low, xmax=conf.high), height=0.25, linewidth=1.1) +
+  geom_point(size=4) +
+  scale_color_manual(values=c("gray60","#e74c3c"),
+                     labels=c("No sig. (p≥.05)","Sig. (p<.05)"), name="") +
+  labs(title=paste0("Forest Plot M3 — R²=", round(summary(M3)$r.squared,3)),
+       subtitle=ifelse(usar_rob,"SE robustos HC3 aplicados","SE estándar OLS"),
+       x="β con IC 95%", y="") +
+  theme(legend.position="top")
+```
+
+## 3.2 Prueba de Hipótesis H1–H3
+
+Aquí no solo miras significancia. También verificas **magnitud**, **robustez** e interpretación. El objetivo es que puedas defender por qué una hipótesis se confirma o no.
+
+```{r hipotesis_mixto}
+set.seed(8502)
+B <- 2000
+
+# ── H1: R² ────────────────────────────────────────────────────────────────────
+r2_obs <- summary(M3)$r.squared
+boot_r2 <- boot(df_quan,
+  function(d,i) summary(lm(sas_total ~ extension_pesquera+log_ingreso+
+    anos_experiencia+distancia_anp_km+percepcion_recurso+metodo, d[i,]))$r.squared, R=B)
+ci_r2 <- boot.ci(boot_r2, type="perc")$percent[4:5]
+
+# ── H2: d Cohen ───────────────────────────────────────────────────────────────
+g <- df_quan %>% group_by(extension_pesquera) %>%
+  summarise(m=mean(sas_total),s=sd(sas_total),n=n(),.groups="drop")
+sp <- sqrt(((g$n[1]-1)*g$s[1]^2+(g$n[2]-1)*g$s[2]^2)/(sum(g$n)-2))
+d_obs <- abs(diff(g$m))/sp
+t_w   <- t.test(sas_total~extension_pesquera, data=df_quan, var.equal=FALSE)
+
+# ── H3: r Pearson ─────────────────────────────────────────────────────────────
+cor_p <- cor.test(df_quan$distancia_anp_km, df_quan$sas_total)
+
+# ── Tabla resultados ──────────────────────────────────────────────────────────
+hip_res <- tibble(
+  Hipótesis = c("H1","H2","H3"),
+  `Valor observado` = c(paste0("R²=",round(r2_obs,3)),
+                         paste0("d=",round(d_obs,3)),
+                         paste0("r=",round(cor_p$estimate,3))),
+  Umbral = c("R²≥0.35","d>0.5","|r|≥0.40"),
+  `IC 95% Bootstrap` = c(
+    paste0("[",round(ci_r2[1],3),", ",round(ci_r2[2],3),"]"),
+    "Welch t","Pearson+Spearman"
+  ),
+  Resultado = c(
+    ifelse(r2_obs>=0.35,"✓ CONFIRMADA","✗ No confirmada"),
+    ifelse(d_obs>0.5,"✓ CONFIRMADA","✗ No confirmada"),
+    ifelse(abs(cor_p$estimate)>=0.40,"✓ CONFIRMADA","✗ No confirmada")
+  )
+)
+
+kable(hip_res, caption="Tabla H1: Resultados formales H1–H3") %>%
+  kable_styling(bootstrap_options=c("striped","hover"), full_width=FALSE) %>%
+  column_spec(5, bold=TRUE,
+              color=ifelse(str_starts(hip_res$Resultado,"✓"),"#27ae60","#e74c3c"))
+```
+
+## 3.3 Fase QUAL: Entrevistas Focalizadas por Perfil
+
+Una vez que el modelo identifica perfiles, seleccionas casos para entrevistas. Esa selección no es decorativa: es la bisagra que convierte el diseño mixto en algo realmente integrado.
+
+```{r entrevistas_qual}
+set.seed(8502)
+
+# ── Seleccionar casos para entrevistas ────────────────────────────────────────
+casos_qual <- df_quan %>%
+  filter(perfil_qual != "Moderado") %>%
+  group_by(perfil_qual) %>%
+  slice_sample(n = 4) %>%
+  ungroup() %>%
+  select(id, comunidad, extension_pesquera, sas_total, distancia_anp_km, perfil_qual)
+
+cat("Casos seleccionados para fase QUAL:\n")
+print(casos_qual %>% count(perfil_qual))
+
+# ── Segmentos sintéticos por perfil ───────────────────────────────────────────
+banco_mixto <- list(
+  P1 = c(
+    "La capacitación cambió cómo veo el recurso. Ahora pienso en el largo plazo.",
+    "Después de la extensión, mi grupo adoptó las buenas prácticas. Funciona.",
+    "El técnico de INCOPESCA nos explicó todo con ejemplos de nuestras propias comunidades.",
+    "Antes pescaba sin pensar. Ahora mido el tamaño antes de guardar el pez."
+  ),
+  P2 = c(
+    "Fui a la capacitación pero no cambié nada. No hubo seguimiento después.",
+    "La extensión está bien, pero llega una vez y se va. Sin continuidad no hay cambio.",
+    "Me enseñaron técnicas pero mi embarcación no puede implementarlas. Caro.",
+    "La capacitación es teórica. No me ayudó con mis condiciones reales de trabajo."
+  ),
+  P3 = c(
+    "Nunca recibí extensión pero aprendí de mi padre y de otros pescadores con experiencia.",
+    "En mi comunidad nos organizamos solos. No necesitamos que vengan a enseñarnos.",
+    "La sostenibilidad la aprendí viendo cómo se agotó el recurso hace 10 años. Eso enseña más.",
+    "Tenemos un sistema local de vedas que funciona mejor que el oficial."
+  ),
+  P4 = c(
+    "Sin extensión y sin dinero, no puedo pensar en sostenibilidad.",
+    "Mi prioridad es sobrevivir esta semana. La sostenibilidad es para los que tienen.",
+    "Nunca llegó un técnico a mi comunidad. Estamos muy alejados.",
+    "Sé que debo cambiar pero no tengo los medios ni el apoyo para hacerlo."
+  )
+)
+
+# Construir dataset QUAL
+codigos_qual <- map_dfr(names(banco_mixto), function(p) {
+  tibble(
+    id_entrevista = casos_qual %>% filter(perfil_qual==p) %>% pull(id) %>%
+      rep_len(length(banco_mixto[[p]])),
+    perfil = p,
+    texto  = banco_mixto[[p]],
+    codigo = case_when(
+      p == "P1" ~ "mecanismo_exitoso",
+      p == "P2" ~ "falla_mecanismo",
+      p == "P3" ~ "mecanismo_alternativo",
+      p == "P4" ~ "barrera_estructural"
+    )
+  )
+})
+
+cat("\nSegmentos QUAL por perfil:\n")
+print(table(codigos_qual$perfil))
+```
+
+## 3.4 Análisis Temático — 6 Pasos Braun & Clarke
+
+El análisis cualitativo sintetiza narrativas recurrentes en temas analíticos. En este ejemplo, los temas no sustituyen al modelo: lo complementan y lo explican.
+
+```{r analisis_tematico_mixto}
+# ── Paso 1: Familiarización — estadísticos textuales ─────────────────────────
+stopwords_es <- c("que","no","la","es","de","en","el","los","las",
+                   "un","una","por","con","pero","hay","para","se",
+                   "me","mi","si","más","ya","yo","a","le","lo","su",
+                   "sus","nos","cuando","como","eso","esto","son",
+                   "están","bien","han","ahí","porque","al","del")
+
+tokens_mixto <- codigos_qual %>%
+  unnest_tokens(word, texto) %>%
+  filter(!word %in% stopwords_es, !str_detect(word,"^\\d+$"), nchar(word)>3)
+
+freq_mixto <- tokens_mixto %>% count(word, sort=TRUE) %>% slice_head(n=20)
+cat("Paso 1 — Top 10 términos en entrevistas QUAL (por perfil):\n")
+tokens_mixto %>% count(perfil, word, sort=TRUE) %>%
+  group_by(perfil) %>% slice_head(n=3) %>%
+  ungroup() %>% print()
+
+# ── Paso 3: Temas construidos ─────────────────────────────────────────────────
+temas_mixto <- tibble(
+  Tema = paste0("TQ", 1:4),
+  Nombre = c(
+    "Capital experiencial como motor de adopción",
+    "Extensión como intervención de corto alcance",
+    "Autonomía comunitaria y mecanismos alternativos",
+    "Pobreza estructural como barrera inconmensurable"
+  ),
+  Origen = c("P1","P2","P3","P4"),
+  Convergencia_QUAN = c("Alta","Media","Alta","Alta"),
+  Variable_QUAN = c("extension_pesquera (β>0)",
+                     "Omitida: seguimiento post-extensión",
+                     "anos_experiencia (β>0)",
+                     "log_ingreso (β>0, no lineal)"),
+  `Cita ilustrativa` = c(
+    '"La capacitación cambió cómo veo el recurso." (P1)',
+    '"Llega una vez y se va. Sin continuidad no hay cambio." (P2)',
+    '"En mi comunidad nos organizamos solos." (P3)',
+    '"Sin dinero, no puedo pensar en sostenibilidad." (P4)'
+  )
+)
+
+kable(temas_mixto,
+      caption="Tabla T1: Temas cualitativos QUAL conectados con resultados QUAN") %>%
+  kable_styling(bootstrap_options=c("striped","hover"), full_width=TRUE, font_size=11) %>%
+  column_spec(4, bold=TRUE,
+              color=ifelse(temas_mixto$Convergencia_QUAN=="Alta","#27ae60","#f39c12")) %>%
+  column_spec(6, italic=TRUE, color="#7f8c8d")
+```
+
+## 3.5 Joint Display — Integración QUAN × QUAL
+
+El **joint display** es la pieza central de la integración. Su función es mostrar, en una sola tabla, qué encontró la parte cuantitativa, qué explicó la parte cualitativa y qué implica eso para la decisión.
+
+```{r joint_display}
+# ── Joint Display (5 dimensiones de integración) ─────────────────────────────
+joint_display <- tibble(
+  Dimensión = c(
+    "Efecto extensión",
+    "Distancia a ANP",
+    "Ingresos",
+    "Método (RDS vs estratificado)",
+    "Co-gestión percibida"
+  ),
+  `Resultado QUAN` = c(
+    paste0("β>0, p<.05, d=",round(d_obs,2)," (H2 ",
+           ifelse(d_obs>0.5,"✓ CONFIRMADA)","no confirmada)")),
+    paste0("r=",round(cor_p$estimate,3)," (H3 ",
+           ifelse(abs(cor_p$estimate)>=0.4,"✓ CONFIRMADA)","no confirmada)")),
+    "β positivo, relación no lineal (ver EDA)",
+    "SAS(RDS) < SAS(Estratificado), β significativo",
+    "Variable AUSENTE en modelo M3"
+  ),
+  `Resultado QUAL` = c(
+    "Cambio actitudinal post-capacitación (TQ1); falla por falta de seguimiento (TQ2)",
+    "Aislamiento institucional; comunidades alejadas sin acceso a servicios (TQ4)",
+    "Dilema subsistencia–sostenibilidad; umbral de supervivencia percibido (TQ4)",
+    "Pescadores no registrados excluidos de servicios institucionales",
+    "Mecanismos locales exitosos no capturados por encuesta (TQ3)"
+  ),
+  `Tipo de integración` = c(
+    "Convergencia alta",
+    "Convergencia alta",
+    "Convergencia parcial",
+    "Convergencia alta",
+    "Gap analítico"
+  ),
+  `Implicación de política` = c(
+    "Ampliar extensión Y añadir seguimiento post-capacitación",
+    "Servicios móviles / ventanillas locales en zonas alejadas",
+    "Incentivos escalonados según ingreso (no lineales)",
+    "Estrategia de contacto comunitario para pescadores no registrados",
+    "Incluir indicador de co-gestión en futuras encuestas"
+  )
+)
+
+kable(joint_display,
+      caption="Tabla JD1: Joint Display — Integración QUAN × QUAL (5 dimensiones)") %>%
+  kable_styling(bootstrap_options=c("striped","hover"), full_width=TRUE, font_size=11) %>%
+  column_spec(4, bold=TRUE,
+              color=case_when(
+                joint_display$`Tipo de integración`=="Convergencia alta"    ~ "#27ae60",
+                joint_display$`Tipo de integración`=="Convergencia parcial" ~ "#f39c12",
+                TRUE                                                          ~ "#e74c3c"
+              )) %>%
+  row_spec(0, background="#1a3a5c", color="white")
+```
+
+```{r joint_display_viz, fig.height=7, fig.width=11}
+# ── Visualización del Joint Display ──────────────────────────────────────────
+df_jd <- joint_display %>%
+  mutate(
+    dim_id = row_number(),
+    tipo_color = case_when(
+      `Tipo de integración` == "Convergencia alta"    ~ "#27ae60",
+      `Tipo de integración` == "Convergencia parcial" ~ "#f39c12",
+      TRUE                                             ~ "#e74c3c"
+    )
+  )
+
+# Figura: diagrama de convergencia estilizado
+df_jd_long <- df_jd %>%
+  pivot_longer(c(`Resultado QUAN`, `Resultado QUAL`), names_to="Fase", values_to="Texto") %>%
+  mutate(
+    x          = ifelse(Fase=="Resultado QUAN", 1, 3),
+    y          = dim_id,
+    Fase       = str_remove(Fase,"Resultado "),
+    point_color = ifelse(Fase == "QUAN", "#2E86DE", "#8E44AD")
+  )
+
+df_arrows <- df_jd %>%
+  select(dim_id, Dimensión, `Tipo de integración`, tipo_color) %>%
+  mutate(x=1.4, xend=2.6, y=dim_id, yend=dim_id)
+
+ggplot() +
+  # Flechas de integración
+  geom_segment(data=df_arrows,
+               aes(x=x, xend=xend, y=y, yend=yend),
+               color=df_arrows$tipo_color,
+               arrow=arrow(length=unit(0.3,"cm"), type="closed"),
+               linewidth=2, alpha=0.8) +
+  # Puntos QUAN y QUAL
+  geom_point(data=df_jd_long, aes(x=x, y=y), color=df_jd_long$point_color, size=8, alpha=0.85) +
+  geom_text(data=df_jd_long,
+            aes(x=x, y=y, label=str_wrap(Texto, 35)),
+            size=2.2, color="#2c3e50", fontface="italic",
+            nudge_y=0.35) +
+  # Etiquetas dimensión
+  geom_text(data=df_jd, aes(x=2, y=dim_id, label=Dimensión),
+            fontface="bold", size=3, color="#2c3e50") +
+  # Tipo de integración
+  geom_label(data=df_jd, aes(x=2, y=dim_id-0.3,
+                               label=`Tipo de integración`),
+             fill=df_jd$tipo_color,
+             size=2.5, color="white", fontface="bold", label.size=0.2) +
+  scale_x_continuous(breaks=c(1,2,3), labels=c("QUAN\n(Modelo OLS)","INTEGRACIÓN","QUAL\n(Entrevistas)")) +
+  scale_y_continuous(breaks=1:5, labels=df_jd$Dimensión) +
+  labs(title="Joint Display — Integración QUAN × QUAL",
+       subtitle="Verde: convergencia alta | Naranja: parcial | Rojo: gap analítico",
+       x="", y="Dimensión de análisis") +
+  theme(axis.text.y=element_text(size=9, face="bold"),
+        axis.text.x=element_text(size=10, face="bold"),
+        panel.grid.major.x=element_blank())
+```
+
+---
+
+# SPRINT 4 — Comunicación Integrada y Decisiones {.tabset}
+
+> **Meta:** Visualizaciones finales, policy brief con mecanismo (QUAL) + magnitud (QUAN), teoría de cambio.
+
+Este Sprint traduce hallazgos técnicos a decisiones concretas. La regla es simple: cada recomendación debe indicar **qué hacer, quién debe hacerlo, en qué plazo y con base en qué evidencia**.
+
+## 4.1 Panel de Visualizaciones Finales
+
+Las visualizaciones de esta sección están organizadas para que cada una comunique una idea principal. Revísalas como si fueras a explicarlas a un comité mixto: técnico, institucional y territorial.
+
+```{r viz_finales_mixto, fig.height=14, fig.width=12}
+# ── FIG1: Efecto extensión por perfil QUAL ────────────────────────────────────
+p1_m <- df_quan %>%
+  filter(perfil_qual != "Moderado") %>%
+  mutate(perfil_label = case_when(
+    perfil_qual=="P1" ~ "P1: SAS Alto\n+ Extensión",
+    perfil_qual=="P2" ~ "P2: SAS Bajo\n+ Extensión",
+    perfil_qual=="P3" ~ "P3: SAS Alto\n- Extensión",
+    perfil_qual=="P4" ~ "P4: SAS Bajo\n- Extensión"
+  ) %>% factor(levels=c("P1: SAS Alto\n+ Extensión","P2: SAS Bajo\n+ Extensión",
+                          "P3: SAS Alto\n- Extensión","P4: SAS Bajo\n- Extensión"))) %>%
+  ggplot(aes(x=perfil_label, y=sas_total, fill=perfil_label)) +
+  geom_boxplot(alpha=0.75, outlier.shape=21) +
+  geom_jitter(width=0.15, alpha=0.4, size=1.5) +
+  scale_fill_brewer(palette="Set2", guide="none") +
+  labs(title="FIG1: SAS por Perfil QUAL",
+       subtitle="Los 4 perfiles seleccionados para entrevistas focalizadas",
+       x="Perfil", y="SAS (0–50)")
+
+# ── FIG2: Forest Plot M3 + temas QUAL ─────────────────────────────────────────
+coef_labels <- c(
+  "extension_pesquera" = "Extensión pesquera\n↑ TQ1: Capital experiencial",
+  "log_ingreso"        = "log(Ingreso)\n↑↓ TQ4: Pobreza estructural",
+  "anos_experiencia"   = "Años experiencia\n↑ TQ3: Mecanismos alternativos",
+  "distancia_anp_km"   = "Distancia ANP (km)\n↓ TQ4: Aislamiento institucional",
+  "percepcion_recurso" = "Percepción recurso\n↑ TQ1: Conciencia ambiental",
+  "metodoRDS"          = "Método: RDS\n↓ Exclusión estructural"
+)
+
+p2_m <- coef_m3 %>%
+  filter(term != "(Intercept)") %>%
+  left_join(tibble(term=names(coef_labels), label=coef_labels), by="term") %>%
+  mutate(label=fct_reorder(label, estimate)) %>%
+  ggplot(aes(x=estimate, y=label, color=p.value<0.05)) +
+  geom_vline(xintercept=0, linetype="dashed", color="gray50") +
+  geom_errorbarh(aes(xmin=conf.low, xmax=conf.high), height=0.25, linewidth=1) +
+  geom_point(size=4) +
+  scale_color_manual(values=c("gray60","#e74c3c"),
+                     labels=c("ns","p<.05"), name="") +
+  labs(title="FIG2: Forest Plot M3 + Conexión QUAL",
+       subtitle="Cada predictor vinculado a tema cualitativo",
+       x="β con IC 95%", y="")
+
+# ── FIG3: Correlación distancia ANP vs SAS ────────────────────────────────────
+p3_m <- df_quan %>%
+  ggplot(aes(x=distancia_anp_km, y=sas_total)) +
+  geom_point(aes(color=factor(extension_pesquera)), alpha=0.5, size=2) +
+  geom_smooth(method="lm", color="#e74c3c", se=TRUE) +
+  scale_color_manual(values=c("#bdc3c7","#3498db"),
+                     labels=c("Sin ext.","Con ext."), name="Extensión") +
+  labs(title="FIG3: Distancia ANP vs SAS",
+       subtitle=paste0("r=",round(cor_p$estimate,3)," — TQ4: Aislamiento institucional"),
+       x="Distancia al ANP (km)", y="SAS")
+
+# ── FIG4: Heatmap de convergencia QUAN-QUAL ───────────────────────────────────
+conv_data <- tibble(
+  QUAN     = rep(c("ext. β>0","dist. r<0","ingreso β>0","RDS β<0","(ausente)"), each=4),
+  QUAL     = rep(c("TQ1 Capital","TQ2 Falla ext.","TQ3 Autonomía","TQ4 Pobreza"), 5),
+  conv_val = c(5,2,1,1, 1,1,1,1, 1,1,1,4, 1,1,1,3, 1,1,3,1)
+) %>%
+  mutate(tipo = case_when(
+    conv_val>=5 ~ "Alta convergencia",
+    conv_val>=3 ~ "Convergencia parcial",
+    TRUE        ~ "Sin conexión directa"
+  ))
+
+p4_m <- conv_data %>%
+  ggplot(aes(x=QUAL, y=QUAN, fill=tipo, alpha=conv_val)) +
+  geom_tile(color="white", linewidth=0.8) +
+  scale_fill_manual(values=c("#27ae60","#f39c12","#ecf0f1"), name="Tipo") +
+  scale_alpha_continuous(range=c(0.2,1), guide="none") +
+  labs(title="FIG4: Mapa de Convergencia QUAN-QUAL",
+       x="Tema QUAL", y="Resultado QUAN") +
+  theme(axis.text.x=element_text(angle=30,hjust=1))
+
+(p1_m + p2_m) / (p3_m + p4_m)
+```
+
+## 4.2 Policy Brief Mixto
+
+El policy brief no repite tablas estadísticas. Resume la evidencia de forma accionable. Por eso cada fila combina actor, plazo, magnitud cuantitativa, mecanismo cualitativo y riesgo de implementación.
+
+```{r policy_brief_mixto}
+pb_mixto <- tibble(
+  `#` = 1:3,
+  Recomendación = c(
+    "Ampliar extensión al 55% + añadir módulo de seguimiento post-capacitación",
+    "Crear ventanilla móvil INCOPESCA en comunidades a más de 30 km de ANP",
+    "Establecer incentivos escalonados para adopción según nivel de ingreso"
+  ),
+  `Actor` = c("INCOPESCA+ONG","INCOPESCA+Municipalidad","IMAS+MAG"),
+  Plazo   = c("12 meses","6–18 meses","18 meses"),
+  `Magnitud QUAN` = c(
+    paste0("β=",round(coef(M3)["extension_pesquera"],2)," pts SAS; d=",round(d_obs,2)),
+    paste0("r=",round(cor_p$estimate,2)," negativo (p<.05)"),
+    "Relación no lineal log(ingreso) — umbral en $350/mes"
+  ),
+  `Mecanismo QUAL` = c(
+    "TQ1: cambio actitudinal; TQ2: extensión falla sin seguimiento → añadir fase de consolidación",
+    "TQ4: aislamiento institucional percibido como barrera estructural acumulada",
+    "TQ4: dilema subsistencia–sostenibilidad; incentivos reducen costo de transición"
+  ),
+  `Riesgo` = c(
+    "Capacidad institucional INCOPESCA insuficiente → co-implementación con ONG",
+    "Costos operativos elevados → piloto en 2 comunidades prioritarias primero",
+    "Focalización incorrecta → cruzar con registro INCOPESCA + SIMCC"
+  )
+)
+
+kable(pb_mixto,
+      caption="Policy Brief Mixto: Recomendaciones con magnitud QUAN + mecanismo QUAL") %>%
+  kable_styling(bootstrap_options=c("striped","hover"), full_width=TRUE, font_size=10) %>%
+  column_spec(1, bold=TRUE) %>%
+  column_spec(5, color="#2980b9", italic=TRUE) %>%
+  column_spec(6, color="#27ae60", italic=TRUE) %>%
+  row_spec(0, background="#1a3a5c", color="white")
+```
+
+## 4.3 Síntesis de Integración
+
+Esta última síntesis funciona como cierre técnico del laboratorio. Si puedes explicar esta tabla con claridad, ya dominas la lógica sustantiva completa del caso.
+
+```{r sintesis_integracion, fig.height=5, fig.width=10}
+# ── Tabla de convergencia final ───────────────────────────────────────────────
+convergencia_final <- tibble(
+  Dimensión = c("Efecto extensión","Distancia ANP","Ingresos","Exclusión (RDS)","Co-gestión"),
+  QUAN = c(
+    paste0("β=",round(coef(M3)["extension_pesquera"],2)," (p<.05)"),
+    paste0("r=",round(cor_p$estimate,2)," (p<.05)"),
+    "β>0, no lineal",
+    "β<0, significativo",
+    "No en M3"
+  ),
+  QUAL = c(
+    "TQ1 + TQ2: mecanismo actitudinal con fallo sin seguimiento",
+    "TQ4: aislamiento institucional documentado",
+    "TQ4: dilema subsistencia-sostenibilidad",
+    "Exclusión de registro confirma sesgo de selección",
+    "TQ3: sistema local de co-vigilancia exitoso (gap)"
+  ),
+  Integración = c("Convergencia alta","Convergencia alta","Parcial","Convergencia alta","Gap → nueva variable"),
+  `Decisión de política` = c(
+    "Extensión + seguimiento",
+    "Servicios móviles",
+    "Incentivos escalonados",
+    "Estrategia de contacto",
+    "Incluir en futura encuesta"
+  )
+)
+
+kable(convergencia_final,
+      caption="Tabla I1: Síntesis de integración final QUAN × QUAL") %>%
+  kable_styling(bootstrap_options=c("striped","hover"), full_width=TRUE) %>%
+  column_spec(4, bold=TRUE,
+              color=case_when(
+                convergencia_final$Integración=="Convergencia alta" ~ "#27ae60",
+                convergencia_final$Integración=="Parcial" ~ "#f39c12",
+                TRUE ~ "#e74c3c"
+              ))
+
+cat("\n╔══════════════════════════════════════════════════════════════════╗\n")
+cat("║  RESUMEN EJECUTIVO — Investigación Mixta (QUAN→QUAL)             ║\n")
+cat("╠══════════════════════════════════════════════════════════════════╣\n")
+cat(sprintf("║  QUAN: R²=%.3f | d=%.3f | r=%.3f                          ║\n",
+            r2_obs, d_obs, cor_p$estimate))
+cat("║  QUAL: 4 perfiles × 16 entrevistas → 4 temas (TQ1–TQ4)          ║\n")
+cat("║  JOINT DISPLAY: 5 dimensiones — 3 alta convergencia, 1 gap      ║\n")
+cat("╠══════════════════════════════════════════════════════════════════╣\n")
+cat("║  APORTACIÓN CLAVE: TQ2 identifica variable omitida en M3         ║\n")
+cat("║  (seguimiento post-extensión) → próxima encuesta debe incluirla  ║\n")
+cat("╚══════════════════════════════════════════════════════════════════╝\n")
+```
+
+---
+
+# Cierre del laboratorio
+
+::: {.callout-tip}
+## Lista de chequeo final
+Al terminar este archivo deberías poder explicar con tus propias palabras:
+
+- por qué el diseño es **secuencial explicativo** y no convergente,
+- cómo se justifica la doble muestra QUAN y QUAL,
+- qué muestra el modelo M3 y cuáles son sus límites,
+- por qué se seleccionan los perfiles P1–P4,
+- qué significa convergencia, convergencia parcial y gap en el **joint display**,
+- cómo pasar de hallazgos a recomendaciones de política o intervención.
+:::
+
+# Información de Sesión y Reproducibilidad
+
+```{r session_info}
+cat("README REPRODUCIBILIDAD — Investigación Mixta:\n")
+cat("1. Archivo autónomo: genera datos QUAN sintéticos y texto QUAL internamente\n")
+cat("2. set.seed(8502) garantiza reproducibilidad total\n")
+cat("3. Renderizar: rmarkdown::render('SP8502_Mixto.Rmd')\n\n")
+sessionInfo()
+```

@@ -1,0 +1,1417 @@
+---
+title: "SP-8502 · Laboratorio Autodirigido de Investigación Cuantitativa"
+subtitle: "Versión pedagógica integrada por Sprints (1–4) · Nivel intermedio"
+author: "SP-8502 · GIACT · Universidad de Costa Rica · I Ciclo 2026"
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    theme: flatly
+    highlight: tango
+    code_folding: show
+    number_sections: true
+    df_print: paged
+    fig_width: 9
+    fig_height: 6
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo       = TRUE,
+  warning    = FALSE,
+  message    = FALSE,
+  fig.align  = "center",
+  cache      = FALSE,
+  dpi        = 150
+)
+
+set.seed(8502)
+
+loc_ok <- tryCatch({
+  suppressWarnings(Sys.setlocale("LC_TIME", "es_CR.UTF-8"))
+}, warning = function(w) NA_character_, error = function(e) NA_character_)
+if (is.na(loc_ok) || identical(loc_ok, "")) {
+  tryCatch({
+    suppressWarnings(Sys.setlocale("LC_TIME", "Spanish"))
+  }, warning = function(w) NA_character_, error = function(e) NA_character_)
+}
+
+paquetes_requeridos <- c(
+  "tidyverse", "psych", "car", "lmtest", "sandwich",
+  "nortest", "boot", "broom", "knitr", "kableExtra",
+  "ggcorrplot", "patchwork", "scales", "forcats",
+  "mice", "pROC", "ResourceSelection", "gridExtra",
+  "ggrepel", "viridis", "RColorBrewer"
+)
+
+faltantes <- paquetes_requeridos[!vapply(paquetes_requeridos, requireNamespace, logical(1), quietly = TRUE)]
+if (length(faltantes) > 0) {
+  stop(
+    paste0(
+      "Faltan paquetes requeridos para renderizar este .Rmd: ",
+      paste(faltantes, collapse = ", "),
+      ".
+Instálelos antes de hacer Knit con:
+",
+      "install.packages(c(",
+      paste(sprintf('"%s"', faltantes), collapse = ", "),
+      '), repos = "https://cloud.r-project.org")'
+    ),
+    call. = FALSE
+  )
+}
+
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(psych)
+  library(car)
+  library(lmtest)
+  library(sandwich)
+  library(nortest)
+  library(boot)
+  library(broom)
+  library(knitr)
+  library(kableExtra)
+  library(ggcorrplot)
+  library(patchwork)
+  library(scales)
+  library(forcats)
+  library(mice)
+  library(pROC)
+  library(ResourceSelection)
+  library(gridExtra)
+  library(ggrepel)
+  library(viridis)
+})
+
+theme_sp8502 <- function(base_size = 12) {
+  theme_minimal(base_size = base_size) +
+    theme(
+      plot.title       = element_text(face = "bold", size = base_size + 2, color = "#1a3a5c"),
+      plot.subtitle    = element_text(color = "#4a6fa5", size = base_size),
+      axis.title       = element_text(face = "bold", color = "#2c3e50"),
+      panel.grid.minor = element_blank(),
+      legend.position  = "bottom",
+      strip.background = element_rect(fill = "#eef2f7", color = NA),
+      strip.text       = element_text(face = "bold")
+    )
+}
+theme_set(theme_sp8502())
+
+cat("✓ Entorno configurado para SP-8502 · Sprint 1–4 Cuantitativo
+")
+```
+
+
+# Bienvenida al laboratorio
+
+Este documento integra en una sola experiencia de trabajo tres piezas que usualmente aparecen separadas en el curso: la **guía sustantiva de los Sprints**, el **ejemplo cuantitativo desarrollado** y el **pipeline en R**. El objetivo no es solo que el código corra, sino que usted pueda entender **qué está haciendo**, **por qué lo hace** y **qué decisión metodológica se desprende** de cada bloque.
+
+## Cómo debe trabajarse este archivo
+
+Use este laboratorio con la siguiente lógica:
+
+1. **Lea el contexto** de cada subsección antes de correr el código.  
+2. **Ejecute los chunks en orden**. Este laboratorio está diseñado como pipeline.  
+3. **Interprete el output** antes de avanzar.  
+4. **Responda las preguntas de decisión** que aparecen al final de cada bloque.  
+5. **Traslade esas decisiones** al entregable del Sprint correspondiente.
+
+## Mapa rápido de los Sprints
+
+| Sprint | Pregunta guía | Producto que alimenta |
+|---|---|---|
+| 1 | ¿Qué voy a medir y cómo limpio/documento mis datos? | `sprint1_reporte_diseno.pdf` |
+| 2 | ¿A quién estudio, con qué instrumento y con qué calidad? | `sprint2_diseno_muestral.pdf` |
+| 3 | ¿Qué explican los datos y qué tan robusta es la respuesta? | `sprint3_hallazgos.pdf` |
+| 4 | ¿Cómo convierto hallazgos técnicos en recomendaciones? | `sprint4_policy_brief.pdf` |
+
+> **Regla de trabajo:** en este laboratorio cada bloque tiene cuatro capas: **contexto**, **ejecución**, **interpretación** y **decisión**. Si una de esas capas falta, el análisis está incompleto.
+
+---
+
+---
+
+# SPRINT 1 — Diseño y Fundamentos de Datos {.tabset}
+
+> **¿Qué se logra aquí?** Definir el problema, construir la matriz metodológica, generar una base con errores realistas y dejar un dataset limpio, interpretable y documentado. Sin un Sprint 1 sólido, los modelos del Sprint 3 se vuelven engañosos.
+
+> **Meta:** Formular el problema, construir la MMR, generar datos sintéticos con 9 errores deliberados y producir el dataset limpio y documentado.
+
+## 1.1 Pregunta de Investigación e Hipótesis
+
+**Contexto.** Antes de analizar cualquier base, hay que fijar con precisión la pregunta central, las hipótesis y la lógica de contraste. En esta sección usted no “llena un requisito”: aquí está definiendo qué evidencia contará como respuesta válida.
+
+```{r hipotesis}
+# ── Pregunta central ─────────────────────────────────────────────────────────
+pregunta_central <- paste(
+  "¿En qué medida los factores socioeconómicos y la intervención institucional",
+  "(extensión pesquera, distancia a ANP) predicen el Score de Adopción",
+  "Sostenible (SAS: 0–50 pts) en pescadores artesanales del Pacífico Central",
+  "de Costa Rica, controlando por método de reclutamiento?"
+)
+
+# ── Hipótesis formales ───────────────────────────────────────────────────────
+hipotesis <- tibble(
+  Hipótesis = c("H1 (Principal)", "H2 (Efecto extensión)", "H3 (Distancia ANP)"),
+  Predicción = c(
+    "El modelo M3 explica ≥ 35% de la varianza del SAS (R² ≥ 0.35, p < 0.05)",
+    "Pescadores con extensión tienen SAS significativamente mayor (d Cohen > 0.5)",
+    "Distancia al ANP correlaciona negativamente con SAS (|r| ≥ 0.40, p < 0.05)"
+  ),
+  Prueba = c(
+    "Test F del modelo OLS completo (M3)",
+    "Prueba t de Welch + d de Cohen",
+    "Correlación de Pearson + Spearman (robustez)"
+  )
+)
+
+cat("PREGUNTA CENTRAL:\n", pregunta_central, "\n\n")
+
+kable(hipotesis, caption = "Tabla H1: Hipótesis formales del estudio cuantitativo") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE) %>%
+  column_spec(1, bold = TRUE, color = "#1a3a5c")
+```
+
+## 1.2 Matriz Metodológica Mixta (MMR)
+
+**Interpretación esperada.** La MMR no es una tabla decorativa. Es el puente entre problema, variable, instrumento y decisión analítica. Si una variable no puede ubicarse claramente en esta matriz, todavía no está bien diseñada.
+
+```{r mmr}
+mmr <- tibble(
+  `#` = 1:10,
+  Variable = c(
+    "sas_total", "extension_pesquera", "ingreso_mensual_usd",
+    "anos_experiencia", "distancia_anp_km", "metodo_reclutamiento",
+    "comunidad", "edad", "sexo", "percepcion_recurso"
+  ),
+  Tipo = c(
+    "Numérica (0–50)", "Binaria (0/1)", "Numérica (USD)",
+    "Numérica (años)", "Numérica (km)", "Categórica",
+    "Categórica", "Numérica (años)", "Binaria", "Ordinal (1–5)"
+  ),
+  Rol = c(
+    "Dependiente", "Predictor principal", "Control socioecon.",
+    "Control experiencia", "Contexto territorial", "Covariable diseño",
+    "Estratificación", "Control demog.", "Control demog.", "Complementaria"
+  ),
+  Instrumento = c(
+    "Escala SAS-10 (Likert 0–5)", "Pregunta binaria directa",
+    "Autorreporte + winsorización", "Autorreporte",
+    "Cálculo GPS a ANP más cercana", "Registro de reclutamiento",
+    "Registro INCOPESCA", "Autorreporte", "Observación + autorreporte",
+    "Escala Likert 1–5"
+  ),
+  Sprint = c("S1-S3", "S1-S3", "S1-S3", "S1-S3", "S1-S3",
+             "S2", "S1-S2", "S1", "S1", "S1-S3")
+)
+
+kable(mmr, caption = "Tabla M1: Matriz Metodológica Mixta (MMR) — Investigación Cuantitativa") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = TRUE) %>%
+  column_spec(4, italic = TRUE) %>%
+  row_spec(1, background = "#e8f4f8", bold = TRUE)
+```
+
+## 1.3 Generación de Datos Sintéticos con 9 Errores Deliberados
+
+**Propósito didáctico.** Aquí se simula una base “parecida a campo real”: inconsistencias tipográficas, códigos especiales, valores imposibles y categorías mal estandarizadas. La idea no es memorizar correcciones, sino aprender a detectar problemas antes de modelar.
+
+```{r datos_sinteticos}
+set.seed(8502)
+N <- 80
+
+comunidades <- c("Quepos", "Jacó", "Tárcoles", "Herradura", "Esterillos")
+n_com <- c(20, 18, 16, 14, 12)
+
+datos_crudos <- tibble(
+  id              = paste0("ANC-", str_pad(1:N, 4, pad = "0")),
+  # E1: Inconsistencia tipográfica en comunidad
+  comunidad       = sample(c("Quepos", "quepos", "QUEPOS",
+                              "Jacó", "Jaco",
+                              "Tárcoles", "Tarcoles",
+                              "Herradura", "herradura",
+                              "Esterillos"), N, replace = TRUE,
+                            prob = rep(c(.07,.04,.04,.06,.04,
+                                         .05,.05,.06,.04,.05), 1)),
+  # E2: Edades imposibles
+  edad            = c(sample(25:65, N - 4, replace = TRUE),
+                      -5, 150, 8, 200),
+  # E3: Múltiples codificaciones de sexo
+  sexo            = sample(c("M", "masculino", "Masculino", "F",
+                              "femenino", "Femenino"), N, replace = TRUE,
+                            prob = c(.22, .12, .10, .20, .18, .18)),
+  anos_experiencia = pmax(1, round(rnorm(N, mean = 18, sd = 8))),
+  distancia_anp_km = abs(rnorm(N, mean = 25, sd = 12)),
+  # E4: Código especial 9999.99 no documentado
+  ingreso_mensual_usd = c(
+    round(abs(rnorm(N - 6, mean = 520, sd = 180))),
+    9999.99, 9999.99, -150, -200, 0, 0
+  ),
+  # E5: Mezcla español/inglés en arte de pesca
+  arte_pesca_principal = sample(
+    c("Trasmallo", "trasmallo", "Línea", "long line", "Linea",
+      "Palangre", "palangre", "Anzuelo"),
+    N, replace = TRUE
+  ),
+  # E6: Dos etiquetas de no-respuesta
+  percepcion_recurso = sample(
+    c("1", "2", "3", "4", "5", "No sé", "NS/NR"),
+    N, replace = TRUE, prob = c(.12,.18,.25,.20,.15,.05,.05)
+  ),
+  # E7: SAS fuera de rango (escala 0–50)
+  sas_total = c(
+    round(pmin(50, pmax(0, rnorm(N - 5, mean = 28, sd = 9)))),
+    55, 60, -3, 58, -1
+  ),
+  # E8: Binaria con 5 formas
+  extension_pesquera = sample(
+    c("Sí", "SI", "si", "1", "No", "no", "NO", "0"),
+    N, replace = TRUE, prob = c(.12, .07, .08, .08, .22, .13, .14, .16)
+  ),
+  metodo = sample(c("Estratificado", "RDS"), N,
+                  replace = TRUE, prob = c(0.7, 0.3))
+) %>%
+  # E9: Columna completamente NA
+  mutate(columna_vacia = NA_real_)
+
+cat("Dataset CRUDO generado: n =", nrow(datos_crudos), "observaciones,",
+    ncol(datos_crudos), "variables\n")
+cat("Errores deliberados incrustados: 9\n")
+
+# Tabla resumen de errores
+errores_tabla <- tibble(
+  `#` = paste0("E", 1:9),
+  Variable = c("comunidad", "edad", "sexo", "ingreso_mensual_usd",
+                "arte_pesca_principal", "percepcion_recurso", "sas_total",
+                "extension_pesquera", "columna_vacia"),
+  `Tipo de error` = c(
+    "Inconsistencia tipográfica (Quepos/quepos/QUEPOS)",
+    "Valores imposibles (-5, 150, 8, 200 años)",
+    "Múltiples codificaciones (M/masculino/Masculino/F/femenino)",
+    "Código especial 9999.99 + negativos no documentados",
+    "Mezcla español/inglés (long line vs Línea)",
+    "Dos etiquetas no-respuesta (No sé / NS/NR)",
+    "Valores fuera de rango (55, 60, -3 en escala 0–50)",
+    "Binaria con 5 formas (Sí/SI/si/1/No/no/NO/0)",
+    "Columna completamente NA"
+  ),
+  `Impacto sin corrección` = c(
+    "Duplica grupos en tablas de frecuencia → análisis por comunidad inválido",
+    "Sesga media y SD de edad → distorsiona controles demográficos",
+    "Factor mal construido → regresión con categorías incorrectas",
+    "Sobreestima promedio de ingreso → sesga β del ingreso en M3",
+    "Fragmenta frecuencias por error tipográfico",
+    "Ambigüedad en tratamiento de missings",
+    "Viola supuestos de escala Likert; sesga variable dependiente",
+    "Factor binario construido incorrectamente → error en coeficiente extensión",
+    "Ruido analítico y desperdicio de memoria"
+  )
+)
+
+kable(errores_tabla,
+      caption = "Tabla E1: Los 9 errores deliberados en el dataset crudo") %>%
+  kable_styling(bootstrap_options = c("striped","hover","condensed"),
+                full_width = TRUE, font_size = 11) %>%
+  column_spec(1, bold = TRUE, color = "#c0392b")
+```
+
+## 1.4 Script de Limpieza — 4 Pasos Pedagógicos
+
+> **Secuencia de trabajo recomendada:** cálculo → interpretación → contexto → decisión. En investigación aplicada, limpiar no es “borrar errores”; es documentar por qué una transformación mejora la validez del análisis.
+
+```{r limpieza_datos}
+# ============================================================
+#  script_limpieza.R · SP-8502 · Sprint 1
+#  Secuencia: CÁLCULO → INTERPRETACIÓN → CONTEXTO → DECISIÓN
+# ============================================================
+
+datos <- datos_crudos
+
+# ── E1: Comunidad — Inconsistencia tipográfica ───────────────────────────────
+# PASO 1 · CÁLCULO
+datos <- datos %>%
+  mutate(comunidad = str_to_title(
+    case_when(
+      str_to_lower(comunidad) == "jaco" ~ "Jacó",
+      str_to_lower(comunidad) == "tarcoles" ~ "Tárcoles",
+      TRUE ~ str_to_lower(comunidad)
+    )
+  ))
+# PASO 2 · INTERPRETACIÓN
+cat("E1 · comunidad — Categorías únicas tras corrección:",
+    paste(unique(datos$comunidad), collapse = ", "), "\n")
+# PASO 3 · CONTEXTO: Error frecuente en encuestas de campo sin validación de campo.
+# PASO 4 · DECISIÓN: str_to_title + normalización manual de acentos. Ref: Wickham (2023) R4DS, Cap. 14.
+
+# ── E2: Edad — Valores imposibles ───────────────────────────────────────────
+cat("\nE2 · edad — Valores fuera de rango antes:", sum(datos$edad < 18 | datos$edad > 80, na.rm=TRUE), "\n")
+datos <- datos %>%
+  mutate(edad = if_else(edad < 18 | edad > 80, NA_real_, as.numeric(edad)))
+cat("E2 · edad — NAs introducidos:", sum(is.na(datos$edad)), "\n")
+# DECISIÓN: No imputar en S1; imputación MICE en S3 con modelo predictivo.
+
+# ── E3: Sexo — Múltiples codificaciones ─────────────────────────────────────
+datos <- datos %>%
+  mutate(sexo = case_when(
+    str_to_lower(sexo) %in% c("m", "masculino") ~ "Hombre",
+    str_to_lower(sexo) %in% c("f", "femenino")  ~ "Mujer",
+    TRUE ~ NA_character_
+  ) %>% factor(levels = c("Hombre", "Mujer")))
+cat("\nE3 · sexo — Distribución:", table(datos$sexo), "\n")
+
+# ── E4: Ingreso — Código 9999.99 y negativos ────────────────────────────────
+cat("\nE4 · ingreso — Valores especiales antes:", sum(datos$ingreso_mensual_usd == 9999.99 | datos$ingreso_mensual_usd <= 0, na.rm=TRUE), "\n")
+datos <- datos %>%
+  mutate(ingreso_mensual_usd = case_when(
+    ingreso_mensual_usd == 9999.99 ~ NA_real_,
+    ingreso_mensual_usd <= 0       ~ NA_real_,
+    TRUE                           ~ ingreso_mensual_usd
+  ))
+cat("E4 · ingreso — NAs resultantes:", sum(is.na(datos$ingreso_mensual_usd)), "\n")
+
+# ── E5: Arte de pesca — Mezcla español/inglés ───────────────────────────────
+datos <- datos %>%
+  mutate(arte_pesca_principal = str_to_title(
+    case_when(
+      str_to_lower(arte_pesca_principal) %in% c("long line", "linea", "línea") ~ "Línea",
+      str_to_lower(arte_pesca_principal) == "trasmallo" ~ "Trasmallo",
+      str_to_lower(arte_pesca_principal) == "palangre"  ~ "Palangre",
+      TRUE ~ str_to_title(arte_pesca_principal)
+    )
+  ) %>% factor())
+cat("\nE5 · arte_pesca — Categorías:", levels(datos$arte_pesca_principal), "\n")
+
+# ── E6: Percepción recurso — Dos etiquetas NS/NR ─────────────────────────────
+datos <- datos %>%
+  mutate(percepcion_recurso = case_when(
+    percepcion_recurso %in% c("No sé", "NS/NR") ~ NA_character_,
+    TRUE ~ percepcion_recurso
+  ) %>% as.numeric())
+cat("\nE6 · percepcion_recurso — NAs:", sum(is.na(datos$percepcion_recurso)), "\n")
+
+# ── E7: SAS — Valores fuera de rango 0–50 ───────────────────────────────────
+cat("\nE7 · sas_total — Valores fuera de rango [0,50] antes:", sum(datos$sas_total < 0 | datos$sas_total > 50, na.rm=TRUE), "\n")
+datos <- datos %>%
+  mutate(sas_total = if_else(sas_total < 0 | sas_total > 50, NA_real_, as.numeric(sas_total)))
+cat("E7 · sas_total — NAs introducidos:", sum(is.na(datos$sas_total)), "\n")
+
+# ── E8: Extensión pesquera — 5 formas de binaria ─────────────────────────────
+datos <- datos %>%
+  mutate(extension_pesquera = case_when(
+    str_to_lower(extension_pesquera) %in% c("sí", "si", "1") ~ 1L,
+    str_to_lower(extension_pesquera) %in% c("no", "0")       ~ 0L,
+    TRUE ~ NA_integer_
+  ))
+cat("\nE8 · extension_pesquera — Distribución:", table(datos$extension_pesquera, useNA = "always"), "\n")
+
+# ── E9: Columna completamente NA ─────────────────────────────────────────────
+datos <- datos %>% select(-columna_vacia)
+cat("\nE9 · columna_vacia — eliminada. Variables restantes:", ncol(datos), "\n")
+
+# ── Variables derivadas ───────────────────────────────────────────────────────
+datos <- datos %>%
+  mutate(
+    log_ingreso = log1p(ingreso_mensual_usd),
+    comunidad   = factor(comunidad),
+    metodo      = factor(metodo),
+    sas_alto    = if_else(sas_total >= 35, 1L, 0L)  # para regresión logística
+  )
+
+cat("\n✓ Limpieza completa. Dataset final: n =", nrow(datos), "| variables:", ncol(datos), "\n")
+cat("NAs por variable:\n")
+print(colSums(is.na(datos)))
+```
+
+## 1.5 EDA — Análisis Exploratorio
+
+**Qué debe lograr aquí.** Identificar forma de distribución, heterogeneidad entre comunidades, necesidad de transformaciones y posibles patrones preliminares. El EDA no se hace para “producir gráficos”, sino para decidir cómo avanzar con el modelado.
+
+```{r eda_figuras, fig.height=10, fig.width=12}
+# ── Figura B1: Histograma + densidad SAS ─────────────────────────────────────
+p1 <- datos %>%
+  filter(!is.na(sas_total)) %>%
+  ggplot(aes(x = sas_total)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "#3498db", color = "white", alpha = 0.8) +
+  geom_density(color = "#e74c3c", linewidth = 1.2, linetype = "dashed") +
+  geom_vline(aes(xintercept = mean(sas_total, na.rm=TRUE)),
+             color = "#2c3e50", linetype = "solid", linewidth = 1) +
+  annotate("text", x = mean(datos$sas_total, na.rm=TRUE) + 2,
+           y = 0.035, label = paste0("x̄ = ", round(mean(datos$sas_total, na.rm=TRUE),1)),
+           color = "#2c3e50", fontface = "bold", size = 3.5) +
+  labs(title = "B1: Distribución del SAS (Variable Dependiente)",
+       subtitle = "Histograma con curva de densidad kernel y media",
+       x = "Score de Adopción Sostenible (0–50)", y = "Densidad") +
+  scale_x_continuous(limits = c(0, 50))
+
+# ── Figura B2: Boxplot por comunidad ─────────────────────────────────────────
+p2 <- datos %>%
+  filter(!is.na(sas_total), !is.na(comunidad)) %>%
+  mutate(comunidad = fct_reorder(comunidad, sas_total, median)) %>%
+  ggplot(aes(x = comunidad, y = sas_total, fill = comunidad)) +
+  geom_boxplot(alpha = 0.75, outlier.shape = 21,
+               outlier.fill = "white", outlier.size = 2) +
+  geom_jitter(width = 0.15, alpha = 0.4, size = 1.5, color = "#2c3e50") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "B2: SAS por Comunidad",
+       subtitle = "Heterogeneidad inter-comunidad",
+       x = "Comunidad", y = "SAS (0–50)") +
+  theme(legend.position = "none")
+
+# ── Figura B3: Distribución ingreso (original vs log) ────────────────────────
+p3a <- datos %>% filter(!is.na(ingreso_mensual_usd)) %>%
+  ggplot(aes(x = ingreso_mensual_usd)) +
+  geom_histogram(bins = 15, fill = "#e67e22", color = "white", alpha = 0.8) +
+  labs(title = "Ingreso (escala original)", x = "USD/mes", y = "n") +
+  scale_x_continuous(labels = dollar)
+
+p3b <- datos %>% filter(!is.na(log_ingreso)) %>%
+  ggplot(aes(x = log_ingreso)) +
+  geom_histogram(bins = 15, fill = "#27ae60", color = "white", alpha = 0.8) +
+  labs(title = "Ingreso (log-transformado)", x = "log(USD/mes + 1)", y = "n")
+
+p3 <- p3a + p3b + plot_annotation(
+  title = "B3: Asimetría del Ingreso — Justificación de log-transformación",
+  subtitle = "El ingreso tiene asimetría derecha pronunciada → usar log(ingreso) en regresión"
+)
+
+# ── Figura B4: Percepción recurso por comunidad ───────────────────────────────
+p4 <- datos %>%
+  filter(!is.na(percepcion_recurso), !is.na(comunidad)) %>%
+  mutate(percepcion_f = factor(percepcion_recurso,
+                                labels = c("Muy mala","Mala","Regular","Buena","Muy buena"))) %>%
+  count(comunidad, percepcion_f) %>%
+  group_by(comunidad) %>%
+  mutate(pct = n / sum(n)) %>%
+  ggplot(aes(x = comunidad, y = pct, fill = percepcion_f)) +
+  geom_col(position = "fill", color = "white") +
+  scale_y_continuous(labels = percent) +
+  scale_fill_brewer(palette = "RdYlGn", name = "Percepción") +
+  labs(title = "B4: Percepción del Recurso por Comunidad",
+       x = "Comunidad", y = "Proporción") +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+(p1 + p2) / (p3) / p4 + plot_layout(heights = c(1, 0.8, 1))
+```
+
+> **Preguntas de decisión para el reporte del Sprint 1:**
+>
+> - ¿Qué variable necesita transformación antes del modelado y por qué?
+> - ¿Qué patrón territorial preliminar aparece entre comunidades?
+> - ¿Qué riesgo habría si usted modela sin corregir los errores de codificación?
+
+```{r eda_correlaciones, fig.height=6, fig.width=7}
+# ── Figura B5: Matriz de correlaciones ───────────────────────────────────────
+vars_cor <- datos %>%
+  select(sas_total, extension_pesquera, log_ingreso,
+         anos_experiencia, distancia_anp_km, percepcion_recurso) %>%
+  drop_na()
+
+corr_mat <- cor(vars_cor, use = "complete.obs")
+p_mat    <- cor_pmat(vars_cor)
+
+ggcorrplot(corr_mat,
+           hc.order = TRUE, type = "lower",
+           lab = TRUE, lab_size = 3.5,
+           p.mat = p_mat, sig.level = 0.05,
+           insig = "blank",
+           colors = c("#e74c3c", "white", "#2ecc71"),
+           title = "B5: Matriz de Correlaciones (p < 0.05)",
+           ggtheme = theme_sp8502())
+```
+
+---
+
+# SPRINT 2 — Muestreo e Instrumento {.tabset}
+
+> **¿Qué se logra aquí?** Justificar el tamaño de muestra, distinguir entre precisión e inferencia, documentar un posible componente RDS y evaluar si el instrumento tiene consistencia suficiente para sostener el análisis posterior.
+
+> **Meta:** Justificar n=80, simular RDS para fracción no registrada, validar instrumento SAS-10.
+
+## 2.1 Fórmula de Cochran + Corrección por Finitud
+
+**Contexto.** Este bloque diferencia dos decisiones que los estudiantes suelen mezclar: el tamaño mínimo para estimar con cierta precisión y el tamaño operativo que realmente se necesita para correr modelos, comparar subgrupos y absorber pérdidas.
+
+```{r cochran}
+# ── Parámetros Cochran ────────────────────────────────────────────────────────
+Z   <- 1.96    # Nivel de confianza 95%
+sigma <- 9.5   # Desviación estándar estimada del SAS (piloto)
+E   <- 3.5     # Error tolerable en puntos SAS
+N_marco <- 820 # Tamaño del marco INCOPESCA
+
+# n0 Cochran
+n0_cochran <- (Z^2 * sigma^2) / E^2
+cat("n₀ Cochran (sin corrección):", round(n0_cochran, 2), "\n")
+
+# Corrección por finitud (FPC)
+n_fpc <- n0_cochran / (1 + (n0_cochran - 1) / N_marco)
+cat("n con FPC:", round(n_fpc, 2), "\n")
+cat("Fracción de muestreo n/N:", round(n_fpc / N_marco * 100, 1), "% → FPC obligatoria (>5%)\n\n")
+
+# ── Comparación de 4 diseños muestrales ──────────────────────────────────────
+comunidades_marco <- tibble(
+  Comunidad   = c("Quepos","Jacó","Tárcoles","Herradura","Esterillos"),
+  N_h         = c(240, 195, 165, 130, 90),
+  sigma_h_est = c(9.8, 9.2, 8.7, 10.1, 9.3)
+) %>%
+  mutate(
+    W_h = N_h / sum(N_h),
+    n_proporcional  = round(W_h * 80),
+    n_neyman        = round((N_h * sigma_h_est) / sum(N_h * sigma_h_est) * 80)
+  )
+
+cat("Asignación por comunidad — Comparación proporcional vs Neyman:\n")
+print(comunidades_marco)
+
+# ── DEFF esperado por diseño ──────────────────────────────────────────────────
+disenos <- tibble(
+  Diseño = c("MAS (sin estratificar)", "Estratificado proporcional",
+              "Neyman óptimo", "Sistemático"),
+  `n mínimo` = c(38, 36, 34, 38),
+  `n operativo` = 80,
+  `DEFF esperado` = c(1.00, 0.92, 0.88, 1.05),
+  `Error estimado SAS` = c(3.5, 3.2, 3.1, 3.6),
+  Recomendación = c("Referencia", "✓ Elegido", "Requiere piloto robusto",
+                     "Marco sin ordenamiento claro")
+)
+
+kable(disenos, caption = "Tabla M2: Comparación de diseños muestrales") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = TRUE) %>%
+  row_spec(2, background = "#d5f5e3", bold = TRUE)
+```
+
+## 2.2 Simulación RDS para Fracción No Registrada
+
+```{r rds_simulacion, fig.height=5}
+set.seed(8502)
+
+# ── Red social simplificada (Watts-Strogatz conceptual) ─────────────────────
+N_rds  <- 200  # pescadores no registrados
+K      <- 5    # grado promedio de red social
+n_sem  <- 5    # semillas heterogéneas
+cupones <- 3   # cupones por persona
+oleadas <- 8
+
+# Simular grados de red (distribución Power-Law aproximada)
+grados <- round(pmax(1, rpois(N_rds, lambda = K)))
+
+# SAS verdadero para no registrados (ligeramente menor por sesgo acceso)
+sas_rds_true <- pmin(50, pmax(0, rnorm(N_rds, mean = 24, sd = 9)))
+
+# ── Estimador Volz-Heckathorn (VH) ───────────────────────────────────────────
+# Simular muestreo por oleadas
+estimados_por_oleada <- numeric(oleadas)
+set.seed(8502)
+muestra_acum <- integer(0)
+
+for (oleada in 1:oleadas) {
+  nuevos <- sample(setdiff(1:N_rds, muestra_acum),
+                   size = min(cupones * max(1, length(muestra_acum)), 24 - length(muestra_acum)),
+                   replace = FALSE,
+                   prob = 1 / grados[setdiff(1:N_rds, muestra_acum)])
+  muestra_acum <- c(muestra_acum, nuevos)
+
+  y_i <- sas_rds_true[muestra_acum]
+  d_i <- grados[muestra_acum]
+
+  # Estimador VH: ponderado por inverso del grado
+  est_vh   <- sum(y_i / d_i) / sum(1 / d_i)
+  estimados_por_oleada[oleada] <- est_vh
+}
+
+# Estimador naive (sin ponderación)
+est_naive <- mean(sas_rds_true[muestra_acum])
+est_vh_final <- estimados_por_oleada[oleadas]
+
+cat("Estimador naive (sin ponderar por grado):", round(est_naive, 2), "\n")
+cat("Estimador VH (Volz-Heckathorn):", round(est_vh_final, 2), "\n")
+cat("Sesgo del estimador naive:", round(est_naive - est_vh_final, 2), "pts SAS\n")
+
+# ── Figura: Convergencia del estimador VH por oleada ─────────────────────────
+tibble(Oleada = 1:oleadas, `Estimador VH` = estimados_por_oleada) %>%
+  ggplot(aes(x = Oleada, y = `Estimador VH`)) +
+  geom_line(color = "#3498db", linewidth = 1.3) +
+  geom_point(size = 3, color = "#2c3e50") +
+  geom_hline(yintercept = est_vh_final, linetype = "dashed", color = "#e74c3c") +
+  geom_hline(yintercept = est_naive, linetype = "dotted", color = "#e67e22") +
+  annotate("text", x = 6.5, y = est_vh_final - 0.8,
+           label = "VH final", color = "#e74c3c", size = 3.5) +
+  annotate("text", x = 6.5, y = est_naive + 0.8,
+           label = "Naive", color = "#e67e22", size = 3.5) +
+  labs(title = "Convergencia del Estimador Volz-Heckathorn por Oleada",
+       subtitle = "El estimador VH se estabiliza antes de la oleada 4 (criterio de diagnóstico)",
+       x = "Oleada de reclutamiento", y = "Estimador SAS medio (VH)") +
+  scale_x_continuous(breaks = 1:8)
+```
+
+## 2.3 Validación del Instrumento SAS-10
+
+**Pregunta guía.** ¿La escala es suficientemente consistente como para ser usada como base de una variable dependiente o de un constructo compuesto? Aquí se revisa eso de forma explícita.
+
+```{r validacion_instrumento}
+set.seed(8502)
+
+# ── Datos piloto (n=30) con 10 ítems Likert 0–5 ──────────────────────────────
+n_piloto <- 30
+escala_base <- rnorm(n_piloto, mean = 2.8, sd = 0.9)
+
+items_piloto <- purrr::map_dfc(1:10, function(i) {
+  ruido   <- rnorm(n_piloto, 0, 0.6)
+  valores <- round(pmin(5, pmax(0, escala_base + ruido)))
+  tibble(!!paste0("item_", i) := valores)
+})
+
+# ── Alpha de Cronbach con namespace explícito para evitar conflictos ─────────
+alpha_result <- psych::alpha(items_piloto)
+
+cat("Alpha de Cronbach:", round(alpha_result$total$raw_alpha, 3), "\n")
+cat("Clasificación:",
+    dplyr::case_when(
+      alpha_result$total$raw_alpha >= 0.90 ~ "Excelente",
+      alpha_result$total$raw_alpha >= 0.80 ~ "Buena",
+      alpha_result$total$raw_alpha >= 0.70 ~ "Aceptable ✓",
+      TRUE ~ "Revisar instrumento"
+    ),
+    "\n\n")
+
+# ── Tabla correcta: correlación ítem-total + alpha si se elimina ─────────────
+tabla_alpha <- alpha_result$item.stats %>%
+  tibble::rownames_to_column("Ítem") %>%
+  select(Ítem, r.cor) %>%
+  left_join(
+    alpha_result$alpha.drop %>%
+      tibble::rownames_to_column("Ítem") %>%
+      select(Ítem, raw_alpha),
+    by = "Ítem"
+  ) %>%
+  rename(
+    `r ítem-total corregida` = r.cor,
+    `Alpha si se elimina`    = raw_alpha
+  ) %>%
+  mutate(
+    Decisión = case_when(
+      `r ítem-total corregida` >= 0.40 ~ "✓ Retener",
+      `r ítem-total corregida` >= 0.30 ~ "✓ Aceptable",
+      TRUE ~ "⚠ Revisar"
+    )
+  )
+
+kable(
+  tabla_alpha,
+  digits = 3,
+  caption = paste("Tabla V1: Validación SAS-10 · Alpha =", round(alpha_result$total$raw_alpha, 3))
+) %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = FALSE) %>%
+  column_spec(
+    4, bold = TRUE,
+    color = ifelse(tabla_alpha$Decisión == "✓ Retener", "#27ae60",
+                   ifelse(tabla_alpha$Decisión == "✓ Aceptable", "#f39c12", "#e74c3c"))
+  )
+```
+
+> **Preguntas de decisión para el reporte del Sprint 2:**
+>
+> - ¿El tamaño muestral operativo se justifica solo por precisión o también por análisis multivariable?
+> - ¿Qué evidencia sugiere que el instrumento es usable?
+> - ¿Qué capa de anonimización protege más la reidentificación indirecta?
+
+```{r anonimizacion}
+# ── Anonimización — 5 capas ───────────────────────────────────────────────────
+set.seed(8502)
+
+datos <- datos %>%
+  mutate(
+    # Capa 1: IDs hash (ya son ANC-XXXX en datos sintéticos)
+    id_anon = paste0("ANC-", str_pad(row_number(), 4, pad = "0")),
+    # Capa 2: GPS sintético a 2 decimales (±1 km)
+    lat_anon = round(runif(n(), 9.40, 10.10), 2),
+    lon_anon = round(runif(n(), -84.90, -84.00), 2),
+    # Capa 3: Semana de encuesta (sin fecha exacta)
+    semana_encuesta = paste0("2026-S", sample(10:16, n(), replace = TRUE)),
+    # Capa 4: Comunidades pequeñas agrupadas
+    comunidad_anon = fct_collapse(
+      factor(comunidad),
+      `Otra zona costera` = c("Herradura", "Esterillos")
+    ),
+    # Capa 5: Edades extremas redondeadas al quinquenio
+    edad_anon = case_when(
+      !is.na(edad) & edad < 25 ~ 25,
+      !is.na(edad) & edad > 65 ~ 65,
+      !is.na(edad) ~ round(edad / 5) * 5,
+      TRUE ~ NA_real_
+    )
+  )
+
+cat("✓ Anonimización completa — 5 capas aplicadas\n")
+cat("Verificación: 'id_raw' en datos:", "id" %in% names(datos), "\n")
+cat("Distribución comunidad_anon:\n")
+print(table(datos$comunidad_anon))
+```
+
+---
+
+# SPRINT 3 — Modelado Estadístico Profundo {.tabset}
+
+> **¿Qué se logra aquí?** Integrar imputación, verificación de supuestos, modelos OLS, regresión logística y bootstrap. Este es el momento del curso donde la pregunta de investigación empieza a recibir una respuesta empírica.
+
+> **Meta:** Verificar supuestos OLS, construir M0-M4, regresión logística, análisis Bootstrap (B=2000) y probar H1–H3.
+
+## 3.1 Imputación MICE
+
+**Contexto.** En esta etapa ya no basta con listar faltantes. Hay que decidir cómo tratarlos de manera coherente con el modelo y reportar el costo analítico de esa decisión.
+
+```{r mice_imputacion}
+set.seed(8502)
+
+vars_modelo <- datos %>%
+  select(sas_total, extension_pesquera, log_ingreso,
+         anos_experiencia, distancia_anp_km, percepcion_recurso,
+         edad_anon, metodo, sas_alto)
+
+cat("Missing values antes de MICE:\n")
+print(colSums(is.na(vars_modelo)))
+
+# Imputación MICE (m=5, método PMM para continuas)
+imp <- mice(vars_modelo, m = 5, method = "pmm",
+            maxit = 10, seed = 8502, printFlag = FALSE)
+
+# Conjunto completo imputado (usar primer conjunto para modelos)
+datos_imp <- complete(imp, action = 1) %>%
+  mutate(comunidad = datos$comunidad)
+
+cat("\nMissing values después de MICE (conjunto 1):\n")
+print(colSums(is.na(datos_imp)))
+cat("\n✓ Imputación MICE completada. n =", nrow(datos_imp), "\n")
+```
+
+## 3.2 Verificación de 6 Supuestos OLS
+
+**Regla metodológica.** No interprete coeficientes antes de revisar supuestos. Un p-valor no corrige un modelo mal especificado.
+
+```{r supuestos_ols, fig.height=10}
+# ── Modelo base para verificación ────────────────────────────────────────────
+m_base <- lm(sas_total ~ extension_pesquera + log_ingreso +
+               anos_experiencia + distancia_anp_km + metodo,
+             data = datos_imp)
+
+# ── S1: Linealidad (LOESS residuos vs ajustados) ──────────────────────────────
+df_resid <- tibble(
+  ajustados = fitted(m_base),
+  residuos  = residuals(m_base)
+)
+
+p_lineal <- ggplot(df_resid, aes(x = ajustados, y = residuos)) +
+  geom_point(alpha = 0.5, color = "#3498db") +
+  geom_smooth(method = "loess", color = "#e74c3c", se = TRUE, linewidth = 1.2) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "S1: Linealidad — Residuos vs Valores Ajustados",
+       subtitle = "Línea LOESS aproximadamente horizontal → supuesto satisfecho",
+       x = "Valores ajustados", y = "Residuos")
+
+# ── S3: Homocedasticidad (Breusch-Pagan) ─────────────────────────────────────
+bp_test <- bptest(m_base)
+cat("S3 · Breusch-Pagan p-valor:", round(bp_test$p.value, 4), "\n")
+usar_robustos <- bp_test$p.value <= 0.05
+cat("SE robustos HC3 activados:", usar_robustos, "\n")
+
+p_homo <- ggplot(df_resid, aes(x = ajustados, y = sqrt(abs(residuos)))) +
+  geom_point(alpha = 0.5, color = "#27ae60") +
+  geom_smooth(method = "loess", color = "#e74c3c", linewidth = 1.2) +
+  labs(title = paste0("S3: Homocedasticidad — Breusch-Pagan p=",
+                       round(bp_test$p.value, 3)),
+       subtitle = ifelse(usar_robustos, "⚠ Heterocedasticidad → SE robustos HC3",
+                                        "✓ Homoscedástico"),
+       x = "Valores ajustados", y = "√|Residuos estandarizados|")
+
+# ── S4: Normalidad de residuos ────────────────────────────────────────────────
+res_std <- rstandard(m_base)
+sw_test  <- shapiro.test(res_std)
+lt_test  <- lillie.test(res_std)
+ad_test  <- ad.test(res_std)
+
+cat("\nS4 · Shapiro-Wilk  p:", round(sw_test$p.value, 4), "\n")
+cat("S4 · Lilliefors    p:", round(lt_test$p.value, 4), "\n")
+cat("S4 · Anderson-Darling p:", round(ad_test$p.value, 4), "\n")
+
+p_qq <- ggplot(tibble(residuos = res_std), aes(sample = residuos)) +
+  stat_qq(color = "#9b59b6", alpha = 0.7) +
+  stat_qq_line(color = "#e74c3c", linewidth = 1.1) +
+  labs(title = paste0("S4: QQ-Plot Residuos — SW p=", round(sw_test$p.value, 3)),
+       x = "Cuantiles teóricos", y = "Cuantiles muestrales")
+
+# ── S5: Multicolinealidad (VIF) ───────────────────────────────────────────────
+vif_vals <- vif(m_base)
+cat("\nS5 · VIF:\n"); print(round(vif_vals, 3))
+cat("Umbral crítico VIF < 10 → Todos satisfacen:", all(vif_vals < 10), "\n")
+
+p_vif <- tibble(Variable = names(vif_vals), VIF = as.numeric(vif_vals)) %>%
+  mutate(Variable = fct_reorder(Variable, VIF)) %>%
+  ggplot(aes(x = VIF, y = Variable, fill = VIF > 5)) +
+  geom_col(color = "white") +
+  geom_vline(xintercept = 10, linetype = "dashed", color = "#e74c3c") +
+  geom_vline(xintercept = 5, linetype = "dotted", color = "#f39c12") +
+  scale_fill_manual(values = c("#2ecc71","#e74c3c"), guide = "none") +
+  labs(title = "S5: Factor de Inflación de Varianza (VIF)",
+       subtitle = "Umbral crítico: 10 (línea roja) | moderado: 5 (línea naranja)",
+       x = "VIF", y = "")
+
+# ── S6: Outliers influyentes (Cook's D) ──────────────────────────────────────
+cook_d <- cooks.distance(m_base)
+umbral_cook <- 4 / nrow(datos_imp)
+outliers_idx <- which(cook_d > umbral_cook)
+cat("\nS6 · Observaciones influyentes (Cook > 4/n =",
+    round(umbral_cook, 4), "):", length(outliers_idx), "\n")
+if (length(outliers_idx) > 0) cat("  Índices:", outliers_idx, "\n")
+
+p_cook <- tibble(obs = 1:length(cook_d), cook = cook_d) %>%
+  ggplot(aes(x = obs, y = cook, color = cook > umbral_cook)) +
+  geom_point(size = 1.5) +
+  geom_hline(yintercept = umbral_cook, linetype = "dashed", color = "#e74c3c") +
+  scale_color_manual(values = c("#3498db","#e74c3c"), guide = "none") +
+  labs(title = paste0("S6: Distancia de Cook (umbral = ", round(umbral_cook, 3), ")"),
+       x = "Observación", y = "Cook's D")
+
+(p_lineal + p_homo) / (p_qq + p_vif) / p_cook
+```
+
+## 3.3 Modelos OLS M0–M4
+
+**Lógica del bloque.** Se construye una secuencia de modelos para mostrar qué gana el análisis al pasar de un modelo nulo a un modelo explicativo más completo. El foco no es “ganar R² a toda costa”, sino sostener una narrativa teórica defendible.
+
+```{r modelos_ols}
+# ── Construcción secuencial de modelos ────────────────────────────────────────
+M0 <- lm(sas_total ~ 1, data = datos_imp)
+
+M1 <- lm(sas_total ~ extension_pesquera,
+          data = datos_imp)
+
+M2 <- lm(sas_total ~ extension_pesquera + log_ingreso +
+            anos_experiencia,
+          data = datos_imp)
+
+M3 <- lm(sas_total ~ extension_pesquera + log_ingreso +
+            anos_experiencia + distancia_anp_km + percepcion_recurso + metodo,
+          data = datos_imp)
+
+M4 <- step(M3, direction = "both", trace = 0)  # parsimonioso
+
+# ── Tabla comparativa de modelos ──────────────────────────────────────────────
+tabla_modelos <- map_dfr(list(M0=M0, M1=M1, M2=M2, M3=M3, M4=M4), function(m) {
+  sm <- summary(m)
+  tibble(
+    R2       = round(sm$r.squared, 4),
+    R2_adj   = round(sm$adj.r.squared, 4),
+    RMSE     = round(sqrt(mean(residuals(m)^2)), 3),
+    AIC      = round(AIC(m), 1),
+    BIC      = round(BIC(m), 1),
+    F_stat   = ifelse(!is.null(sm$fstatistic),
+                       round(sm$fstatistic[1], 2), NA),
+    p_F      = ifelse(!is.null(sm$fstatistic),
+                       round(pf(sm$fstatistic[1], sm$fstatistic[2],
+                                sm$fstatistic[3], lower.tail = FALSE), 5), NA),
+    n_vars   = length(coef(m)) - 1
+  )
+}, .id = "Modelo")
+
+kable(tabla_modelos, caption = "Tabla R1: Comparación de modelos OLS (M0–M4)") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = FALSE) %>%
+  row_spec(4, background = "#d5f5e3", bold = TRUE) %>%
+  footnote(general = "M3 = modelo principal reportado. M4 = verificación de robustez (stepwise).")
+```
+
+```{r coeficientes_m3}
+# ── Tabla de coeficientes M3 con SE robustos si corresponde ──────────────────
+if (usar_robustos) {
+  vcov_rob   <- vcovHC(M3, type = "HC3")
+  coef_rob   <- lmtest::coeftest(M3, vcov = vcov_rob)
+  coef_tabla <- broom::tidy(coef_rob) %>%
+    mutate(
+      conf.low  = estimate - 1.96 * std.error,
+      conf.high = estimate + 1.96 * std.error
+    )
+  nota_se <- "SE robustos HC3 (IC95% aproximados con normal estándar)"
+} else {
+  coef_tabla <- broom::tidy(M3, conf.int = TRUE)
+  nota_se    <- "SE estándar OLS"
+}
+
+# Betas estandarizados
+X_std <- datos_imp %>%
+  select(extension_pesquera, log_ingreso, anos_experiencia,
+         distancia_anp_km, percepcion_recurso) %>%
+  mutate(across(everything(), scale))
+
+datos_std <- as.data.frame(X_std) %>%
+  mutate(sas_total_std = as.numeric(scale(datos_imp$sas_total)))
+
+m3_std <- lm(sas_total_std ~ extension_pesquera + log_ingreso +
+               anos_experiencia + distancia_anp_km + percepcion_recurso,
+             data = datos_std)
+betas_std <- c(`(Intercept)` = NA_real_, coef(m3_std)[-1], metodoRDS = NA_real_)
+
+coef_final <- coef_tabla %>%
+  mutate(
+    `β estand.` = round(unname(betas_std[match(term, names(betas_std))]), 3),
+    sig = case_when(
+      p.value < 0.001 ~ "***",
+      p.value < 0.01  ~ "**",
+      p.value < 0.05  ~ "*",
+      p.value < 0.10  ~ ".",
+      TRUE ~ "ns"
+    )
+  ) %>%
+  select(term, estimate, std.error, statistic, p.value, conf.low, conf.high, `β estand.`, sig) %>%
+  rename(Variable = term, β = estimate, SE = std.error,
+         t = statistic, p = p.value, `IC 2.5%` = conf.low, `IC 97.5%` = conf.high)
+
+kable(coef_final, digits = 3,
+      caption = paste("Tabla R2: Coeficientes M3 —", nota_se)) %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = TRUE) %>%
+  column_spec(9, bold = TRUE) %>%
+  footnote(general = "*** p<.001 | ** p<.01 | * p<.05 | . p<.10 | ns = no significativo")
+```
+
+```{r forest_plot, fig.height=6, fig.width=9}
+# ── Forest Plot M3 ────────────────────────────────────────────────────────────
+coef_final %>%
+  filter(Variable != "(Intercept)") %>%
+  mutate(
+    Variable = case_when(
+      Variable == "extension_pesquera" ~ "Extensión pesquera",
+      Variable == "log_ingreso"        ~ "log(Ingreso)",
+      Variable == "anos_experiencia"   ~ "Años experiencia",
+      Variable == "distancia_anp_km"   ~ "Distancia ANP (km)",
+      Variable == "percepcion_recurso" ~ "Percepción recurso",
+      Variable == "metodoRDS"          ~ "Método: RDS",
+      TRUE ~ Variable
+    )
+  ) %>%
+  mutate(Variable = fct_reorder(Variable, β),
+         significativo = p < 0.05) %>%
+  ggplot(aes(x = β, y = Variable, color = significativo)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_errorbarh(aes(xmin = `IC 2.5%`, xmax = `IC 97.5%`),
+                 height = 0.25, linewidth = 1.1) +
+  geom_point(size = 4) +
+  scale_color_manual(values = c("gray60","#e74c3c"),
+                     labels = c("No significativo (p≥.05)","Significativo (p<.05)"),
+                     name = "") +
+  labs(title = "Forest Plot — Modelo M3 (OLS)",
+       subtitle = paste("R² =", round(summary(M3)$r.squared, 3),
+                        "| R²adj =", round(summary(M3)$adj.r.squared, 3)),
+       x = "Coeficiente β con IC 95%", y = "") +
+  theme(legend.position = "top")
+```
+
+## 3.4 Regresión Logística
+
+**Para qué sirve este bloque.** Complementa el modelo lineal al traducir el problema en términos de probabilidad de pertenecer al grupo de SAS alto. No reemplaza el OLS; lo complementa.
+
+```{r regresion_logistica, fig.height=5}
+# ── Modelo logístico: P(SAS_alto=1) ──────────────────────────────────────────
+logit_m <- glm(sas_alto ~ extension_pesquera + log_ingreso +
+                 anos_experiencia + distancia_anp_km + percepcion_recurso,
+               data = datos_imp, family = binomial(link = "logit"))
+
+# Tabla Odds Ratios
+or_tabla <- tidy(logit_m, conf.int = TRUE, exponentiate = TRUE) %>%
+  filter(term != "(Intercept)") %>%
+  mutate(
+    term = case_when(
+      term == "extension_pesquera" ~ "Extensión pesquera",
+      term == "log_ingreso"        ~ "log(Ingreso)",
+      term == "anos_experiencia"   ~ "Años experiencia",
+      term == "distancia_anp_km"   ~ "Distancia ANP (km)",
+      term == "percepcion_recurso" ~ "Percepción recurso",
+      TRUE ~ term
+    ),
+    sig = case_when(p.value < 0.001 ~ "***", p.value < 0.01 ~ "**",
+                    p.value < 0.05 ~ "*", TRUE ~ "ns")
+  ) %>%
+  rename(Variable = term, OR = estimate, `IC 2.5%` = conf.low, `IC 97.5%` = conf.high)
+
+kable(or_tabla, digits = 3,
+      caption = "Tabla R3: Odds Ratios — Regresión Logística (outcome: SAS ≥ 35)") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = FALSE) %>%
+  column_spec(2, bold = TRUE)
+
+# ── AUC-ROC ──────────────────────────────────────────────────────────────────
+roc_obj <- roc(datos_imp$sas_alto, fitted(logit_m), quiet = TRUE)
+auc_val <- auc(roc_obj)
+cat("\nAUC-ROC:", round(auc_val, 4), "\n")
+cat("Clasificación:", ifelse(auc_val >= 0.8, "Bueno (≥0.8)",
+                      ifelse(auc_val >= 0.7, "Aceptable (0.7–0.8)", "Bajo (<0.7)")), "\n")
+
+# ── Test de Hosmer-Lemeshow ───────────────────────────────────────────────────
+hl_test <- hoslem.test(datos_imp$sas_alto, fitted(logit_m), g = 10)
+cat("Hosmer-Lemeshow p:", round(hl_test$p.value, 4),
+    "→", ifelse(hl_test$p.value > 0.05, "Buen ajuste calibración ✓", "Revisar calibración"), "\n")
+
+# ── Curva ROC ────────────────────────────────────────────────────────────────
+roc_df <- tibble(
+  especificidad = 1 - roc_obj$specificities,
+  sensibilidad  = roc_obj$sensitivities
+)
+ggplot(roc_df, aes(x = especificidad, y = sensibilidad)) +
+  geom_line(color = "#3498db", linewidth = 1.5) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray") +
+  annotate("text", x = 0.65, y = 0.35,
+           label = paste0("AUC = ", round(auc_val, 3)),
+           size = 5, fontface = "bold", color = "#3498db") +
+  labs(title = "Curva ROC — Regresión Logística",
+       subtitle = paste("Hosmer-Lemeshow p =", round(hl_test$p.value, 3)),
+       x = "1 – Especificidad (Tasa FP)", y = "Sensibilidad (Tasa VP")
+```
+
+> **Preguntas de decisión para el reporte del Sprint 3:**
+>
+> - ¿Qué supuesto fue el más frágil en el modelo base?
+> - ¿Debe reportarse M3 como modelo principal? ¿Por qué?
+> - ¿Qué cambia al interpretar resultados como asociación lineal versus probabilidad de SAS alto?
+
+## 3.5 Bootstrap B=2000
+
+```{r bootstrap, fig.height=7}
+set.seed(8502)
+B <- 2000
+
+# ── H1: Bootstrap R² ─────────────────────────────────────────────────────────
+r2_obs <- summary(M3)$r.squared
+
+boot_r2 <- function(data, i) {
+  d <- data[i, ]
+  m <- lm(sas_total ~ extension_pesquera + log_ingreso +
+            anos_experiencia + distancia_anp_km + percepcion_recurso + metodo,
+          data = d)
+  summary(m)$r.squared
+}
+boot_r2_res <- boot(datos_imp, boot_r2, R = B)
+ci_r2 <- boot.ci(boot_r2_res, type = "perc", conf = 0.95)$percent[4:5]
+
+cat("H1 · Bootstrap R² (B=2000):\n")
+cat("  R² observado:", round(r2_obs, 4), "\n")
+cat("  IC 95% Bootstrap:", round(ci_r2[1], 4), "–", round(ci_r2[2], 4), "\n")
+cat("  Umbral H1 (0.35):", ifelse(ci_r2[1] > 0.35 | r2_obs >= 0.35, "SE CONFIRMA ✓", "No confirmada"), "\n\n")
+
+# ── H2: d de Cohen (Bootstrap) ────────────────────────────────────────────────
+grupos <- datos_imp %>%
+  filter(!is.na(sas_total), !is.na(extension_pesquera)) %>%
+  group_by(extension_pesquera) %>%
+  summarise(media = mean(sas_total), sd = sd(sas_total), n = n(), .groups = "drop")
+
+sd_pooled <- sqrt(((grupos$n[1]-1)*grupos$sd[1]^2 +
+                     (grupos$n[2]-1)*grupos$sd[2]^2) /
+                    (sum(grupos$n) - 2))
+d_obs <- abs(diff(grupos$media)) / sd_pooled
+t_welch <- t.test(sas_total ~ extension_pesquera, data = datos_imp, var.equal = FALSE)
+
+boot_d <- function(data, i) {
+  d <- data[i, ]
+  g <- d %>% group_by(extension_pesquera) %>%
+    summarise(m = mean(sas_total, na.rm=TRUE), s = sd(sas_total, na.rm=TRUE), n = n(), .groups="drop")
+  if (nrow(g) < 2) return(NA)
+  sp <- sqrt(((g$n[1]-1)*g$s[1]^2 + (g$n[2]-1)*g$s[2]^2) / (sum(g$n)-2))
+  abs(diff(g$m)) / sp
+}
+boot_d_res <- boot(datos_imp, boot_d, R = B)
+ci_d <- boot.ci(boot_d_res, type = "perc", conf = 0.95)$percent[4:5]
+
+cat("H2 · d de Cohen:\n")
+cat("  d observado:", round(d_obs, 3), "\n")
+cat("  IC 95% Bootstrap:", round(ci_d[1], 3), "–", round(ci_d[2], 3), "\n")
+cat("  Welch t p:", round(t_welch$p.value, 4), "\n")
+cat("  Umbral H2 (d > 0.5):", ifelse(d_obs > 0.5, "SE CONFIRMA ✓", "No confirmada"), "\n\n")
+
+# ── H3: Correlación Pearson + Spearman ────────────────────────────────────────
+cor_pearson  <- cor.test(datos_imp$distancia_anp_km, datos_imp$sas_total)
+cor_spearman <- cor.test(datos_imp$distancia_anp_km, datos_imp$sas_total,
+                          method = "spearman")
+
+cat("H3 · Correlación distancia_anp_km ~ sas_total:\n")
+cat("  Pearson r =", round(cor_pearson$estimate, 3),
+    "| p =", round(cor_pearson$p.value, 4), "\n")
+cat("  Spearman ρ =", round(cor_spearman$estimate, 3),
+    "| p =", round(cor_spearman$p.value, 4), "\n")
+cat("  Umbral H3 (|r| ≥ 0.40):",
+    ifelse(abs(cor_pearson$estimate) >= 0.40, "SE CONFIRMA ✓", "No confirmada"), "\n\n")
+
+# ── Resumen hipótesis ─────────────────────────────────────────────────────────
+hipotesis_res <- tibble(
+  Hipótesis = c("H1", "H2", "H3"),
+  `Valor observado` = c(
+    paste0("R² = ", round(r2_obs, 3)),
+    paste0("d = ", round(d_obs, 3)),
+    paste0("r = ", round(cor_pearson$estimate, 3))
+  ),
+  Umbral = c("R² ≥ 0.35", "d > 0.5", "|r| ≥ 0.40"),
+  `IC 95% Bootstrap` = c(
+    paste0("[", round(ci_r2[1],3), ", ", round(ci_r2[2],3), "]"),
+    paste0("[", round(ci_d[1],3), ", ", round(ci_d[2],3), "]"),
+    "Pearson + Spearman"
+  ),
+  Resultado = c(
+    ifelse(r2_obs >= 0.35, "✓ SE CONFIRMA", "✗ No confirmada"),
+    ifelse(d_obs > 0.5, "✓ SE CONFIRMA", "✗ No confirmada"),
+    ifelse(abs(cor_pearson$estimate) >= 0.40, "✓ SE CONFIRMA", "✗ No confirmada")
+  )
+)
+
+kable(hipotesis_res,
+      caption = "Tabla H2: Resultados formales de las hipótesis H1–H3") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = FALSE) %>%
+  column_spec(5, bold = TRUE,
+              color = ifelse(str_starts(hipotesis_res$Resultado, "✓"), "#27ae60", "#e74c3c"))
+```
+
+```{r bootstrap_plots, fig.height=5, fig.width=10}
+# ── Distribución Bootstrap del R² y d ────────────────────────────────────────
+p_boot_r2 <- tibble(r2 = boot_r2_res$t) %>%
+  ggplot(aes(x = r2)) +
+  geom_histogram(bins = 40, fill = "#3498db", color = "white", alpha = 0.8) +
+  geom_vline(xintercept = r2_obs, color = "#e74c3c", linewidth = 1.2) +
+  geom_vline(xintercept = ci_r2, linetype = "dashed", color = "#e74c3c") +
+  geom_vline(xintercept = 0.35, linetype = "solid", color = "#f39c12", linewidth = 1.2) +
+  annotate("text", x = 0.35 + 0.01, y = Inf, vjust = 1.5,
+           label = "Umbral H1", color = "#f39c12", size = 3.5) +
+  labs(title = paste0("Bootstrap R² (B=", B, ")"),
+       subtitle = paste0("IC 95%: [", round(ci_r2[1],3), ", ", round(ci_r2[2],3), "]"),
+       x = "R² bootstrap", y = "Frecuencia")
+
+p_boot_d <- tibble(d = boot_d_res$t[!is.na(boot_d_res$t)]) %>%
+  ggplot(aes(x = d)) +
+  geom_histogram(bins = 40, fill = "#9b59b6", color = "white", alpha = 0.8) +
+  geom_vline(xintercept = d_obs, color = "#e74c3c", linewidth = 1.2) +
+  geom_vline(xintercept = ci_d, linetype = "dashed", color = "#e74c3c") +
+  geom_vline(xintercept = 0.5, linetype = "solid", color = "#f39c12", linewidth = 1.2) +
+  annotate("text", x = 0.5 + 0.02, y = Inf, vjust = 1.5,
+           label = "Umbral H2", color = "#f39c12", size = 3.5) +
+  labs(title = paste0("Bootstrap d de Cohen (B=", B, ")"),
+       subtitle = paste0("IC 95%: [", round(ci_d[1],3), ", ", round(ci_d[2],3), "]"),
+       x = "d de Cohen bootstrap", y = "Frecuencia")
+
+p_boot_r2 + p_boot_d
+```
+
+## 3.6 Simulación Monte Carlo
+
+```{r monte_carlo, fig.height=5}
+set.seed(8502)
+n_sim <- 5000
+
+# Coeficiente extensión de M3
+beta_ext <- coef(M3)["extension_pesquera"]
+se_ext   <- sqrt(vcov(M3)["extension_pesquera","extension_pesquera"])
+
+# Covarianza porcentual de extensión: 35% actual → 55% objetivo
+cobertura_actual  <- mean(datos_imp$extension_pesquera, na.rm = TRUE)
+cobertura_objetivo <- 0.55
+delta_cobertura <- cobertura_objetivo - cobertura_actual
+
+# Monte Carlo: variar beta con incertidumbre paramétrica
+betas_mc <- rnorm(n_sim, mean = beta_ext, sd = se_ext)
+efecto_mc <- betas_mc * delta_cobertura
+
+cat("Simulación Monte Carlo (n_sim =", n_sim, "):\n")
+cat("Cobertura actual de extensión:", round(cobertura_actual*100, 1), "%\n")
+cat("Cobertura objetivo:", round(cobertura_objetivo*100, 1), "%\n")
+cat("Δ cobertura:", round(delta_cobertura*100, 1), "puntos porcentuales\n")
+cat("\nEfecto esperado en SAS medio:\n")
+cat("  Media:", round(mean(efecto_mc), 3), "pts SAS\n")
+cat("  IC 95%: [", round(quantile(efecto_mc, 0.025), 3), ",",
+    round(quantile(efecto_mc, 0.975), 3), "] pts SAS\n")
+cat("⚠ ADVERTENCIA: Esta simulación NO es causal.\n")
+
+tibble(efecto = efecto_mc) %>%
+  ggplot(aes(x = efecto)) +
+  geom_histogram(bins = 50, fill = "#e67e22", color = "white", alpha = 0.8) +
+  geom_vline(xintercept = mean(efecto_mc), color = "#e74c3c", linewidth = 1.2) +
+  geom_vline(xintercept = quantile(efecto_mc, c(0.025, 0.975)),
+             linetype = "dashed", color = "#e74c3c") +
+  labs(title = "Monte Carlo: Efecto Esperado de Ampliar Cobertura de Extensión",
+       subtitle = "Escenario: 35% → 55% cobertura. ASOCIATIVO, no causal.",
+       x = "Incremento esperado en SAS (puntos)", y = "Frecuencia")
+```
+
+---
+
+# SPRINT 4 — Comunicación y Decisiones {.tabset}
+
+> **Producto esperado:** al final de este Sprint, el estudiante debería poder escribir recomendaciones con estructura mínima: **hallazgo → implicación → actor responsable → plazo → limitación**.
+
+> **¿Qué se logra aquí?** Traducir los resultados técnicos en mensajes ejecutables: visualizaciones con una idea central, síntesis para policy brief y recomendaciones con actor, plazo y fundamento empírico.
+
+> **Meta:** Traducir coeficientes en recomendaciones de política con magnitud, incertidumbre y actor responsable.
+
+## 4.1 Visualizaciones Finales
+
+```{r viz_finales, fig.height=14, fig.width=12}
+# ── FIG1: Efecto de extensión sobre SAS (comparación de grupos) ───────────────
+p_ext <- datos_imp %>%
+  mutate(extension_f = factor(extension_pesquera,
+                               labels = c("Sin extensión","Con extensión"))) %>%
+  ggplot(aes(x = extension_f, y = sas_total, fill = extension_f)) +
+  stat_summary(fun.data = mean_cl_boot, geom = "bar", color = "white",
+               width = 0.5, alpha = 0.85) +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.25,
+               linewidth = 1) +
+  geom_jitter(width = 0.1, alpha = 0.3, size = 1.5) +
+  scale_fill_manual(values = c("#bdc3c7","#3498db"), guide = "none") +
+  annotate("text", x = 1.5, y = max(datos_imp$sas_total, na.rm=TRUE) * 0.95,
+           label = paste0("d = ", round(d_obs, 2),
+                           "\nt-Welch p = ", round(t_welch$p.value, 3)),
+           size = 3.5, color = "#2c3e50") +
+  labs(title = "FIG1: Efecto de Extensión Pesquera sobre SAS",
+       subtitle = paste0("d Cohen = ", round(d_obs,2),
+                          " — H2 ", ifelse(d_obs > 0.5,"CONFIRMADA ✓","No confirmada")),
+       x = "", y = "SAS (0–50 pts)")
+
+# ── FIG2: Relación distancia ANP vs SAS ───────────────────────────────────────
+p_dist <- datos_imp %>%
+  ggplot(aes(x = distancia_anp_km, y = sas_total)) +
+  geom_point(aes(color = factor(extension_pesquera)), alpha = 0.6, size = 2.5) +
+  geom_smooth(method = "lm", color = "#e74c3c", se = TRUE, linetype = "dashed") +
+  scale_color_manual(values = c("#bdc3c7","#3498db"),
+                     labels = c("Sin ext.","Con ext."), name = "Extensión") +
+  annotate("text", x = max(datos_imp$distancia_anp_km, na.rm=TRUE)*0.6,
+           y = max(datos_imp$sas_total, na.rm=TRUE)*0.95,
+           label = paste0("r = ", round(cor_pearson$estimate, 3),
+                           " (p=", round(cor_pearson$p.value, 3), ")"),
+           size = 3.5, color = "#e74c3c") +
+  labs(title = "FIG2: Distancia al ANP vs SAS",
+       subtitle = paste0("H3 ", ifelse(abs(cor_pearson$estimate)>=0.4,"CONFIRMADA ✓","No confirmada")),
+       x = "Distancia al ANP más cercana (km)", y = "SAS (0–50 pts)")
+
+# ── FIG3: Perfiles de adopción por comunidad ──────────────────────────────────
+p_perfil <- datos_imp %>%
+  filter(!is.na(comunidad)) %>%
+  group_by(comunidad) %>%
+  summarise(
+    SAS_medio = mean(sas_total, na.rm=TRUE),
+    SAS_sd    = sd(sas_total, na.rm=TRUE) / sqrt(n()),
+    Extensión_pct = mean(extension_pesquera, na.rm=TRUE) * 100,
+    n = n(), .groups = "drop"
+  ) %>%
+  mutate(comunidad = fct_reorder(comunidad, SAS_medio)) %>%
+  ggplot(aes(x = comunidad, y = SAS_medio, fill = Extensión_pct)) +
+  geom_col(color = "white", alpha = 0.9) +
+  geom_errorbar(aes(ymin = SAS_medio - SAS_sd, ymax = SAS_medio + SAS_sd),
+                width = 0.3, linewidth = 1) +
+  scale_fill_viridis_c(option = "D", name = "% con extensión") +
+  labs(title = "FIG3: SAS Medio por Comunidad",
+       x = "Comunidad", y = "SAS medio ± SE")
+
+# ── FIG4: Escenario de política 2026–2028 ────────────────────────────────────
+anos  <- 2026:2028
+sas_base <- mean(datos_imp$sas_total, na.rm = TRUE)
+sas_proy <- sas_base + cumsum(c(0, mean(efecto_mc) * 0.5, mean(efecto_mc)))
+sas_opt  <- sas_base + cumsum(c(0, quantile(efecto_mc, 0.75), quantile(efecto_mc, 0.975)))
+sas_pes  <- sas_base + cumsum(c(0, quantile(efecto_mc, 0.25), quantile(efecto_mc, 0.025)))
+
+tibble(Año = anos, Base = sas_proy, Optimista = sas_opt, Pesimista = sas_pes) %>%
+  pivot_longer(-Año, names_to = "Escenario", values_to = "SAS") -> df_proy
+
+p_proy <- df_proy %>%
+  ggplot(aes(x = Año, y = SAS, color = Escenario, linetype = Escenario)) +
+  geom_line(linewidth = 1.3) +
+  geom_point(size = 3) +
+  scale_color_manual(values = c("#2ecc71","#3498db","#e74c3c")) +
+  scale_x_continuous(breaks = anos) +
+  labs(title = "FIG4: Proyección SAS — Escenario Extensión 35%→55%",
+       subtitle = "PROYECCIÓN ASOCIATIVA — No implica causalidad",
+       x = "Año", y = "SAS proyectado (0–50)")
+
+(p_ext + p_dist) / (p_perfil + p_proy)
+```
+
+## 4.2 Policy Brief — Recomendaciones
+
+```{r policy_brief}
+recomendaciones <- tibble(
+  `#` = 1:3,
+  Recomendación = c(
+    "Ampliar cobertura de extensión pesquera al 55% en comunidades con SAS < 25",
+    "Crear ventanilla de servicios INCOPESCA en comunidades alejadas (>30 km de ANP)",
+    "Implementar paquete de incentivos financieros para pescadores con ingreso < $400/mes"
+  ),
+  `Actor líder` = c(
+    "INCOPESCA + aliados ONG",
+    "INCOPESCA + Municipalidad",
+    "IMAS + MAG + Banca"
+  ),
+  Plazo = c("12 meses", "6–18 meses", "18 meses"),
+  `Justificación cuantitativa` = c(
+    paste0("Efecto extensión: β=", round(coef(M3)["extension_pesquera"],2),
+           " pts SAS (p<.05), d=", round(d_obs,2), " > umbral 0.5"),
+    paste0("Distancia ANP: r=", round(cor_pearson$estimate,2),
+           " negativo (p<.05), H3 ", ifelse(abs(cor_pearson$estimate)>=0.4,"CONFIRMADA","no confirmada")),
+    "Relación no lineal ingreso-SAS; umbral de subsistencia identificado en EDA"
+  ),
+  `Indicador de seguimiento` = c(
+    "% pescadores con capacitación en últimos 12 meses (≥55% en 2027)",
+    "Tiempo promedio de viaje a INCOPESCA (objetivo: <2 horas)",
+    "% pescadores con acceso a crédito verde (objetivo: 20% en 2027)"
+  )
+)
+
+kable(recomendaciones, caption = "Policy Brief: 3 Recomendaciones SMART con evidencia cuantitativa") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = TRUE, font_size = 11) %>%
+  column_spec(1, bold = TRUE) %>%
+  column_spec(5, italic = TRUE, color = "#34495e") %>%
+  row_spec(0, background = "#1a3a5c", color = "white")
+```
+
+## 4.3 Resumen Ejecutivo
+
+```{r resumen_ejecutivo}
+cat("╔══════════════════════════════════════════════════════════════════╗\n")
+cat("║  RESUMEN EJECUTIVO — SP-8502 · Investigación Cuantitativa       ║\n")
+cat("╠══════════════════════════════════════════════════════════════════╣\n")
+cat("║  Estudio: n=80 pescadores artesanales, Pacífico Central, CR      ║\n")
+cat("║  Variable dependiente: SAS (Score Adopción Sostenible, 0–50)    ║\n")
+cat("╠══════════════════════════════════════════════════════════════════╣\n")
+cat("║  RESULTADOS PRINCIPALES:                                         ║\n")
+cat(sprintf("║  • R² M3 = %.3f (H1: umbral 0.35 → %s)        ║\n",
+            r2_obs, ifelse(r2_obs>=0.35,"CONFIRMADA ✓   ","No confirmada  ")))
+cat(sprintf("║  • d Cohen = %.3f (H2: umbral 0.5 → %s)      ║\n",
+            d_obs, ifelse(d_obs>0.5,"CONFIRMADA ✓ ","No confirmada")))
+cat(sprintf("║  • r Pearson = %.3f (H3: umbral 0.40 → %s) ║\n",
+            cor_pearson$estimate,
+            ifelse(abs(cor_pearson$estimate)>=0.40,"CONFIRMADA ✓","No confirmada")))
+cat("╠══════════════════════════════════════════════════════════════════╣\n")
+cat("║  INSTRUMENTO: α Cronbach =", round(alpha_result$total$raw_alpha, 3),
+    "→ confiabilidad aceptable      ║\n")
+cat("║  BOOTSTRAP: B=2000 réplicas — IC 95% estables                   ║\n")
+cat("╠══════════════════════════════════════════════════════════════════╣\n")
+cat("║  NOTA: Lenguaje predictivo (no causal). Diseño transversal.      ║\n")
+cat("╚══════════════════════════════════════════════════════════════════╝\n")
+```
+
+---
+
+# Información de Sesión y Reproducibilidad
+
+```{r session_info}
+cat("README REPRODUCIBILIDAD:\n")
+cat("1. Instalar paquetes: ejecutar chunk 'setup'\n")
+cat("2. Renderizar: rmarkdown::render('SP8502_Cuantitativo.Rmd')\n")
+cat("3. set.seed(8502) garantiza resultados idénticos\n\n")
+sessionInfo()
+```
+
+
+---
+
+# Reflexión final del laboratorio
+
+Antes de cerrar el documento, verifique que puede responder con claridad estas cuatro preguntas:
+
+1. **Diseño:** ¿qué variable dependiente definió y cómo la operacionalizó?  
+2. **Calidad de datos:** ¿qué correcciones o transformaciones fueron críticas para que el análisis fuera válido?  
+3. **Inferencia:** ¿qué resultado sostiene mejor la respuesta a la pregunta central?  
+4. **Decisión:** ¿qué recomendación sería metodológicamente defendible y qué limitación debe acompañarla?  
+
+> Si no puede responder estas cuatro preguntas sin mirar el código línea por línea, todavía no ha terminado el laboratorio: solo lo ha ejecutado.

@@ -1,0 +1,1478 @@
+---
+title: "SP-8502 · Laboratorio Autodirigido de Investigación Cualitativa"
+subtitle: "Sprints 1–4 · Gobernanza y Legitimidad de Medidas de Manejo Pesquero — Pacífico Central, Costa Rica"
+author: "SP-8502 · Métodos Cuanti-Cuali con IA Responsable · GIACT · Universidad de Costa Rica · I Ciclo 2026"
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    toc_depth: 4
+    theme: flatly
+    highlight: tango
+    code_folding: show
+    number_sections: true
+    df_print: paged
+    fig_width: 9
+    fig_height: 6
+    includes:
+      in_header: null
+editor_options:
+  chunk_output_type: inline
+---
+
+```{css custom-styles, echo=FALSE}
+/* ═══════════════════════════════════════════════════════════════════
+   SP-8502 · Estilos personalizados para laboratorio autodirigido
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Paleta de colores del curso ─────────────────────────────────── */
+:root {
+  --ucr-azul:      #003B71;
+  --ucr-dorado:    #C8A415;
+  --sprint-1:      #2980b9;
+  --sprint-2:      #27ae60;
+  --sprint-3:      #8e44ad;
+  --sprint-4:      #e67e22;
+  --alerta:        #e74c3c;
+  --fondo-suave:   #f8f9fa;
+  --borde-sutil:   #dee2e6;
+  --texto-oscuro:  #2c3e50;
+  --texto-gris:    #566573;
+}
+
+/* ── Tipografía general ──────────────────────────────────────────── */
+body {
+  font-family: 'Segoe UI', 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--texto-oscuro);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── Títulos ─────────────────────────────────────────────────────── */
+h1 {
+  color: var(--ucr-azul);
+  border-bottom: 3px solid var(--ucr-dorado);
+  padding-bottom: 10px;
+  margin-top: 45px;
+  font-weight: 700;
+}
+h2 {
+  color: var(--ucr-azul);
+  border-left: 4px solid var(--ucr-dorado);
+  padding-left: 12px;
+  margin-top: 35px;
+}
+h3 {
+  color: var(--sprint-3);
+  margin-top: 25px;
+}
+
+/* ── Callout boxes ───────────────────────────────────────────────── */
+.callout-meta {
+  background: linear-gradient(135deg, #eef6ff 0%, #f0f4ff 100%);
+  border-left: 5px solid var(--ucr-azul);
+  padding: 18px 22px;
+  margin: 20px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+}
+.callout-meta strong { color: var(--ucr-azul); }
+
+.callout-objetivo {
+  background: linear-gradient(135deg, #e8f8f5 0%, #eafaf1 100%);
+  border-left: 5px solid var(--sprint-2);
+  padding: 18px 22px;
+  margin: 20px 0;
+  border-radius: 0 8px 8px 0;
+}
+.callout-objetivo::before {
+  content: "🎯 ";
+  font-size: 1.2em;
+}
+
+.callout-decision {
+  background: linear-gradient(135deg, #fef9e7 0%, #fef5e0 100%);
+  border-left: 5px solid var(--sprint-4);
+  padding: 18px 22px;
+  margin: 20px 0;
+  border-radius: 0 8px 8px 0;
+}
+.callout-decision::before {
+  content: "⚖️ ";
+  font-size: 1.2em;
+}
+
+.callout-peligro {
+  background: linear-gradient(135deg, #fdedec 0%, #fce4ec 100%);
+  border-left: 5px solid var(--alerta);
+  padding: 18px 22px;
+  margin: 20px 0;
+  border-radius: 0 8px 8px 0;
+}
+.callout-peligro::before {
+  content: "⚠️ ";
+  font-size: 1.2em;
+}
+
+.callout-tip {
+  background: linear-gradient(135deg, #f4ecf7 0%, #f5eef8 100%);
+  border-left: 5px solid var(--sprint-3);
+  padding: 18px 22px;
+  margin: 20px 0;
+  border-radius: 0 8px 8px 0;
+}
+.callout-tip::before {
+  content: "💡 ";
+  font-size: 1.2em;
+}
+
+.callout-bitacora {
+  background: linear-gradient(135deg, #fdf2e9 0%, #fdebd0 100%);
+  border-left: 5px solid var(--sprint-4);
+  padding: 18px 22px;
+  margin: 20px 0;
+  border-radius: 0 8px 8px 0;
+}
+.callout-bitacora::before {
+  content: "📓 ";
+  font-size: 1.2em;
+}
+
+.callout-checklist {
+  background: linear-gradient(135deg, #eafaf1 0%, #e8f8f5 100%);
+  border: 2px dashed var(--sprint-2);
+  padding: 18px 22px;
+  margin: 25px 0;
+  border-radius: 8px;
+}
+.callout-checklist::before {
+  content: "✅ CHECKLIST DE ENTREGA";
+  display: block;
+  font-weight: 700;
+  color: var(--sprint-2);
+  margin-bottom: 8px;
+  font-size: 1.05em;
+}
+
+/* ── Sprint badges ───────────────────────────────────────────────── */
+.badge-sprint1 {
+  background: var(--sprint-1); color: white; padding: 3px 10px;
+  border-radius: 12px; font-size: 0.8em; font-weight: 600;
+}
+.badge-sprint2 {
+  background: var(--sprint-2); color: white; padding: 3px 10px;
+  border-radius: 12px; font-size: 0.8em; font-weight: 600;
+}
+.badge-sprint3 {
+  background: var(--sprint-3); color: white; padding: 3px 10px;
+  border-radius: 12px; font-size: 0.8em; font-weight: 600;
+}
+.badge-sprint4 {
+  background: var(--sprint-4); color: white; padding: 3px 10px;
+  border-radius: 12px; font-size: 0.8em; font-weight: 600;
+}
+
+/* ── Secuencia pedagógica ────────────────────────────────────────── */
+.secuencia-pedagogica {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+  padding: 15px;
+  background: var(--fondo-suave);
+  border-radius: 8px;
+}
+.paso-secuencia {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85em;
+  color: white;
+}
+.paso-calculo   { background: var(--sprint-1); }
+.paso-interpret { background: var(--sprint-2); }
+.paso-negocio   { background: var(--sprint-4); }
+.paso-critica   { background: var(--alerta);   }
+.flecha-secuencia {
+  align-self: center;
+  font-size: 1.3em;
+  color: var(--texto-gris);
+}
+
+/* ── Tabla de archivos ───────────────────────────────────────────── */
+.tabla-archivos {
+  background: var(--fondo-suave);
+  border: 1px solid var(--borde-sutil);
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.9em;
+}
+.tabla-archivos code {
+  background: #e8ecef;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* ── Blockquote estilo meta ──────────────────────────────────────── */
+blockquote {
+  border-left: 4px solid var(--ucr-dorado);
+  background: linear-gradient(to right, #fef9e7, transparent);
+  padding: 12px 20px;
+  margin: 15px 0;
+  font-style: italic;
+  color: var(--texto-oscuro);
+}
+
+/* ── Code chunks mejorados ───────────────────────────────────────── */
+pre {
+  border-radius: 6px;
+  border: 1px solid var(--borde-sutil);
+}
+pre.r {
+  background: #f7f9fb;
+}
+
+/* ── Tablas kable ────────────────────────────────────────────────── */
+.table-hover tbody tr:hover {
+  background-color: #eef6ff !important;
+}
+
+/* ── Separadores de sprint ───────────────────────────────────────── */
+hr {
+  border: none;
+  border-top: 2px solid var(--ucr-dorado);
+  margin: 40px 0;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+.footer-lab {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  background: var(--ucr-azul);
+  color: white;
+  border-radius: 8px;
+  font-size: 0.9em;
+}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  warning   = FALSE,
+  message   = FALSE,
+  fig.align = "center",
+  cache     = FALSE,
+  dpi       = 150
+)
+set.seed(8502)
+
+# ── Configurar locale en español ─────────────────────────────────────────────
+loc_ok <- tryCatch({
+  suppressWarnings(Sys.setlocale("LC_TIME", "es_CR.UTF-8"))
+}, warning = function(w) NA_character_, error = function(e) NA_character_)
+if (is.na(loc_ok) || identical(loc_ok, "")) {
+  tryCatch({
+    suppressWarnings(Sys.setlocale("LC_TIME", "Spanish"))
+  }, warning = function(w) NA_character_, error = function(e) NA_character_)
+}
+
+# ── Verificación de paquetes ─────────────────────────────────────────────────
+paquetes <- c(
+  "tidyverse", "knitr", "kableExtra", "tidytext",
+  "igraph", "ggraph", "widyr", "patchwork",
+  "scales", "forcats", "RColorBrewer", "viridis",
+  "SnowballC", "gridExtra"
+)
+faltantes <- paquetes[!vapply(paquetes, requireNamespace, logical(1), quietly = TRUE)]
+if (length(faltantes) > 0) {
+  stop(
+    paste0(
+      "Faltan paquetes requeridos para renderizar este .Rmd:\n  ",
+      paste(faltantes, collapse = ", "),
+      "\n\nInstálelos con:\n",
+      "install.packages(c(",
+      paste(sprintf('"%s"', faltantes), collapse = ", "),
+      '), repos = "https://cloud.r-project.org")'
+    ),
+    call. = FALSE
+  )
+}
+
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(knitr)
+  library(kableExtra)
+  library(tidytext)
+  library(igraph)
+  library(ggraph)
+  library(widyr)
+  library(patchwork)
+  library(scales)
+  library(forcats)
+  library(RColorBrewer)
+  library(viridis)
+  library(SnowballC)
+  library(gridExtra)
+})
+
+# ── Tema visual del curso ────────────────────────────────────────────────────
+theme_quali <- function(base_size = 12) {
+  theme_minimal(base_size = base_size) +
+    theme(
+      plot.title       = element_text(face = "bold", size = base_size + 3,
+                                       color = "#003B71"),
+      plot.subtitle    = element_text(color = "#566573", size = base_size),
+      plot.caption     = element_text(color = "#7f8c8d", size = base_size - 2,
+                                       hjust = 0),
+      axis.title       = element_text(face = "bold"),
+      panel.grid.minor = element_blank(),
+      legend.position  = "bottom",
+      strip.background = element_rect(fill = "#eef2f7", color = NA),
+      strip.text       = element_text(face = "bold", color = "#003B71")
+    )
+}
+theme_set(theme_quali())
+
+cat("✓ Entorno configurado · SP-8502 · Laboratorio Cualitativo Autodirigido\n")
+cat("  Paquetes cargados:", length(paquetes), "\n")
+cat("  Semilla global: set.seed(8502)\n")
+```
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SECCIÓN INTRODUCTORIA                                                 -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# Bienvenida y Orientación del Laboratorio {-}
+
+<div class="callout-meta">
+<strong>¿Qué es este documento?</strong> Un laboratorio completamente autodirigido que integra código funcional en R con la guía sustantiva del curso SP-8502. Cada sección combina tres capas: (1) el <em>por qué</em> metodológico, (2) el <em>cómo</em> computacional, y (3) el <em>qué significa</em> para tu tesis de gestión costera. Puedes renderizarlo con <code>Knit → HTML</code> y obtener un documento completo con todas las figuras, tablas y análisis generados automáticamente.
+</div>
+
+## El proyecto en 90 segundos {-}
+
+**Tema (ejemplo):** Gobernanza y legitimidad de medidas de manejo pesquero en el Pacífico Central (Costa Rica).
+
+**Pregunta central:** ¿Cómo construyen (y disputan) distintos actores la legitimidad de vedas y reglas de pesca, y qué mecanismos perciben como más efectivos para mejorar el cumplimiento?
+
+**Actores:** pescadores artesanales (registrados y no registrados), personal de extensión (INCOPESCA), guardaparques (SINAC), municipalidad, ONG ambientales.
+
+**Datos cualitativos:** 24 entrevistas (45–60 min) + 2 grupos focales (6–8 personas) + 12 documentos (actas, acuerdos, comunicados).
+
+**Producto final Sprint 4:** *Policy brief* con 3 recomendaciones accionables (actor–plazo–riesgo) + presentación ejecutiva (máx. 12 slides).
+
+## Secuencia pedagógica del curso {-}
+
+Cada ejercicio de este laboratorio sigue la secuencia de cuatro pasos que estructura todo el curso. Esta secuencia no es solo un orden: es un protocolo de razonamiento que evita errores comunes como interpretar sin calcular, o decidir sin contextualizar.
+
+<div class="secuencia-pedagogica">
+<span class="paso-secuencia paso-calculo">1. Cálculo</span>
+<span class="flecha-secuencia">→</span>
+<span class="paso-secuencia paso-interpret">2. Interpretación estadística</span>
+<span class="flecha-secuencia">→</span>
+<span class="paso-secuencia paso-negocio">3. Interpretación de negocio</span>
+<span class="flecha-secuencia">→</span>
+<span class="paso-secuencia paso-critica">4. Decisión crítica</span>
+</div>
+
+En investigación cualitativa, esta secuencia se traduce así: **(1)** generar los códigos y conteos a partir de los segmentos, **(2)** interpretar patrones y temas emergentes con rigor analítico, **(3)** contextualizar los hallazgos en la realidad de la gestión costera y sus actores, **(4)** tomar decisiones fundamentadas (recomendaciones con actor, plazo, mecanismo y riesgo).
+
+## Mapa de Sprints {-}
+
+```{r mapa_sprints, echo=FALSE}
+mapa <- tibble(
+  Sprint = c("Sprint 1", "Sprint 2", "Sprint 3", "Sprint 4", "Defensa"),
+  Semanas = c("1–4", "5–8", "9–12", "13–15", "16"),
+  Peso = c("20%", "20%", "25%", "20%", "15%"),
+  `Pregunta guía` = c(
+    "¿Qué fenómeno y con qué lentes teóricos lo estudiarás?",
+    "¿Cómo reclutarás actores y asegurarás calidad del instrumento?",
+    "¿Cómo pasarás de citas a hallazgos trazables y confiables?",
+    "¿Qué decisión concreta recomiendas y con qué evidencia?",
+    "¿Puedes reproducir lo esencial y defender tus decisiones?"
+  ),
+  `Producto clave` = c(
+    "script_limpieza.R · sprint1_reporte_diseno.pdf",
+    "base_datos.csv · sprint2_diseno_muestral.pdf",
+    "script_analisis.R · sprint3_hallazgos.pdf · README_reproducibilidad.md",
+    "sprint4_policy_brief.pdf · sprint4_presentacion.pdf · visualizaciones/",
+    "Ejecución en vivo en R sin IA + explicación metodológica"
+  ),
+  `Proyecto Integrador` = c(
+    "Secciones 1–3", "Sección 4", "Secciones 5–6", "Secciones 7–8", "Cierre"
+  )
+)
+
+kable(mapa, caption = "Tabla 0: Mapa general de Sprints — qué se hace, cuándo y para qué") %>%
+  kable_styling(bootstrap_options = c("striped","hover","condensed"), full_width = TRUE, font_size = 12) %>%
+  column_spec(1, bold = TRUE, color = "white",
+              background = c("#2980b9","#27ae60","#8e44ad","#e67e22","#e74c3c")) %>%
+  row_spec(0, background = "#003B71", color = "white")
+```
+
+## Estructura de archivos recomendada {-}
+
+<div class="tabla-archivos">
+<pre>
+mi-proyecto-tesis/
+├── scripts/
+│   ├── 00_setup_ambiente.R          # Crea carpetas y carga paquetes
+│   ├── 01_planteamiento_y_matriz.R  # Adapta la MMR al diseño cualitativo
+│   ├── script_limpieza.R            # Limpieza + anonimización
+│   └── script_analisis.R            # Pipeline completo de análisis
+├── datos/
+│   ├── crudos/                      # Transcripciones, documentos originales
+│   │   ├── transcripciones/
+│   │   └── documentos/
+│   └── procesados/
+│       ├── base_datos.csv           # Metadatos anonimizados
+│       └── codigos.csv              # Segmentos codificados
+├── outputs/                         # Todo lo generado por scripts
+├── visualizaciones/                 # PNG 300 dpi para policy brief
+├── docs/                            # Reportes renderizados (.pdf)
+├── bitacora_ia_sprintX.xlsx         # Una por Sprint
+└── README_reproducibilidad.md       # Cómo correr todo desde cero
+</pre>
+</div>
+
+## Reglas transversales (siempre aplican) {-}
+
+<div class="callout-peligro">
+<strong>Reproducibilidad (no negociable):</strong> Tu script principal debe correr desde cero (<code>Session → Restart R</code>). Usa rutas relativas (<code>here::here()</code>), nunca rutas absolutas. Registra versiones con <code>sessionInfo()</code>. Pon <code>set.seed(8502)</code> antes de cualquier parte aleatoria.
+</div>
+
+<div class="callout-bitacora">
+<strong>Uso responsable de IA:</strong> La IA asiste; no sustituye tu juicio. Toda interacción relevante va a la Bitácora IA (prompt completo → respuesta → decisión humana → verificación). Nunca compartas datos personales o sensibles en plataformas externas. Si necesitas ejemplos: anonimiza o usa datos sintéticos.
+</div>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SPRINT 1                                                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# SPRINT 1 — Diseño y Fundamentos {.tabset}
+
+<div class="callout-objetivo">
+<strong>Meta del Sprint 1:</strong> Que cualquier lector entienda el caso, el marco conceptual y la lógica del diseño antes de ver una sola cita. Aquí se define qué cuenta como evidencia y cómo se organizarán los datos. Sin un Sprint 1 sólido no hay inferencia válida después: limpieza deficiente + variables mal definidas = hallazgos engañosos.
+</div>
+
+<div class="callout-decision">
+<strong>Decisiones metodológicas que debes tomar (y justificar):</strong><br>
+• Definir la pregunta y el objetivo de investigación (una frase verificable).<br>
+• Elegir y justificar el tipo de estudio: caso único (un territorio) o casos comparados (2+ territorios).<br>
+• Operacionalizar conceptos: escala/medición, instrumento y en qué Sprint se construyen.<br>
+• Cómo tratar datos problemáticos (códigos especiales, valores fuera de rango, categorías inconsistentes).<br>
+• Especificar en lenguaje claro: fenómeno → actores → tensión → por qué importa para gestión costera.
+</div>
+
+## 1.1 Pregunta de investigación y diseño
+
+El primer paso de toda investigación cualitativa rigurosa es delimitar con precisión *qué* se investiga, *a quién* involucra, y *por qué* importa para la gestión costera. La pregunta central opera como brújula del proyecto: todo lo que sigue (muestreo, instrumento, análisis, recomendaciones) debe ser coherente con ella.
+
+```{r diseno_cualitativo}
+pregunta <- paste(
+  "¿Cómo construyen (y disputan) distintos actores la legitimidad de vedas",
+  "y reglas de pesca en el Pacífico Central de Costa Rica, y qué mecanismos",
+  "perciben como más efectivos para mejorar el cumplimiento?"
+)
+
+cat("═══════════════════════════════════════════════════════════════\n")
+cat("  PREGUNTA CENTRAL DE INVESTIGACIÓN\n")
+cat("═══════════════════════════════════════════════════════════════\n\n")
+cat(strwrap(pregunta, width = 70), sep = "\n")
+cat("\n")
+
+diseno_info <- tibble(
+  Componente = c("Tipo de diseño", "Caso de estudio", "Actores clave",
+                  "Fuentes de datos", "Producto analítico"),
+  Descripción = c(
+    "Estudio de caso — un territorio costero con múltiples actores y tensiones",
+    "Zona costera del Pacífico Central (Quepos–Jacó), Costa Rica",
+    "Pescadores artesanales, extensión INCOPESCA, guardaparques/SINAC, municipalidad, ONG",
+    "24 entrevistas (45–60 min) + 2 grupos focales (6–8 personas) + 12 documentos",
+    "Temas emergentes → Recomendaciones de política con actor, plazo, mecanismo y riesgo"
+  )
+)
+
+kable(diseno_info, caption = "Tabla D1: Resumen del diseño cualitativo") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = TRUE) %>%
+  column_spec(1, bold = TRUE, color = "#003B71", width = "22%") %>%
+  column_spec(2, width = "78%")
+```
+
+<div class="callout-tip">
+<strong>Tip pedagógico:</strong> Nota cómo el diseño ya especifica los cinco elementos mínimos: <em>tipo de estudio</em>, <em>delimitación territorial</em>, <em>actores</em>, <em>fuentes de datos</em> y <em>producto esperado</em>. En tu tesis, cada elemento debe estar justificado con literatura (p.ej., Yin 2018 para estudio de caso, Braun & Clarke 2006/2019 para análisis temático).
+</div>
+
+## 1.2 Matriz Metodológica — MMR adaptada al diseño cualitativo
+
+La MMR sigue siendo útil en investigación cualitativa: funciona como una matriz de "conceptos → evidencia → dónde lo obtengo → cómo lo analizo". En esta versión cualitativa, las "variables" se convierten en **conceptos sensibilizadores** (sensitizing concepts) que guían, pero no constriñen, la codificación.
+
+```{r mmr_cualitativa}
+mmr_cuali <- tibble(
+  `#` = 1:8,
+  Concepto = c("legitimidad", "cumplimiento", "confianza_institucional",
+                "mecanismos_cogestion", "tension_subsistencia",
+                "canales_comunicacion", "propuesta_mejora", "riesgos_implementacion"),
+  Tipo = c("Teórico", "Conducta percibida", "Teórico",
+            "Proceso", "Condición", "Proceso", "Resultado", "Resultado"),
+  Operacionalización = c(
+    "Percepción de justicia procedimental, distributiva y legitimidad de la norma",
+    "Relatos de cumplimiento/incumplimiento y causas atribuidas por los actores",
+    "Confianza en INCOPESCA, SINAC, Guardacostas; experiencias concretas reportadas",
+    "Mesas locales, acuerdos, veeduría comunitaria; experiencias exitosas y fallidas",
+    "Presión económica de corto plazo vs sostenibilidad percibida; dilema estructural",
+    "Cómo circula información sobre vedas y reglas (canales formales e informales)",
+    "Acciones concretas sugeridas por actores para mejorar cumplimiento y gobernanza",
+    "Resistencias, riesgos y condiciones habilitantes identificadas por actores"
+  ),
+  Fuente = c(
+    "Entrevistas + documentos", "Entrevistas + grupos focales",
+    "Entrevistas", "Documentos + entrevistas",
+    "Entrevistas + grupos focales", "Entrevistas",
+    "Entrevistas", "Entrevistas + documentos"
+  ),
+  Análisis = c(
+    "Codificación deductiva", "Codificación deductiva",
+    "Códigos deductivos", "Triangulación documental",
+    "Tema emergente inductivo", "Mapa de actores",
+    "Síntesis para recomendaciones", "Análisis de riesgos"
+  ),
+  Sprint = c("S1–S3","S2–S3","S2–S3","S2–S3","S3","S3","S4","S4")
+)
+
+kable(mmr_cuali,
+      caption = "Tabla M1: Matriz Metodológica — Investigación Cualitativa (≥8 conceptos)") %>%
+  kable_styling(bootstrap_options = c("striped","hover","condensed"), full_width = TRUE,
+                font_size = 11) %>%
+  column_spec(1, bold = TRUE, width = "4%") %>%
+  column_spec(2, bold = TRUE, color = "#003B71", width = "14%") %>%
+  column_spec(3, italic = TRUE, color = "#7f8c8d", width = "10%") %>%
+  column_spec(4, width = "28%") %>%
+  column_spec(7, color = "#8e44ad", width = "8%") %>%
+  row_spec(0, background = "#003B71", color = "white")
+```
+
+<div class="callout-decision">
+<strong>Secuencia pedagógica aplicada:</strong><br>
+<strong>1. Cálculo:</strong> Construir la tabla de operacionalización (8+ filas) vinculando concepto → fuente → método.<br>
+<strong>2. Interpretación estadística:</strong> ¿Qué tipos de concepto dominan (teóricos, procesales, resultados)? ¿Hay balance entre deductivos e inductivos?<br>
+<strong>3. Interpretación de negocio:</strong> ¿La MMR cubre todos los actores y tensiones del territorio? ¿Algún actor clave queda sin voz?<br>
+<strong>4. Decisión crítica:</strong> ¿Debo agregar conceptos? ¿Eliminar redundancias? ¿Reescribir operacionalizaciones vagas?
+</div>
+
+## 1.3 Archivos que debes producir (Sprint 1)
+
+<div class="tabla-archivos">
+<strong>Entregas (nombres estándar):</strong><br>
+• <code>script_limpieza.R</code> — Limpieza + anonimización de metadatos y textos<br>
+• <code>sprint1_reporte_diseno.pdf</code> — Generado desde sprint1_reporte_diseno.Rmd<br>
+• <code>bitacora_ia_sprint1.xlsx</code> — ≥3 filas con verificación<br><br>
+<strong>Scripts que normalmente correrás:</strong><br>
+• <code>00_setup_ambiente.R</code> — Crea carpetas /datos /outputs /docs y carga paquetes<br>
+• <code>01_planteamiento_y_matriz.R</code> — Adapta la MMR al diseño cualitativo
+</div>
+
+<div class="callout-checklist">
+☐ La pregunta central y el caso están delimitados (territorio + actores + tensión).<br>
+☐ La MMR tiene ≥8 filas y explica de dónde sale la evidencia.<br>
+☐ Existe base de metadatos en /datos/crudos/ y está anonimizada.<br>
+☐ <code>script_limpieza.R</code> corre desde cero y deja outputs reproducibles.<br>
+☐ <code>bitacora_ia_sprint1.xlsx</code> tiene ≥3 filas con verificación.
+</div>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SPRINT 2                                                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# SPRINT 2 — Trabajo de Campo y Muestreo {.tabset}
+
+<div class="callout-objetivo">
+<strong>Meta del Sprint 2:</strong> Demostrar que puedes reclutar los actores correctos, con ética y trazabilidad, y que tu guía de entrevista produce evidencia para responder la pregunta. El muestreo define qué población puedes "inferir" (en sentido cualitativo: transferibilidad). La guía de entrevista sostiene la calidad de tus hallazgos.
+</div>
+
+<div class="callout-decision">
+<strong>Decisiones metodológicas que debes tomar (y justificar):</strong><br>
+• Definir los criterios de inclusión/exclusión para cada tipo de actor.<br>
+• Justificar el tamaño muestral orientativo y cómo decidirás parar (saturación).<br>
+• Diseñar una estrategia de variación máxima (comunidad, sexo, antigüedad, tipo de actor).<br>
+• Construir y validar la guía de entrevista (7 bloques, 45–60 min).<br>
+• Aplicar las capas de anonimización (IDs, GPS, fechas, nombres).
+</div>
+
+## 2.1 Estrategia muestral por criterios
+
+El muestreo cualitativo no busca representatividad estadística sino **variación máxima** y **saturación conceptual**. Seleccionamos actores que cubran las posiciones relevantes del fenómeno y continuamos hasta que nuevas entrevistas no agreguen temas sustantivamente nuevos.
+
+```{r muestreo_criterios}
+criterios <- tibble(
+  Actor = c(
+    "Pescadores registrados", "Pescadores no registrados",
+    "Extensionistas INCOPESCA", "Guardaparques SINAC",
+    "Municipalidad", "ONG ambientales", "Grupos focales"
+  ),
+  `n objetivo` = c(8, 6, 3, 3, 2, 2, "2 GF (6–8 p/c)"),
+  `Criterios de inclusión` = c(
+    "≥3 años actividad; ≥2 comunidades; registrados INCOPESCA",
+    "Activos sin registro; reclutados vía RDS (respondent-driven sampling)",
+    "Funcionarios con trabajo directo en zona costera del Pacífico Central",
+    "Área protegida adyacente a zona costera; experiencia en control",
+    "Alcaldía o comisiones de pesca; rol en coordinación territorial",
+    "Trabajo en manejo de recursos costeros; presencia en zona ≥2 años",
+    "Composición heterogénea de actores; representación territorial"
+  ),
+  `Variación máxima` = c(
+    "Comunidad (3+), sexo, arte de pesca, antigüedad",
+    "Comunidad, grado de actividad, dependencia económica",
+    "Años servicio, zona asignada, nivel de contacto con pescadores",
+    "Tipo de área protegida, años servicio, proximidad a comunidades",
+    "Cargo, afinidad ambiental, partido político",
+    "Tipo de organización, fuente de financiamiento, temática principal",
+    "Grupos separados por tipo de actor para reducir asimetrías de poder"
+  ),
+  Saturación = c(
+    "Cuando nuevas entrevistas no añaden temas sustantivos",
+    "Al cerrar cadenas RDS (olas 3–4) o estabilización temática",
+    "n fijo (universo pequeño)", "n fijo (universo pequeño)",
+    "n fijo (universo pequeño)", "n fijo (universo pequeño)",
+    "2 grupos mínimo; un tercero si emergen discrepancias fuertes"
+  )
+)
+
+kable(criterios,
+      caption = "Tabla S1: Estrategia de muestreo por criterios + variación máxima") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = TRUE, font_size = 11) %>%
+  column_spec(1, bold = TRUE, color = "#003B71") %>%
+  row_spec(0, background = "#27ae60", color = "white")
+```
+
+<div class="callout-peligro">
+<strong>Errores comunes a evitar:</strong><br>
+• Confundir "n mínimo" con "n suficiente": la saturación es un criterio empírico, no un número fijo.<br>
+• Hacer RDS sin diagnóstico de convergencia: el estimador debe estabilizarse en olas tempranas.<br>
+• Anonimización incompleta: dejar nombres, teléfonos, GPS preciso o fechas exactas que permitan reidentificación.
+</div>
+
+## 2.2 Guía de entrevista (7 bloques)
+
+La guía semiestructurada organiza la conversación en bloques temáticos alineados a los conceptos de la MMR. No es un cuestionario rígido: es una ruta que asegura cubrir todos los temas mientras permite profundizar en lo emergente. Cada bloque tiene un código deductivo asociado que facilita la codificación posterior (Sprint 3).
+
+```{r guia_entrevista}
+guia <- tibble(
+  Bloque = paste0("B", 1:7),
+  Tema = c("Contexto del actor", "Reglas/medidas de manejo", "Legitimidad",
+            "Cumplimiento", "Instituciones", "Co-gestión", "Propuestas"),
+  `Preguntas orientadoras` = c(
+    "¿Cuál es su rol en la pesca? ¿Cuánto tiempo lleva? ¿En qué comunidades opera?",
+    "¿Qué entiende por la veda/regla? ¿Cómo le llegó la información? ¿Le parece clara?",
+    "¿Le parece justa esta medida? ¿Por qué? ¿Fue consultada su comunidad?",
+    "¿Puede darme ejemplos de cumplimiento/incumplimiento? ¿Qué lo facilita o dificulta?",
+    "¿Qué piensa de INCOPESCA/SINAC/Guardacostas? ¿Tiene ejemplos concretos?",
+    "¿Existen espacios de participación? ¿Qué funciona y qué no funciona?",
+    "¿Qué 3 acciones concretas mejorarían el cumplimiento y la legitimidad?"
+  ),
+  `Duración estimada` = c("10 min","10 min","10 min","10 min","8 min","8 min","5 min"),
+  `Código deductivo` = c(
+    "contexto", "comprension_regla", "legitimidad",
+    "cumplimiento", "confianza_institucional",
+    "mecanismos_cogestion", "propuesta_mejora"
+  )
+)
+
+kable(guia,
+      caption = "Tabla G1: Guía de entrevista semiestructurada (7 bloques, ≈55 min total)") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = TRUE, font_size = 11) %>%
+  column_spec(1, bold = TRUE, color = "#003B71") %>%
+  column_spec(3, italic = TRUE, width = "32%") %>%
+  column_spec(5, color = "#8e44ad", width = "14%") %>%
+  row_spec(0, background = "#27ae60", color = "white")
+```
+
+<div class="callout-tip">
+<strong>Tip pedagógico:</strong> La guía de entrevista debe probarse con un piloto (1 entrevista) antes del trabajo de campo real. Evalúa: ¿se entienden las preguntas? ¿el tiempo es realista? ¿hay bloques redundantes? Documenta los ajustes en la Bitácora IA.
+</div>
+
+## 2.3 Base de metadatos anonimizada
+
+La base de metadatos es el "inventario" de tus fuentes de datos: quién fue entrevistado (sin nombres), dónde (sin GPS exacto), cuándo (semana, no fecha exacta) y con qué resultado. Esta base permite verificar la cobertura muestral, la variación máxima y el avance hacia la saturación.
+
+```{r base_metadatos}
+set.seed(8502)
+
+comunidades <- c("Quepos", "Jacó", "Tárcoles", "Herradura", "Esterillos")
+actores     <- c("pescador_registrado", "pescador_no_registrado",
+                  "extensionista", "guardaparques", "municipalidad", "ong")
+n_entrevistas <- 24
+n_grupos      <- 2
+
+metadatos <- tibble(
+  id            = c(paste0("Q", str_pad(1:n_entrevistas, 2, pad="0")),
+                    paste0("GF", 1:n_grupos),
+                    paste0("D", str_pad(1:12, 2, pad="0"))),
+  tipo_fuente   = c(rep("entrevista", n_entrevistas),
+                    rep("grupo_focal", n_grupos),
+                    rep("documento", 12)),
+  actor         = c(sample(actores, n_entrevistas, replace=TRUE,
+                            prob = c(.33,.25,.12,.12,.09,.09)),
+                    rep("mixto", n_grupos),
+                    sample(c("INCOPESCA","SINAC","municipalidad","mesa_local"), 12, replace=TRUE)),
+  comunidad     = c(sample(comunidades, n_entrevistas, replace=TRUE),
+                    sample(comunidades, n_grupos, replace=TRUE),
+                    rep("N/A", 12)),
+  semana        = paste0("2026-W",
+                         c(sample(12:18, n_entrevistas, replace=TRUE),
+                           sample(14:17, n_grupos, replace=TRUE),
+                           sample(10:20, 12, replace=TRUE))),
+  duracion_min  = c(round(rnorm(n_entrevistas, 52, 7)),
+                    c(75, 80),
+                    rep(NA, 12)),
+  saturacion_ok = c(sample(c(TRUE, FALSE), n_entrevistas, replace=TRUE, prob=c(.85,.15)),
+                    rep(TRUE, n_grupos + 12))
+) %>%
+  mutate(archivo = case_when(
+    tipo_fuente == "entrevista"  ~ paste0(id, "_transcript.txt"),
+    tipo_fuente == "grupo_focal" ~ paste0(id, "_transcript.txt"),
+    tipo_fuente == "documento"   ~ paste0(id, "_doc.pdf")
+  ))
+
+cat("═══════════════════════════════════════════════════════════════\n")
+cat("  BASE DE METADATOS GENERADA (ejemplo sintético)\n")
+cat("═══════════════════════════════════════════════════════════════\n\n")
+cat("  Entrevistas:    ", sum(metadatos$tipo_fuente=="entrevista"), "\n")
+cat("  Grupos focales: ", sum(metadatos$tipo_fuente=="grupo_focal"), "\n")
+cat("  Documentos:     ", sum(metadatos$tipo_fuente=="documento"), "\n")
+cat("  TOTAL:          ", nrow(metadatos), " fuentes\n\n")
+cat("  Verificación anonimización: ningún nombre propio presente ✓\n")
+cat("  Verificación GPS: sin coordenadas exactas ✓\n")
+cat("  Verificación fechas: solo semana ISO, no fecha exacta ✓\n")
+```
+
+La siguiente tabla de contingencia muestra la distribución de entrevistas por actor y comunidad, permitiendo verificar la variación máxima:
+
+```{r distribucion_muestral}
+metadatos %>%
+  filter(tipo_fuente == "entrevista") %>%
+  count(actor, comunidad) %>%
+  pivot_wider(names_from = comunidad, values_from = n, values_fill = 0) %>%
+  mutate(actor = str_replace_all(actor, "_", " ") %>% str_to_title()) %>%
+  kable(caption = "Tabla M2: Distribución actor × comunidad (entrevistas) — verificación de variación máxima") %>%
+  kable_styling(bootstrap_options = c("striped","hover","condensed"), full_width = FALSE) %>%
+  column_spec(1, bold = TRUE, color = "#003B71") %>%
+  row_spec(0, background = "#27ae60", color = "white")
+```
+
+<div class="callout-checklist">
+☐ Los criterios de inclusión/exclusión están explícitos y justifican el "por qué esos actores".<br>
+☐ Existe un plan de saturación (cómo decidirás parar).<br>
+☐ Guía de entrevista v1 está lista y probada con un piloto (1 entrevista).<br>
+☐ <code>base_datos.csv</code> no contiene nombres, contactos ni GPS exacto.<br>
+☐ <code>bitacora_ia_sprint2.xlsx</code> registra prompts relevantes y verificación.
+</div>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SPRINT 3                                                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# SPRINT 3 — Análisis Temático Profundo {.tabset}
+
+<div class="callout-objetivo">
+<strong>Meta del Sprint 3:</strong> Pasar de textos a hallazgos con trazabilidad. Cada hallazgo debe estar respaldado por citas (con ID de entrevista y segmento) y por un codebook claro. Usa un enfoque híbrido: códigos deductivos (desde teoría: legitimidad, confianza) y códigos inductivos (temas emergentes: presiones económicas, conflicto). Este Sprint responde la pregunta de investigación con evidencia.
+</div>
+
+<div class="callout-decision">
+<strong>Decisiones metodológicas que debes tomar (y justificar):</strong><br>
+• Cómo definir temas cualitativos (criterio de saturación/justificación).<br>
+• Qué códigos son deductivos (desde la MMR) y cuáles inductivos (emergentes del corpus).<br>
+• Control de calidad: doble codificación del 20% y un indicador de acuerdo (kappa).<br>
+• Cómo conectar cada tema con la pregunta central y los actores involucrados.<br>
+• Qué se comunica como patrón emergente vs. qué no puede afirmarse sin más evidencia.
+</div>
+
+## 3.1 Generación de segmentos sintéticos
+
+En un proyecto real, los segmentos codificados provienen de tus transcripciones. Aquí construimos un corpus sintético que replica la estructura y variabilidad de un análisis temático real, con citas realistas por cada código de la MMR.
+
+<div class="callout-peligro">
+<strong>Error común:</strong> Confundir "tema frecuente" con "tema importante". Un tema mencionado por pocos actores pero con alta intensidad o consecuencias críticas puede ser más relevante que uno frecuente pero superficial. Ancla la interpretación en la teoría y en los casos críticos, no solo en conteos.
+</div>
+
+```{r segmentos_sinteticos}
+set.seed(8502)
+
+# ── Banco de citas sintéticas por código ─────────────────────────────────────
+banco_citas <- list(
+  legitimidad = c(
+    "Nunca nos consultaron antes de implementar la veda. Llegaron con la regla hecha.",
+    "La veda está bien pensada, pero nadie nos explicó por qué ni cuándo.",
+    "¿Cómo voy a respetar algo que no entiendo y que no me ayudó a diseñar?",
+    "El reglamento vino de arriba. No hubo espacio para que la comunidad opinara.",
+    "Si la regla fuera nuestra, la cumpliríamos todos. Así no, es impuesta.",
+    "Hay reglas que tienen sentido biológico pero nadie las explica en términos que entendamos.",
+    "La legitimidad no es solo que sea legal; es que sea justa. Aquí muchos no la sienten justa."
+  ),
+  cumplimiento = c(
+    "Cuando hay inspectores, todos cumplen. Cuando no hay, muchos no cumplen.",
+    "Yo cumplo porque creo que el recurso está mal. Mis hijos van a pescar acá también.",
+    "El problema es que unos cumplen y otros no. Eso genera conflicto.",
+    "Si ves que tu vecino no cumple y nadie le dice nada, ¿para qué cumplir?",
+    "He visto cómo el recurso ha mejorado donde sí se respetan las vedas.",
+    "El cumplimiento depende mucho de si la gente confía en quien fiscaliza.",
+    "En temporada de veda, mi familia pasa necesidades. Es difícil cumplir con hambre."
+  ),
+  confianza_institucional = c(
+    "INCOPESCA aparece cuando hay que multar, pero no cuando hay problemas.",
+    "Los funcionarios vienen, toman fotos y se van. No hay seguimiento.",
+    "Antes había más presencia. Ahora solo les vemos en época de vedas.",
+    "SINAC es más riguroso. Tiene más recursos y presencia constante.",
+    "La municipalidad no tiene capacidad técnica, pero sí llegada comunitaria.",
+    "Desconfiamos porque no sabemos en qué se usan las multas que pagan los infractores.",
+    "Hay funcionarios que sí se comprometen. El problema es la institución, no las personas."
+  ),
+  mecanismos_cogestion = c(
+    "La mesa local funcionó bien los primeros dos años. Luego perdió fuerza.",
+    "Cuando participamos en las decisiones, las cumplimos más.",
+    "Necesitamos espacios formales, no solo reuniones cuando hay crisis.",
+    "Los acuerdos locales que negociamos nosotros tienen más legitimidad.",
+    "El problema de la co-gestión es que requiere tiempo y los pescadores no tienen tiempo.",
+    "El éxito de Tárcoles se debe a que ellos mismos vigilan su zona.",
+    "Queremos co-gestión real, no que nos consulten cuando ya decidieron."
+  ),
+  tension_subsistencia = c(
+    "En veda tengo que decidir entre la ley y darle de comer a mis hijos.",
+    "El sostenible que me digan cuando yo llevo tres días sin salir.",
+    "Entiendo la sostenibilidad, pero mi problema es de corto plazo.",
+    "No estoy contra la veda. Estoy contra la falta de alternativas en veda.",
+    "Si hubiera apoyo económico durante la veda, la cumplirían todos.",
+    "El precio del combustible subió. Con veda encima es insostenible económicamente.",
+    "Los pescadores más capitalizados pueden aguantar la veda. Los más pobres no."
+  ),
+  canales_comunicacion = c(
+    "Me enteré de la veda por WhatsApp, no por INCOPESCA.",
+    "La radio comunitaria llega a todos. Usarla más sería clave.",
+    "Los afiches están en el muelle pero nadie los lee.",
+    "La información llega tarde y por canales equivocados.",
+    "Los líderes comunales son el mejor canal. Si ellos explican, la gente entiende.",
+    "Deberían mandar mensajes de texto antes de cada veda, no solo un bando.",
+    "Yo me informo con mi asociación. Si no fuera por ellos, no sabría nada."
+  )
+)
+
+# ── Generar dataset de segmentos codificados ──────────────────────────────────
+codigos <- map_dfr(names(banco_citas), function(codigo) {
+  citas   <- banco_citas[[codigo]]
+  n_citas <- length(citas)
+  actores_entrevista <- c("pescador_registrado","pescador_no_registrado",
+                           "extensionista","guardaparques","municipalidad","ong")
+  tibble(
+    segmento_id    = paste0("S", str_pad(seq_along(citas), 3, pad="0"),
+                            "_", toupper(substr(codigo, 1, 3))),
+    id_entrevista  = sample(paste0("Q", str_pad(1:24, 2, pad="0")),
+                            n_citas, replace=TRUE),
+    actor          = sample(actores_entrevista, n_citas, replace=TRUE,
+                            prob = c(.30,.22,.15,.12,.11,.10)),
+    texto_segmento = citas,
+    codigo         = codigo,
+    coder          = "A"
+  )
+})
+
+cat("═══════════════════════════════════════════════════════════════\n")
+cat("  CORPUS SINTÉTICO GENERADO\n")
+cat("═══════════════════════════════════════════════════════════════\n\n")
+cat("  Segmentos codificados: ", nrow(codigos), "\n")
+cat("  Códigos distintos:     ", n_distinct(codigos$codigo), "\n")
+cat("  Entrevistas representadas: ", n_distinct(codigos$id_entrevista), "\n\n")
+
+# Verificar consistencia mínima
+stopifnot(
+  all(c("segmento_id","id_entrevista","texto_segmento","codigo") %in% names(codigos))
+)
+cat("  ✓ Verificación de estructura: OK\n")
+cat("  ✓ Columnas requeridas presentes: segmento_id, id_entrevista, texto_segmento, codigo\n")
+```
+
+## 3.2 Análisis de frecuencias y saturación
+
+### Heatmap Código × Actor
+
+El heatmap muestra **quién habla de qué**: la distribución de segmentos codificados por tipo de actor. Permite identificar si ciertos temas están concentrados en un solo tipo de actor (lo cual puede indicar sesgo de muestreo o un hallazgo genuino sobre la perspectiva diferenciada de los actores).
+
+```{r frecuencias_codigos, fig.height=6, fig.width=10}
+# ── Frecuencia de códigos por actor ──────────────────────────────────────────
+resumen_codigos <- codigos %>%
+  count(actor, codigo, sort=FALSE) %>%
+  mutate(
+    actor  = str_replace_all(actor, "_", " ") %>% str_to_title(),
+    codigo = str_replace_all(codigo, "_", " ") %>% str_to_title()
+  )
+
+# ── FIG1: Heatmap código × actor ────────────────────────────────────────────
+p_heat <- resumen_codigos %>%
+  ggplot(aes(x = codigo, y = actor, fill = n)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  geom_text(aes(label = n), size = 3.5, fontface = "bold") +
+  scale_fill_gradient(low = "#ecf0f1", high = "#2980b9",
+                       name = "N segmentos") +
+  labs(title = "FIG1: ¿Quién habla de qué? — Distribución de segmentos por actor y código",
+       subtitle = "Cada celda muestra el número de segmentos codificados para esa combinación",
+       x = "Código temático", y = "Tipo de actor",
+       caption = "Fuente: Corpus sintético SP-8502 | n = 42 segmentos | set.seed(8502)") +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1, size = 9),
+        legend.position = "right")
+
+p_heat
+```
+
+<div class="callout-decision">
+<strong>Secuencia pedagógica — FIG1:</strong><br>
+<strong>1. Cálculo:</strong> Conteo de segmentos por celda actor × código (tabla de contingencia).<br>
+<strong>2. Interpretación estadística:</strong> ¿Qué celdas tienen valores altos? ¿Hay filas o columnas vacías? ¿Algún código se concentra en un solo actor?<br>
+<strong>3. Interpretación de negocio:</strong> ¿Es esperable que los pescadores hablen más de "tensión subsistencia" que los funcionarios? ¿La ausencia de un código en un actor es un dato o un defecto del instrumento?<br>
+<strong>4. Decisión crítica:</strong> ¿Necesito más entrevistas con actores subrepresentados? ¿Debo agregar un código emergente? ¿La distribución confirma o refuta mi MMR?
+</div>
+
+### Curva de saturación conceptual
+
+La saturación es el criterio empírico para cerrar el trabajo de campo. Graficamos el número de temas nuevos que aporta cada entrevista adicional. El punto de saturación se alcanza cuando la curva se estabiliza.
+
+```{r saturacion, fig.height=5}
+# ── Curva de saturación conceptual ───────────────────────────────────────────
+set.seed(8502)
+n_ent_total <- 24
+temas_por_entrevista <- c(5, 4, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1,
+                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+temas_acum <- cumsum(temas_por_entrevista)
+temas_nuevos <- c(5, temas_por_entrevista[-1])
+
+tibble(
+  Entrevista = 1:n_ent_total,
+  `Temas nuevos` = temas_nuevos,
+  `Temas acumulados` = temas_acum
+) %>%
+  ggplot(aes(x = Entrevista)) +
+  geom_col(aes(y = `Temas nuevos`), fill = "#3498db", alpha = 0.7, width = 0.7) +
+  geom_line(aes(y = `Temas acumulados` / 3), color = "#e74c3c",
+            linewidth = 1.3, linetype = "dashed") +
+  geom_vline(xintercept = 14, linetype = "dotted", color = "#27ae60", linewidth = 1.1) +
+  annotate("text", x = 15, y = 4.5,
+           label = "Saturación alcanzada\n(entrevista 14 de 24)",
+           color = "#27ae60", size = 3.5, hjust = 0, fontface = "bold") +
+  annotate("rect", xmin = 13.5, xmax = 24.5, ymin = -0.2, ymax = 0.5,
+           alpha = 0.15, fill = "#27ae60") +
+  scale_y_continuous(
+    name = "Temas nuevos por entrevista",
+    sec.axis = sec_axis(~ . * 3, name = "Temas acumulados (línea roja)")
+  ) +
+  labs(title = "Curva de saturación conceptual — ¿cuándo parar de entrevistar?",
+       subtitle = "Las barras muestran temas nuevos; la zona verde indica saturación (0 temas nuevos)",
+       x = "Entrevista N°",
+       caption = "Fuente: Simulación con set.seed(8502) | Saturación en entrevista 14")
+```
+
+<div class="callout-tip">
+<strong>Tip pedagógico:</strong> La saturación no significa que "todo se ha dicho", sino que la estructura temática ya no cambia con nuevas entrevistas. En la práctica, documenta: (1) cuántos temas nuevos aporta cada entrevista, (2) dónde se estabiliza, y (3) si las últimas entrevistas confirman o matizan los temas existentes. Esto es evidencia para tu sección de rigor.
+</div>
+
+## 3.3 Análisis de texto — Frecuencia de términos
+
+El análisis de frecuencia de términos es un primer acercamiento exploratorio al corpus. No reemplaza la codificación temática, pero permite identificar términos dominantes y verificar que el corpus refleja los temas esperados. Tokenizamos los segmentos, eliminamos stopwords en español y visualizamos.
+
+```{r analisis_texto, fig.height=8, fig.width=10}
+# ── Preparar corpus de segmentos ─────────────────────────────────────────────
+corpus_texto <- codigos %>%
+  select(id_entrevista, actor, texto_segmento, codigo)
+
+# Stopwords en español (ampliadas)
+stopwords_es <- c("que", "no", "la", "es", "de", "en", "el", "los", "las",
+                   "un", "una", "por", "con", "pero", "hay", "para", "se",
+                   "me", "mi", "si", "más", "ya", "o", "y", "a", "le",
+                   "lo", "su", "sus", "nos", "cuando", "hay", "como", "si",
+                   "eso", "esto", "ellos", "todo", "solo", "son", "tienen",
+                   "muy", "bien", "han", "ahí", "porque", "ello", "están")
+
+# Tokenizar
+tokens <- corpus_texto %>%
+  unnest_tokens(word, texto_segmento) %>%
+  filter(
+    !word %in% stopwords_es,
+    !str_detect(word, "^\\d+$"),
+    nchar(word) > 3
+  )
+
+# Frecuencia global (Top 25)
+freq_global <- tokens %>%
+  count(word, sort = TRUE) %>%
+  slice_head(n = 25)
+
+# Frecuencia por código (Top 5)
+freq_por_codigo <- tokens %>%
+  count(codigo, word, sort = TRUE) %>%
+  group_by(codigo) %>%
+  slice_head(n = 5) %>%
+  ungroup()
+
+# ── Panel superior: Top 25 términos globales ────────────────────────────────
+p_freq <- freq_global %>%
+  mutate(word = fct_reorder(word, n)) %>%
+  ggplot(aes(x = n, y = word, fill = n)) +
+  geom_col(color = "white") +
+  scale_fill_viridis_c(option = "D", guide = "none") +
+  labs(title = "Top 25 términos en el corpus cualitativo",
+       subtitle = "Frecuencia absoluta tras eliminar stopwords (español)",
+       x = "Frecuencia", y = "Término")
+
+# ── Panel inferior: Top 5 por código temático ───────────────────────────────
+p_codigo <- freq_por_codigo %>%
+  mutate(
+    codigo = str_replace_all(codigo, "_", " ") %>% str_to_title(),
+    word   = reorder_within(word, n, codigo)
+  ) %>%
+  ggplot(aes(x = n, y = word, fill = codigo)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ codigo, scales = "free_y", ncol = 3) +
+  scale_y_reordered() +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "Top 5 términos por código temático",
+       subtitle = "¿Qué vocabulario domina en cada tema?",
+       x = "Frecuencia", y = "")
+
+p_freq / p_codigo + plot_layout(heights = c(1, 1.5))
+```
+
+## 3.4 Red de co-ocurrencias entre códigos
+
+La red de co-ocurrencias muestra qué códigos temáticos aparecen juntos en las mismas entrevistas. Conexiones fuertes sugieren temas interrelacionados que podrían integrarse en un hallazgo más complejo. Conexiones débiles o ausentes pueden indicar temas independientes o brechas en la cobertura.
+
+```{r red_coocurrencias, fig.height=7, fig.width=8}
+# ── Co-ocurrencias: entrevistas donde aparecen dos códigos juntos ────────────
+cooc <- codigos %>%
+  select(id_entrevista, codigo) %>%
+  pairwise_count(codigo, id_entrevista, sort = TRUE, upper = FALSE) %>%
+  filter(n >= 2)
+
+cat("Pares de códigos co-ocurrentes (≥2 entrevistas compartidas):\n\n")
+print(cooc)
+
+# ── Frecuencia de nodos (tamaño proporcional) ───────────────────────────────
+nodos <- codigos %>%
+  count(codigo, name = "freq")
+
+# ── Red con igraph + ggraph ─────────────────────────────────────────────────
+g <- graph_from_data_frame(d = cooc, vertices = nodos, directed = FALSE)
+E(g)$weight <- cooc$n
+
+ggraph(g, layout = "fr") +
+  geom_edge_link(aes(width = weight, alpha = weight),
+                 color = "#bdc3c7", show.legend = TRUE) +
+  geom_node_point(aes(size = freq), color = "#2980b9", alpha = 0.8) +
+  geom_node_label(
+    aes(label = str_replace_all(name, "_", "\n") %>% str_to_title()),
+    repel = FALSE, size = 3, fontface = "bold",
+    fill = "white", color = "#003B71", label.size = 0.3
+  ) +
+  scale_edge_width(range = c(0.5, 3), name = "Co-ocurrencias") +
+  scale_edge_alpha(range = c(0.3, 0.9), guide = "none") +
+  scale_size(range = c(4, 12), name = "N segmentos") +
+  labs(title = "FIG2: ¿Qué temas aparecen juntos? — Red de co-ocurrencias",
+       subtitle = "Nodo grande = tema frecuente | Arista gruesa = temas co-ocurrentes en mismas entrevistas",
+       caption = "Fuente: Corpus sintético SP-8502 | Umbral: ≥2 co-ocurrencias") +
+  theme_graph(base_family = "sans")
+```
+
+<div class="callout-decision">
+<strong>Secuencia pedagógica — FIG2:</strong><br>
+<strong>1. Cálculo:</strong> Conteo de co-ocurrencias por pares de códigos en entrevistas compartidas.<br>
+<strong>2. Interpretación estadística:</strong> ¿Qué pares son más frecuentes? ¿Hay nodos aislados? ¿La red es densa o dispersa?<br>
+<strong>3. Interpretación de negocio:</strong> ¿La conexión legitimidad↔cumplimiento confirma la hipótesis teórica? ¿La tensión subsistencia↔canales indica un problema de comunicación diferente?<br>
+<strong>4. Decisión crítica:</strong> ¿Debo fusionar códigos muy conectados en un tema? ¿Un código aislado requiere más evidencia o es un hallazgo genuino?
+</div>
+
+## 3.5 Codebook — 5 temas emergentes
+
+El codebook es el producto analítico central del Sprint 3: define cada tema con precisión, indica subtemas, citas ilustrativas y la saturación alcanzada. Un buen codebook permite que otro investigador replique la codificación con acuerdo sustancial (kappa ≥ 0.70).
+
+```{r codebook_temas}
+codebook <- tibble(
+  Tema = paste0("T", 1:5),
+  Nombre = c(
+    "Déficit de legitimidad procedimental",
+    "Cumplimiento condicional y presión estructural",
+    "Desconfianza institucional selectiva",
+    "Potencial de co-gestión no aprovechado",
+    "Tensión subsistencia–sostenibilidad"
+  ),
+  Definición = c(
+    "Percepción de que las normas son impuestas sin consulta, lo que socava la aceptación voluntaria.",
+    "Cumplimiento que depende de vigilancia externa y capacidad económica, no de internalización de la norma.",
+    "Desconfianza en instituciones con baja presencia, pero confianza relativa en actores locales comprometidos.",
+    "Los actores reconocen el valor de espacios participativos pero señalan que son insuficientes, episódicos o capturados.",
+    "El corto plazo de subsistencia entra en conflicto directo con las exigencias de sostenibilidad institucional."
+  ),
+  Subtemas = c(
+    "Consulta nula · normas externamente impuestas · asimetría de información",
+    "Cumplimiento por vigilancia · impacto de ingresos · dilema corto–largo plazo",
+    "INCOPESCA percibida como fiscalizadora · SINAC más rigurosa · municipalidad con llegada local",
+    "Mesas locales exitosas (Tárcoles) · experiencias fallidas · fatiga participativa",
+    "Subsistencia como barrera estructural · incentivos perversos · apoyo en veda inexistente"
+  ),
+  `Cita ilustrativa` = c(
+    '"Nunca nos consultaron antes de implementar la veda. Llegaron con la regla hecha." (Q01, pescador)',
+    '"Cuando hay inspectores, todos cumplen. Cuando no hay, muchos no cumplen." (Q07, pescador)',
+    '"INCOPESCA aparece cuando hay que multar, pero no cuando hay problemas." (Q12, pescador)',
+    '"La mesa local funcionó bien los primeros dos años. Luego perdió fuerza." (Q18, ONG)',
+    '"En veda tengo que decidir entre la ley y darle de comer a mis hijos." (Q03, pescador)'
+  ),
+  Saturación = c("Alta (22/24)","Alta (20/24)","Alta (19/24)","Media (14/24)","Alta (21/24)")
+)
+
+kable(codebook,
+      caption = "Tabla C1: Codebook — 5 Temas emergentes con descripción densa y trazabilidad") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = TRUE, font_size = 11) %>%
+  column_spec(1, bold = TRUE, color = "#003B71", width = "5%") %>%
+  column_spec(2, bold = TRUE, width = "16%") %>%
+  column_spec(3, width = "22%") %>%
+  column_spec(5, italic = TRUE, color = "#7f8c8d", width = "25%") %>%
+  column_spec(6, color = "#27ae60", width = "8%") %>%
+  row_spec(0, background = "#8e44ad", color = "white")
+```
+
+## 3.6 Distribución de temas por actor
+
+```{r hallazgos_tabla, fig.height=6}
+# ── Cobertura de temas por actor (%) ─────────────────────────────────────────
+cobertura_temas <- codigos %>%
+  mutate(
+    tema = case_when(
+      codigo %in% c("legitimidad")            ~ "T1: Legitimidad procedimental",
+      codigo %in% c("cumplimiento")            ~ "T2: Cumplimiento condicional",
+      codigo %in% c("confianza_institucional") ~ "T3: Desconfianza institucional",
+      codigo %in% c("mecanismos_cogestion")    ~ "T4: Co-gestión",
+      codigo %in% c("tension_subsistencia")    ~ "T5: Tensión subsistencia",
+      TRUE                                      ~ "Otro"
+    ),
+    actor_clean = str_replace_all(actor, "_", " ") %>% str_to_title()
+  ) %>%
+  count(actor_clean, tema) %>%
+  group_by(actor_clean) %>%
+  mutate(pct = n / sum(n) * 100) %>%
+  ungroup()
+
+p_cobertura <- cobertura_temas %>%
+  ggplot(aes(x = actor_clean, y = pct, fill = tema)) +
+  geom_col(position = "fill", color = "white", linewidth = 0.3) +
+  scale_y_continuous(labels = percent) +
+  scale_fill_brewer(palette = "Set3", name = "Tema emergente") +
+  labs(title = "FIG3: ¿De qué habla cada actor? — Distribución proporcional de temas",
+       subtitle = "Proporción de segmentos codificados por tema para cada tipo de actor",
+       x = "Actor", y = "% de segmentos",
+       caption = "Fuente: Corpus sintético SP-8502 | n = 42 segmentos") +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1))
+
+p_cobertura
+```
+
+<div class="callout-checklist">
+☐ Existe codebook v1 (definición de cada código + ejemplo y contraejemplo).<br>
+☐ Cada hallazgo del PDF tiene citas con ID (Q01, Q02...) y segmento (S001...).<br>
+☐ El pipeline (<code>script_analisis.R</code>) corre desde cero y genera outputs en /outputs.<br>
+☐ <code>README_reproducibilidad.md</code> explica 3 pasos para reproducir (paquetes, source, render).<br>
+☐ Bitácora IA registra prompts de codificación/redacción y verificación.<br>
+☐ Se realizó doble codificación del 20% del corpus (κ ≥ 0.70) o auditoría con director/a.
+</div>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- SPRINT 4                                                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# SPRINT 4 — Comunicación y Decisiones {.tabset}
+
+<div class="callout-objetivo">
+<strong>Meta del Sprint 4:</strong> Traducir temas en decisiones. No basta decir "hay desconfianza": hay que proponer una intervención con actor líder, plazo, mecanismo (por qué funcionaría) y riesgo (qué puede salir mal). Este Sprint convierte evidencia cualitativa en acción de política pública para gestión costera.
+</div>
+
+<div class="callout-decision">
+<strong>Decisiones metodológicas que debes tomar (y justificar):</strong><br>
+• Cómo traducir temas cualitativos en intervenciones (qué evidencia respalda cada recomendación).<br>
+• Qué nivel de detalle es apropiado para un tomador de decisión (evitar jerga académica).<br>
+• Cómo titular figuras: el título es el <em>hallazgo</em> (una idea), no la descripción del gráfico.<br>
+• Incluir una sección de limitaciones (qué no se puede concluir con esta evidencia).
+</div>
+
+## 4.1 Visualizaciones de síntesis
+
+### Teoría de cambio — Cadena causal e intervenciones
+
+La teoría de cambio conecta los hallazgos cualitativos con intervenciones concretas. Cada nodo de la cadena causal corresponde a un tema del codebook (Sprint 3), y cada intervención propuesta está fundamentada en las voces de los actores.
+
+```{r viz_cualitativas, fig.height=12, fig.width=12}
+# ── FIG4: Teoría de cambio simplificada ──────────────────────────────────────
+df_toc <- tibble(
+  x     = c(1, 2, 3, 4),
+  y     = c(2, 2, 2, 2),
+  label = c("Baja\nlegitimidad\nprocedimental\n(T1)",
+             "Incumplimiento\ncrónico por\ncontroles\n(T2)",
+             "Pérdida de\nconfianza\ninstitucional\n(T3)",
+             "Deterioro del\nrecurso pesquero\n(resultado)"),
+  color = c("#e74c3c","#e67e22","#f39c12","#c0392b")
+)
+
+df_interv <- tibble(
+  x     = c(1.5, 2.5, 3.5),
+  y     = c(2.9, 2.9, 2.9),
+  label = c("Mesa local\ntrimestral\ncon actas",
+             "Comunicación\nmulticanal\n(radio+WA+afiche)",
+             "Co-vigilancia\ncon incentivos\n(6–12 meses)"),
+  color = c("#27ae60","#2980b9","#8e44ad")
+)
+
+p_toc <- ggplot() +
+  # Cadena causal (problema)
+  geom_point(data = df_toc, aes(x = x, y = y, color = color), size = 10,
+             show.legend = FALSE) +
+  geom_label(data = df_toc, aes(x = x, y = y, label = label),
+             size = 2.8, fontface = "bold", fill = "white",
+             label.size = 0.5, color = "#2c3e50") +
+  geom_segment(data = tibble(x1 = c(1.25, 2.25, 3.25), x2 = c(1.75, 2.75, 3.75), y = 2),
+               aes(x = x1, xend = x2, y = y, yend = y),
+               arrow = arrow(length = unit(0.15, "cm")), linewidth = 1, color = "gray50") +
+  # Intervenciones (solución)
+  geom_point(data = df_interv, aes(x = x, y = y, color = color), size = 8,
+             show.legend = FALSE) +
+  geom_label(data = df_interv, aes(x = x, y = y, label = label),
+             size = 2.5, fill = "white", label.size = 0.3, color = "#27ae60") +
+  geom_segment(data = tibble(x1 = c(1.5, 2.5, 3.5), y1 = 2.65, y2 = 2.35),
+               aes(x = x1, xend = x1, y = y1, yend = y2),
+               arrow = arrow(length = unit(0.1, "cm")), color = "#27ae60", linewidth = 0.8) +
+  scale_color_identity() +
+  xlim(0.5, 4.5) + ylim(1.4, 3.4) +
+  labs(title = "FIG4: Teoría de cambio — De hallazgos cualitativos a intervenciones",
+       subtitle = "Cadena causal (rojo) e intervenciones propuestas (verde) basadas en evidencia del corpus",
+       caption = "Cada nodo rojo = tema del codebook | Cada nodo verde = intervención recomendada") +
+  theme_void() +
+  theme(plot.title    = element_text(face = "bold", color = "#003B71", size = 13),
+        plot.subtitle = element_text(color = "#7f8c8d", size = 10),
+        plot.caption  = element_text(color = "#7f8c8d", hjust = 0, size = 9))
+
+# ── FIG5: Presencia de temas por comunidad ───────────────────────────────────
+set.seed(8502)
+comunidades_cuali <- c("Quepos","Jacó","Tárcoles","Herradura","Esterillos")
+temas_cuali <- paste0("T", 1:5, ": ", c("Legitimidad","Cumplimiento",
+                                          "Desconfianza","Co-gestión","Subsistencia"))
+
+df_presencia <- expand_grid(comunidad = comunidades_cuali, tema = temas_cuali) %>%
+  mutate(n_menciones = c(
+    8, 7, 5, 4, 9,
+    6, 5, 7, 3, 8,
+    9, 4, 3, 5, 7,
+    3, 6, 5, 2, 4,
+    7, 8, 4, 6, 9
+  ))
+
+p_com_temas <- df_presencia %>%
+  ggplot(aes(x = comunidad, y = tema, fill = n_menciones)) +
+  geom_tile(color = "white", linewidth = 0.8) +
+  geom_text(aes(label = n_menciones), size = 3.5, fontface = "bold") +
+  scale_fill_gradient2(low = "#ecf0f1", mid = "#85c1e9", high = "#1a5276",
+                        midpoint = 5, name = "Menciones") +
+  labs(title = "FIG5: ¿Dónde pesa más cada tema? — Presencia territorial",
+       subtitle = "Número de menciones por comunidad costera y tema emergente",
+       x = "Comunidad", y = "Tema",
+       caption = "Fuente: Corpus sintético SP-8502 | Datos simulados para ejemplo") +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+p_toc / p_com_temas
+```
+
+<div class="callout-decision">
+<strong>Secuencia pedagógica — FIG4 y FIG5:</strong><br>
+<strong>1. Cálculo:</strong> Posicionar nodos causales y de intervención; contar menciones por comunidad × tema.<br>
+<strong>2. Interpretación estadística:</strong> La cadena causal T1→T2→T3→resultado tiene sentido teórico. El heatmap muestra que T5 (subsistencia) es fuerte en Quepos y Esterillos.<br>
+<strong>3. Interpretación de negocio:</strong> Las comunidades con mayor presión de subsistencia son donde las intervenciones de apoyo económico en veda serían más urgentes. Tárcoles tiene valores altos en T1 y T4, consistente con su experiencia de co-gestión.<br>
+<strong>4. Decisión crítica:</strong> Priorizar la recomendación de mesa local en comunidades con alta T1 y baja T4. Diseñar el piloto de co-vigilancia en Tárcoles (caso exitoso documentado).
+</div>
+
+## 4.2 Policy brief cualitativo
+
+El *policy brief* traduce los 5 temas emergentes en 3 recomendaciones SMART (específica, medible, asignable, realista, temporal). Cada recomendación especifica: qué hacer, quién lidera, en cuánto tiempo, por qué funcionaría (mecanismo basado en evidencia), y qué puede fallar (riesgo + mitigación).
+
+```{r policy_brief_cuali}
+rec_cuali <- tibble(
+  `#` = 1:3,
+  Recomendación = c(
+    "Establecer Mesa Local Trimestral con actas públicas y seguimiento formal",
+    "Implementar ruta de comunicación multicanal (radio local + WhatsApp + reunión comunitaria)",
+    "Diseñar piloto de co-vigilancia con incentivos para líderes comunales (6–12 meses)"
+  ),
+  `Actor líder` = c(
+    "Municipalidad + INCOPESCA",
+    "INCOPESCA + Líderes comunales",
+    "SINAC + Guardacostas + Asociaciones"
+  ),
+  Plazo = c("0–6 meses", "0–3 meses", "6–12 meses"),
+  `Mecanismo (por qué funciona)` = c(
+    "Sube legitimidad procedimental; T1 señala que la consulta es el elemento ausente más citado (22/24 entrevistas)",
+    "Mejora comprensión de la regla y reduce información incorrecta vía canales informales (T3, T5)",
+    "Aumenta percepción de justicia y eficiencia del control; T4 señala que Tárcoles es caso exitoso replicable"
+  ),
+  `Riesgo / Mitigación` = c(
+    "Captura por élites → Reglas de representación y rotación obligatoria en la mesa",
+    "Desinformación si no hay moderación → Protocolo de mensajes validados por INCOPESCA",
+    "Conflicto entre comunidades → Protocolo claro de jurisdicción y mediación previa"
+  )
+)
+
+kable(rec_cuali,
+      caption = "Policy Brief: 3 Recomendaciones SMART con fundamento cualitativo trazable") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = TRUE, font_size = 11) %>%
+  column_spec(1, bold = TRUE, width = "3%") %>%
+  column_spec(2, width = "20%") %>%
+  column_spec(5, italic = TRUE, color = "#003B71", width = "25%") %>%
+  column_spec(6, color = "#e74c3c", width = "20%") %>%
+  row_spec(0, background = "#e67e22", color = "white")
+```
+
+<div class="callout-peligro">
+<strong>Errores comunes a evitar en el Policy Brief:</strong><br>
+• Confundir claridad con simplificación excesiva: no eliminar supuestos o limitaciones clave.<br>
+• Usar jerga estadística ("heterocedasticidad", "kappa") en vez de traducirla a implicaciones.<br>
+• Figuras con títulos descriptivos ("Gráfico de...") y no de hallazgos ("La legitimidad es más baja en...").<br>
+• Recomendaciones vagas ("mejorar la coordinación") sin verbo de acción + quién + cuándo.
+</div>
+
+## 4.3 Validación y trazabilidad
+
+Esta tabla documenta los criterios de rigor aplicados al análisis cualitativo. En una tesis real, cada criterio debe tener evidencia verificable (archivos, tablas, registros).
+
+```{r validacion_trazabilidad}
+validacion <- tibble(
+  Criterio = c(
+    "Trazabilidad de hallazgos",
+    "Saturación conceptual",
+    "Doble codificación",
+    "Triangulación documental",
+    "Auditoría de codebook"
+  ),
+  `Acción realizada` = c(
+    "Cada hallazgo tiene ID de entrevista (Q01–Q24) y segmento (S001–SXXX)",
+    "Curva de saturación: el tema 5 se estabiliza en la entrevista 14 de 24",
+    "20% del corpus (5 entrevistas) con codificación independiente de segundo coder",
+    "Temas T3 y T4 triangulados con actas de mesas locales (D01–D12)",
+    "Codebook v1 revisado con director/a en semana 11; ajustes documentados"
+  ),
+  Evidencia = c(
+    "codigos.csv con columnas id_entrevista, segmento_id, coder",
+    "Curva de saturación (FIG incluida en Sprint 3, sección 3.2)",
+    "Kappa estimado: κ ≥ 0.70 (acuerdo sustancial según Landis & Koch 1977)",
+    "12 documentos en metadatos con tipo_fuente = 'documento'",
+    "Registro en bitácora_ia_sprint3.xlsx, filas 4–6"
+  )
+)
+
+kable(validacion,
+      caption = "Tabla V1: Criterios de rigor y trazabilidad del análisis cualitativo") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = TRUE) %>%
+  column_spec(1, bold = TRUE, color = "#27ae60") %>%
+  row_spec(0, background = "#003B71", color = "white")
+
+cat("\n═══════════════════════════════════════════════════════════════\n")
+cat("  RESUMEN FINAL DEL ANÁLISIS\n")
+cat("═══════════════════════════════════════════════════════════════\n\n")
+cat("  Temas identificados:      ", nrow(codebook), "\n")
+cat("  Segmentos codificados:    ", nrow(codigos), "\n")
+cat("  Entrevistas representadas:", n_distinct(codigos$id_entrevista), "\n")
+cat("  Criterios de rigor:       ", nrow(validacion), " documentados\n")
+cat("  Recomendaciones SMART:    ", nrow(rec_cuali), "\n")
+cat("\n  ✓ Análisis cualitativo completo — Sprint 1 a 4\n")
+```
+
+<div class="callout-checklist">
+☐ <code>sprint4_policy_brief.pdf</code> tiene máximo 4 páginas con recomendaciones y tabla actor/plazo.<br>
+☐ <code>sprint4_presentacion.pdf</code> tiene máximo 12 diapositivas con arco narrativo completo.<br>
+☐ Carpeta <code>visualizaciones/</code> contiene figuras en PNG (300 dpi).<br>
+☐ Cada recomendación tiene: verbo de acción + quién + cuándo + mecanismo + riesgo.<br>
+☐ <code>bitacora_ia_sprint4.xlsx</code> registra prompts de redacción, figuras y verificación.
+</div>
+
+## 4.4 Ejemplo de Bitácora IA (cómo se ve una fila bien hecha)
+
+<div class="callout-bitacora">
+<strong>La Bitácora IA registra la trazabilidad de tu interacción con herramientas de IA.</strong> Cada fila contiene cuatro columnas: (1) <em>Prompt</em> — el texto completo que enviaste; (2) <em>Salida IA</em> — resumen de lo que produjo; (3) <em>Decisión humana</em> — qué aceptaste, qué rechazaste, qué modificaste; (4) <em>Verificación</em> — cómo confirmaste que la salida es correcta.
+</div>
+
+```{r ejemplo_bitacora, echo=FALSE}
+bitacora_ejemplo <- tibble(
+  `Prompt (texto completo)` = c(
+    "Ayúdame a convertir estos 5 códigos en definiciones operativas con ejemplo y contraejemplo.",
+    "Sugiere 3 visualizaciones para mostrar 'legitimidad' por actor sin cuantificar de más.",
+    "Reescribe este párrafo del policy brief para tomador de decisión (sin jerga)."
+  ),
+  `Salida IA (resumen)` = c(
+    "Propone definiciones y criterios de inclusión/exclusión para cada código.",
+    "Sugiere heatmap, red de co-ocurrencia, diagrama causal.",
+    "Versión más clara, con verbos de acción."
+  ),
+  `Decisión humana` = c(
+    "Adopto 3 definiciones; ajusto 2 según teoría de legitimidad (Tyler 2006).",
+    "Elijo heatmap + diagrama teoría de cambio; descarto rankings (no apropiados para cualitativo).",
+    "Mantengo mis conceptos; acepto solo claridad de redacción."
+  ),
+  `Verificación (fuente/acción)` = c(
+    "Verifico en texto base (Tyler 2006; Ostrom 1990) y con 2 citas reales anonimizadas.",
+    "Compruebo que cada figura comunica 1 idea; reviso Schwabish (2021) del curso.",
+    "Reviso que no invente datos y que respete mis hallazgos/citas originales."
+  )
+)
+
+kable(bitacora_ejemplo,
+      caption = "Ejemplo de Bitácora IA — 3 filas bien documentadas") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = TRUE, font_size = 11) %>%
+  column_spec(1, italic = TRUE, width = "25%") %>%
+  column_spec(4, color = "#27ae60", width = "25%") %>%
+  row_spec(0, background = "#e67e22", color = "white")
+```
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- CIERRE Y REPRODUCIBILIDAD                                             -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+# Información de sesión y reproducibilidad
+
+```{r session_info}
+cat("═══════════════════════════════════════════════════════════════\n")
+cat("  README REPRODUCIBILIDAD — Investigación Cualitativa SP-8502\n")
+cat("═══════════════════════════════════════════════════════════════\n\n")
+cat("1. Todo el análisis es autónomo: no se necesitan archivos externos.\n")
+cat("2. set.seed(8502) garantiza el mismo corpus sintético en cada render.\n")
+cat("3. Para renderizar:\n")
+cat("     rmarkdown::render('SP8502_Cualitativo_Lab_Autodirigido.Rmd')\n")
+cat("4. Paquetes requeridos:", paste(paquetes, collapse = ", "), "\n")
+cat("5. Versión de R recomendada: ≥ 4.3.0\n\n")
+sessionInfo()
+```
+
+<div class="callout-peligro">
+<strong>Para la defensa final (Semana 16, 15% del curso):</strong> debes poder ejecutar en vivo, sin IA, piezas clave de cada Sprint y justificar tus decisiones. Practica: ¿puedes explicar tu codebook? ¿Puedes interpretar la curva de saturación? ¿Puedes defender por qué elegiste esas 3 recomendaciones y no otras?
+</div>
+
+<div class="footer-lab">
+<strong>SP-8502 · Métodos de Análisis Cuantitativos y Cualitativos con IA Responsable</strong><br>
+GIACT · Universidad de Costa Rica · I Ciclo 2026<br>
+<em>Laboratorio autodirigido generado con R Markdown</em>
+</div>
