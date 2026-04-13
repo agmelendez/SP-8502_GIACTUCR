@@ -1,788 +1,1554 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SP-8502 · Guía de Archivos y Lógica del Curso</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --ucr-azul:    #003F8A;
-    --ucr-verde:   #1d7e6a;
-    --ucr-naranja: #e06c00;
-    --ucr-rojo:    #c0392b;
-    --ucr-dorado:  #d4a017;
-    --bg:          #f8f6f1;
-    --bg-card:     #ffffff;
-    --ink:         #1a1a2e;
-    --ink-light:   #4a4a6a;
-    --ink-faint:   #9090b0;
-    --border:      #e0ddd5;
-    --code-bg:     #0d1117;
-    --s1: #003F8A; --s2: #1d7e6a; --s3: #8b5cf6; --s4: #e06c00;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SP-8502 · Guía de Archivos y Lógica del Curso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Source+Serif+4:wght@300;400;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --ucr-azul: #003F8A;
+      --ucr-verde: #1d7e6a;
+      --ucr-naranja: #e06c00;
+      --ucr-rojo: #c0392b;
+      --ucr-dorado: #d4a017;
+      --bg: #f8f6f1;
+      --bg-card: #ffffff;
+      --ink: #1a1a2e;
+      --ink-light: #4a4a6a;
+      --ink-faint: #9090b0;
+      --border: #e0ddd5;
+      --code-bg: #0d1117;
+      --s1: #003F8A;
+      --s2: #1d7e6a;
+      --s3: #8b5cf6;
+      --s4: #e06c00;
+    }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  body {
-    font-family: 'Source Serif 4', Georgia, serif;
-    background: var(--bg);
-    color: var(--ink);
-    line-height: 1.7;
-    overflow-x: hidden;
-  }
+    body {
+      font-family: 'Source Serif 4', Georgia, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
 
-  /* ── HERO ── */
-  .hero {
-    background: var(--ucr-azul);
-    background-image:
-      radial-gradient(ellipse at 20% 50%, rgba(29,126,106,0.35) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, rgba(212,160,23,0.2) 0%, transparent 50%);
-    color: #fff;
-    padding: 72px 40px 64px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.55);
-    margin-bottom: 16px;
-  }
-  .hero h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(32px, 5vw, 58px);
-    font-weight: 900;
-    line-height: 1.05;
-    max-width: 760px;
-    margin-bottom: 16px;
-  }
-  .hero h1 em { color: var(--ucr-dorado); font-style: normal; }
-  .hero p {
-    font-size: 17px;
-    color: rgba(255,255,255,0.75);
-    max-width: 650px;
-    margin-bottom: 24px;
-  }
-  .hero-obj {
-    background: rgba(212,160,23,0.15);
-    border-left: 4px solid var(--ucr-dorado);
-    padding: 16px 24px;
-    margin-bottom: 32px;
-    border-radius: 0 8px 8px 0;
-    max-width: 800px;
-  }
-  .hero-obj h4 {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--ucr-dorado);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-  }
-  .hero-obj p { font-size: 15px; margin-bottom: 0; color: #fff; }
+    /* ── HERO ── */
+    .hero {
+      background: var(--ucr-azul);
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(29, 126, 106, 0.35) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(212, 160, 23, 0.2) 0%, transparent 50%);
+      color: #fff;
+      padding: 72px 40px 64px;
+      position: relative;
+      overflow: hidden;
+    }
 
-  /* ── NAV ── */
-  .sticky-nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(248,246,241,0.97);
-    backdrop-filter: blur(12px);
-    border-bottom: 2px solid var(--border);
-    padding: 0 40px;
-    display: flex;
-    align-items: center;
-    gap: 0;
-    overflow-x: auto;
-  }
-  .nav-btn {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 16px 20px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    color: var(--ink-faint);
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .nav-btn:hover { color: var(--ink); }
-  .nav-btn.active { color: var(--ink); border-bottom-color: var(--ucr-azul); font-weight: 600; }
+    .hero-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
+      margin-bottom: 16px;
+    }
 
-  /* ── LAYOUT ── */
-  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
-  .sprint-section { display: none; padding: 60px 0; }
-  .sprint-section.visible { display: block; animation: fadeIn 0.4s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(32px, 5vw, 58px);
+      font-weight: 900;
+      line-height: 1.05;
+      max-width: 760px;
+      margin-bottom: 16px;
+    }
 
-  .sprint-header {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 24px;
-    align-items: start;
-    margin-bottom: 32px;
-    padding-bottom: 32px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sprint-badge {
-    width: 72px; height: 72px;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 600;
-  }
-  .sprint-badge .s-n { font-size: 11px; letter-spacing: 2px; opacity: 0.7; }
-  .sprint-badge .s-d { font-size: 26px; font-weight: 700; }
-  .s1-badge { background: rgba(0,63,138,0.1); color: var(--s1); border: 2px solid rgba(0,63,138,0.25); }
-  .s2-badge { background: rgba(29,126,106,0.1); color: var(--s2); border: 2px solid rgba(29,126,106,0.25); }
-  .s3-badge { background: rgba(139,92,246,0.1); color: var(--s3); border: 2px solid rgba(139,92,246,0.25); }
-  .s4-badge { background: rgba(224,108,0,0.1); color: var(--s4); border: 2px solid rgba(224,108,0,0.25); }
+    .hero h1 em {
+      color: var(--ucr-dorado);
+      font-style: normal;
+    }
 
-  .sprint-header-text h2 { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--ink); margin-bottom: 8px; }
-  .sprint-meta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-faint); margin-bottom: 12px; }
-  .sprint-desc { font-size: 16px; color: var(--ink-light); max-width: 800px; }
+    .hero p {
+      font-size: 17px;
+      color: rgba(255, 255, 255, 0.75);
+      max-width: 650px;
+      margin-bottom: 24px;
+    }
 
-  /* ── INFO BLOCKS ── */
-  .sprint-info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    margin-bottom: 40px;
-  }
-  .info-block { background: rgba(255,255,255,0.6); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-  .info-block h4 { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 1.5px; color: var(--ucr-azul); margin-bottom: 12px; }
-  .info-block ul { list-style: none; padding-left: 0; }
-  .info-block ul li { font-size: 14px; color: var(--ink-light); margin-bottom: 6px; padding-left: 14px; position: relative; }
-  .info-block ul li::before { content: "›"; position: absolute; left: 0; color: var(--ucr-dorado); font-weight: bold; }
+    .hero-obj {
+      background: rgba(212, 160, 23, 0.15);
+      border-left: 4px solid var(--ucr-dorado);
+      padding: 16px 24px;
+      margin-bottom: 32px;
+      border-radius: 0 8px 8px 0;
+      max-width: 800px;
+    }
 
-  .deliverables-bar {
-    background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--ucr-dorado);
-    border-radius: 8px; padding: 20px 24px; margin-bottom: 48px;
-  }
-  .deliverables-bar-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-faint); margin-bottom: 10px; display: block; }
-  .deliverables-bar ul { margin: 0; padding-left: 18px; }
-  .deliverables-bar li { color: var(--ink); font-size: 15px; margin-bottom: 4px; font-weight: 600; }
-  .deliverables-bar li span { font-weight: 300; color: var(--ink-light); }
+    .hero-obj h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--ucr-dorado);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
 
-  /* ── WEEK TIMELINE (NEW) ── */
-  .week-group {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    margin-bottom: 24px;
-    overflow: hidden;
-  }
-  .week-header {
-    background: #fdfcf9;
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .week-header .w-badge {
-    background: var(--ink);
-    color: #fff;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 11px;
-    letter-spacing: 1px;
-  }
-  .week-body { padding: 20px 24px; }
-  
-  .file-item {
-    display: flex;
-    gap: 16px;
-    padding: 16px 0;
-    border-bottom: 1px dashed var(--border);
-  }
-  .file-item:last-child { border-bottom: none; padding-bottom: 0; }
-  .file-item:first-child { padding-top: 0; }
-  
-  .f-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-  .f-r { background: rgba(0,63,138,0.08); color: var(--ucr-azul); }
-  .f-rmd { background: rgba(29,126,106,0.08); color: var(--ucr-verde); }
-  .f-star { background: rgba(212,160,23,0.12); color: var(--ucr-dorado); }
+    .hero-obj p {
+      font-size: 15px;
+      margin-bottom: 0;
+      color: #fff;
+    }
 
-  .f-content { flex: 1; }
-  .f-title { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; display: flex; align-items: center; gap: 8px;}
-  .entregable-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: var(--ucr-dorado); color: white; letter-spacing: 1px; }
-  .f-desc { font-size: 14px; color: var(--ink-light); margin-bottom: 10px; line-height: 1.6; }
-  .f-analogy {
-    padding: 10px 14px;
-    background: rgba(212,160,23,0.08);
-    border-left: 3px solid var(--ucr-dorado);
-    border-radius: 0 4px 4px 0;
-    font-size: 13px;
-    color: var(--ink);
-    font-style: italic;
-  }
-  .f-analogy strong { font-style: normal; color: var(--ucr-dorado); }
+    /* ── SIDEBAR NAV ── */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 260px;
+      background: rgba(248, 246, 241, 0.97);
+      border-right: 2px solid var(--border);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding-bottom: 20px;
+    }
 
-  /* ── RESUMEN MODULES ── */
-  .pedagogy-box { background: linear-gradient(135deg, rgba(0,63,138,0.05) 0%, rgba(29,126,106,0.05) 100%); border: 1px solid rgba(0,63,138,0.15); border-radius: 16px; padding: 28px 32px; margin: 48px 0; }
-  .pedagogy-box h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--ucr-azul); margin-bottom: 20px; }
-  .pedagogy-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-  .ped-step { padding: 16px 20px; border-radius: 10px; border-left: 4px solid; background: #fff; }
-  .ped-1 { border-color: #2563eb; } .ped-2 { border-color: #16a34a; } .ped-3 { border-color: #d97706; } .ped-4 { border-color: #9333ea; }
-  .ped-step h4 { font-family: 'IBM Plex Mono', monospace; font-size: 10px; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
+    .sidebar .nav-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin: 24px 20px 10px;
+    }
 
-  .defensa-box { background: var(--code-bg); color: #e6edf3; border-radius: 16px; padding: 32px; margin: 48px 0; }
-  .defensa-box h3 { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--ucr-dorado); margin-bottom: 12px; }
-  .defensa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 24px; }
-  .def-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px 18px; }
-  .def-item h4 { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--code-blue); margin-bottom: 6px; }
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 15px 20px;
+    }
 
-</style>
+    .nav-btn, .nav-link-ext {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      text-align: left;
+      padding: 12px 20px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--ink-light);
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-btn:hover, .nav-link-ext:hover {
+      color: var(--ink);
+      background: rgba(0,0,0,0.03);
+    }
+
+    .nav-btn.active {
+      color: var(--ink);
+      border-left-color: var(--ucr-azul);
+      font-weight: 600;
+      background: rgba(0, 63, 138, 0.05);
+    }
+    
+    .nav-link-ext.gemini-link {
+      color: #8b5cf6;
+      font-weight: 600;
+    }
+    
+    .nav-link-ext.gemini-link:hover {
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .main-content {
+      margin-left: 260px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        position: relative;
+        border-right: none;
+        border-bottom: 2px solid var(--border);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .sprint-section {
+      display: none;
+      padding: 60px 0;
+    }
+
+    .sprint-section.visible {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .sprint-header {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 32px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sprint-badge {
+      width: 72px;
+      height: 72px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600;
+    }
+
+    .sprint-badge .s-n {
+      font-size: 11px;
+      letter-spacing: 2px;
+      opacity: 0.7;
+    }
+
+    .sprint-badge .s-d {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .s1-badge {
+      background: rgba(0, 63, 138, 0.1);
+      color: var(--s1);
+      border: 2px solid rgba(0, 63, 138, 0.25);
+    }
+
+    .s2-badge {
+      background: rgba(29, 126, 106, 0.1);
+      color: var(--s2);
+      border: 2px solid rgba(29, 126, 106, 0.25);
+    }
+
+    .s3-badge {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--s3);
+      border: 2px solid rgba(139, 92, 246, 0.25);
+    }
+
+    .s4-badge {
+      background: rgba(224, 108, 0, 0.1);
+      color: var(--s4);
+      border: 2px solid rgba(224, 108, 0, 0.25);
+    }
+
+    .sprint-header-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .sprint-meta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-faint);
+      margin-bottom: 12px;
+    }
+
+    .sprint-desc {
+      font-size: 16px;
+      color: var(--ink-light);
+      max-width: 800px;
+    }
+
+    /* ── INFO BLOCKS ── */
+    .sprint-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .info-block {
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .info-block h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: var(--ucr-azul);
+      margin-bottom: 12px;
+    }
+
+    .info-block ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .info-block ul li {
+      font-size: 14px;
+      color: var(--ink-light);
+      margin-bottom: 6px;
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .info-block ul li::before {
+      content: "›";
+      position: absolute;
+      left: 0;
+      color: var(--ucr-dorado);
+      font-weight: bold;
+    }
+
+    .deliverables-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--ucr-dorado);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 48px;
+    }
+
+    .deliverables-bar-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-faint);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .deliverables-bar ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .deliverables-bar li {
+      color: var(--ink);
+      font-size: 15px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .deliverables-bar li span {
+      font-weight: 300;
+      color: var(--ink-light);
+    }
+
+    /* ── WEEK TIMELINE (NEW) ── */
+    .week-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .week-header {
+      background: #fdfcf9;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .week-header .w-badge {
+      background: var(--ink);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    .week-body {
+      padding: 20px 24px;
+    }
+
+    .file-item {
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .file-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .file-item:first-child {
+      padding-top: 0;
+    }
+
+    .f-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .f-r {
+      background: rgba(0, 63, 138, 0.08);
+      color: var(--ucr-azul);
+    }
+
+    .f-rmd {
+      background: rgba(29, 126, 106, 0.08);
+      color: var(--ucr-verde);
+    }
+
+    .f-star {
+      background: rgba(212, 160, 23, 0.12);
+      color: var(--ucr-dorado);
+    }
+
+    .f-content {
+      flex: 1;
+    }
+
+    .f-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .entregable-tag {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--ucr-dorado);
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .f-desc {
+      font-size: 14px;
+      color: var(--ink-light);
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .f-analogy {
+      padding: 10px 14px;
+      background: rgba(212, 160, 23, 0.08);
+      border-left: 3px solid var(--ucr-dorado);
+      border-radius: 0 4px 4px 0;
+      font-size: 13px;
+      color: var(--ink);
+      font-style: italic;
+    }
+
+    .f-analogy strong {
+      font-style: normal;
+      color: var(--ucr-dorado);
+    }
+
+    /* ── RESUMEN MODULES ── */
+    .pedagogy-box {
+      background: linear-gradient(135deg, rgba(0, 63, 138, 0.05) 0%, rgba(29, 126, 106, 0.05) 100%);
+      border: 1px solid rgba(0, 63, 138, 0.15);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin: 48px 0;
+    }
+
+    .pedagogy-box h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--ucr-azul);
+      margin-bottom: 20px;
+    }
+
+    .pedagogy-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .ped-step {
+      padding: 16px 20px;
+      border-radius: 10px;
+      border-left: 4px solid;
+      background: #fff;
+    }
+
+    .ped-1 {
+      border-color: #2563eb;
+    }
+
+    .ped-2 {
+      border-color: #16a34a;
+    }
+
+    .ped-3 {
+      border-color: #d97706;
+    }
+
+    .ped-4 {
+      border-color: #9333ea;
+    }
+
+    .ped-step h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      margin-bottom: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .defensa-box {
+      background: var(--code-bg);
+      color: #e6edf3;
+      border-radius: 16px;
+      padding: 32px;
+      margin: 48px 0;
+    }
+
+    .defensa-box h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--ucr-dorado);
+      margin-bottom: 12px;
+    }
+
+    .defensa-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .def-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+
+    .def-item h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      color: var(--code-blue);
+      margin-bottom: 6px;
+    }
+
+    /* ── EJEMPLOS (MODAL & CARDS) ── */
+    .ejemplos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+
+    .ejemplo-card {
+      background: var(--bg-card);
+      padding: 32px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+      text-align: center;
+    }
+
+    .ejemplo-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: var(--ucr-azul);
+      margin-bottom: 16px;
+    }
+
+    .ejemplo-card-info {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      color: var(--ink-light);
+      margin-bottom: 20px;
+      line-height: 1.6;
+      word-break: break-word; /* Prevents long filenames from overflowing */
+    }
+
+    .ejemplo-card-info strong {
+      color: var(--ink);
+      display: block;
+      margin-top: 8px;
+    }
+
+    .ejemplo-card-info a {
+      color: var(--ucr-azul);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--ucr-azul);
+      transition: all 0.2s;
+    }
+
+    .ejemplo-card-info a:hover {
+      color: var(--ucr-naranja);
+      border-bottom-color: var(--ucr-naranja);
+    }
+
+    .doc-link {
+      color: var(--ucr-azul);
+      text-decoration: none;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .doc-link:hover {
+      text-decoration: underline;
+    }
+
+    .img-preview {
+      width: 100%;
+      max-width: 250px;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .img-preview:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .img-modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      padding-top: 80px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+    }
+
+    .img-modal-content {
+      margin: auto;
+      display: block;
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      animation: zoomIn 0.3s ease;
+    }
+
+    .img-modal-close {
+      position: absolute;
+      top: 30px;
+      right: 50px;
+      color: #fff;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .img-modal-close:hover {
+      color: var(--ucr-dorado);
+    }
+
+    @keyframes zoomIn {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- ══ HERO ══ -->
-<section class="hero">
-  <div class="container">
-    <div class="hero-label">UCR · GIACT · SEP · 2026-I · Resolución R-469-2025</div>
-    <h1>SP-8502 · <em>Investigación Asistida</em></h1>
-    <p>Guía Maestra Metodológica orientada a perfiles en biología y ciencias sociales (No estadísticos puros), documentando cada archivo y entregable del ciclo de investigación R.</p>
-    
-    <div class="hero-obj">
-      <h4>🎯 Objetivo General del Curso</h4>
-      <p>Formar a profesionales costeros en la integración rigurosa de métodos mixtos (cuantitativos y cualitativos). A través de 4 Sprints utilizarás Inteligencia Artificial de forma ética (Prompt Engineering en R) para procesar datos ecológicos y humanos, culminando en la redacción de <em>Policy Briefs</em> ejecutivos para la toma de políticas públicas basadas en evidencia.</p>
-    </div>
+  <!-- ══ NAV SIDEBAR ══ -->
+  <nav class="sidebar">
+    <div class="nav-title" style="margin-top: 30px;">Guía Principal</div>
+    <button class="nav-btn active" data-s="resumen" onclick="show('resumen',this)">🗺 Resumen</button>
+    <button class="nav-btn" data-s="s1" onclick="show('s1',this)">S1 · Diseño y Datos</button>
+    <button class="nav-btn" data-s="s2" onclick="show('s2',this)">S2 · Campo y Muestreo</button>
+    <button class="nav-btn" data-s="s3" onclick="show('s3',this)">S3 · Análisis Profundo</button>
+    <button class="nav-btn" data-s="s4" onclick="show('s4',this)">S4 · Comunicación</button>
+    <button class="nav-btn" data-s="ejemplos" onclick="show('ejemplos',this)">📚 Ejemplos</button>
+    <button class="nav-btn" data-s="python" onclick="show('python',this)">🐍 Python (Colab)</button>
 
-    <div class="hero-stats">
-      <div class="stat"><span class="stat-n">27</span><span class="stat-l">Archivos R / Rmd</span></div>
-      <div class="stat"><span class="stat-n">16</span><span class="stat-l">Semanas de Trabajo</span></div>
-      <div class="stat"><span class="stat-n">12</span><span class="stat-l">Entregables Oficiales</span></div>
-    </div>
+    <div class="sidebar-divider"></div>
+    <div class="nav-title">Recursos Extra</div>
+    <a href="TeoriaMuestreo.html" class="nav-link-ext">📐 Teoría del Muestreo</a>
+    <a href="TecnicasEstadisticas.html" class="nav-link-ext">📊 Técnicas Estadísticas</a>
+    <a href="https://gemini.google.com/gem/1ILQPJG4BhYf9xI53Yas6_L9cmXr_Cjld?usp=sharing" target="_blank" class="nav-link-ext gemini-link">✨ Asistente IA (Gemini)</a>
+  </nav>
 
-    <a href="https://agmelendez.github.io/SP-8502_GIACTUCR/" style="display:inline-flex;align-items:center;gap:8px;margin-top:24px;padding:12px 28px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;text-decoration:none;font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:1px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">← Regresar a la Página Principal</a>
-  </div>
-</section>
+  <div class="main-content">
+    <!-- ══ HERO ══ -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-label">UCR · GIACT · SEP · 2026-I · Resolución R-469-2025</div>
+        <h1>SP-8502 · <em>Investigación Asistida</em></h1>
+        <p>Guía Maestra Metodológica orientada a perfiles en biología y ciencias sociales (No estadísticos puros),
+          documentando cada archivo y entregable del ciclo de investigación R.</p>
 
-<!-- ══ NAV ══ -->
-<nav class="sticky-nav">
-  <button class="nav-btn active" data-s="resumen" onclick="show('resumen',this)">🗺 Resumen</button>
-  <button class="nav-btn" data-s="s1" onclick="show('s1',this)">S1 · Diseño y Datos</button>
-  <button class="nav-btn" data-s="s2" onclick="show('s2',this)">S2 · Campo y Muestreo</button>
-  <button class="nav-btn" data-s="s3" onclick="show('s3',this)">S3 · Análisis Profundo</button>
-  <button class="nav-btn" data-s="s4" onclick="show('s4',this)">S4 · Comunicación</button>
-</nav>
+        <div class="hero-obj">
+          <h4>🎯 Objetivo General del Curso</h4>
+          <p>Formar a profesionales costeros en la integración rigurosa de métodos mixtos (cuantitativos y cualitativos).
+            A través de 4 Sprints utilizarás Inteligencia Artificial de forma ética (Prompt Engineering en R) para
+            procesar datos ecológicos y humanos, culminando en la redacción de <em>Policy Briefs</em> ejecutivos para la
+            toma de políticas públicas basadas en evidencia.</p>
+        </div>
 
-<!-- ══════════════════════════════════════════════
+        <div class="hero-stats">
+          <div class="stat"><span class="stat-n">27</span><span class="stat-l">Archivos R / Rmd</span></div>
+          <div class="stat"><span class="stat-n">16</span><span class="stat-l">Semanas de Trabajo</span></div>
+          <div class="stat"><span class="stat-n">12</span><span class="stat-l">Entregables Oficiales</span></div>
+        </div>
+      </div>
+    </section>
+
+  <!-- ══════════════════════════════════════════════
      RESUMEN GENERAL
 ══════════════════════════════════════════════════ -->
-<div id="sec-resumen" class="sprint-section visible">
-<div class="container">
+  <div id="sec-resumen" class="sprint-section visible">
+    <div class="container">
 
-  <div class="pedagogy-box">
-    <h3>Secuencia Pedagógica en 4 Pasos</h3>
-    <p style="font-size:15px;color:var(--ink-light);margin-bottom:20px;">Cada semana debes someter el código estadístico a esta validación de laboratorio de 4 filtros obligatorios para tus reportes:</p>
-    <div class="pedagogy-steps">
-      <div class="ped-step ped-1">
-        <h4 style="color:#2563eb;">Paso 1 · Cálculo</h4>
-        <p>¿Funciona el código R? Aquí ocurre la prueba mecánica y la compilación reproducibe de la base de datos o el modelo.</p>
+      <div class="pedagogy-box">
+        <h3>Secuencia Pedagógica en 4 Pasos</h3>
+        <p style="font-size:15px;color:var(--ink-light);margin-bottom:20px;">Cada semana debes someter el código
+          estadístico a esta validación de laboratorio de 4 filtros obligatorios para tus reportes:</p>
+        <div class="pedagogy-steps">
+          <div class="ped-step ped-1">
+            <h4 style="color:#2563eb;">Paso 1 · Cálculo</h4>
+            <p>¿Funciona el código R? Aquí ocurre la prueba mecánica y la compilación reproducibe de la base de datos o
+              el modelo.</p>
+          </div>
+          <div class="ped-step ped-2">
+            <h4 style="color:#16a34a;">Paso 2 · Interpretación</h4>
+            <p>Diagnóstico puro: ¿Qué nos arroja el P-valor? ¿Hay magnitud u homoscedasticidad verificable
+              empíricamente?</p>
+          </div>
+          <div class="ped-step ped-3">
+            <h4 style="color:#d97706;">Paso 3 · Contexto Biológico</h4>
+            <p>Traducir el número al ecosistema: ¿Por qué tener un coeficiente "negativo" destruye manglares en la vida
+              real?</p>
+          </div>
+          <div class="ped-step ped-4">
+            <h4 style="color:#9333ea;">Paso 4 · Decisión Crítica</h4>
+            <p>Elaboración de política metodológica o dictamen recomendando acción gubernamental, municipal o
+              comunitaria sustentada.</p>
+          </div>
+        </div>
       </div>
-      <div class="ped-step ped-2">
-        <h4 style="color:#16a34a;">Paso 2 · Interpretación</h4>
-        <p>Diagnóstico puro: ¿Qué nos arroja el P-valor? ¿Hay magnitud u homoscedasticidad verificable empíricamente?</p>
+
+      <div class="defensa-box" id="examen-final">
+        <h3>🎓 Semana 16: Defensa Final en Vivo (15%)</h3>
+        <p style="font-size:14px;color:rgba(255,255,255,0.7);max-width:800px;line-height:1.6;">
+          Es la culminación preparatoria hacia tu Candidatura. Durante los 4 sprints aprendiste a apalancar la I.A. de
+          forma responsable, pero en esta semana crucial, defenderás oral e individualmente a los datos de la
+          investigación **sin el apoyo de IA conversacional en tiempo real**. El fin es probar que el intelecto
+          principal fue y es tu dominio analítico experto.
+        </p>
+        <div class="defensa-grid">
+          <div class="def-item">
+            <h4>Demo en Vivo de RStudio</h4>
+            <p>Deberás reproducir y modificar parte del código matriz de tu modelo frente al comité sin ChatGPT.
+              Conocimiento en R basal es necesario.</p>
+          </div>
+          <div class="def-item">
+            <h4>Defensa Explicativa de Prompts</h4>
+            <p>Validación cruzada de tu Bitácora de Inteligencia Artificial; discutirás por qué decidiste confiar y por
+              qué rechazaste correcciones de la IA.</p>
+          </div>
+          <div class="def-item">
+            <h4>Resumen Ejecutivo (1 Pág)</h4>
+            <p>Una única hoja entregada al jurado sintetizando lo cuantificable con tu marco cualitativo; simulando
+              briefing a un ministro.</p>
+          </div>
+        </div>
       </div>
-      <div class="ped-step ped-3">
-        <h4 style="color:#d97706;">Paso 3 · Contexto Biológico</h4>
-        <p>Traducir el número al ecosistema: ¿Por qué tener un coeficiente "negativo" destruye manglares en la vida real?</p>
+
+      <div class="deliverables-bar" style="border-left-color: var(--ucr-verde); margin-top: 48px;">
+        <span class="deliverables-bar-label">Enlaces Importantes</span>
+        <ul>
+          <li><a href="https://chat.qwen.ai/s/deploy/t_16f0a7b2-b4da-4123-85bd-7519c8246b72" class="doc-link" target="_blank" rel="noopener noreferrer">Teoría aplicada 1</a> <span>(Asistente de Inteligencia Artificial)</span></li>
+          <li><a href="https://gemini.google.com/share/f9f5574f23e2" class="doc-link" target="_blank" rel="noopener noreferrer">Teoría aplicada 2</a> <span>(Asistente de Inteligencia Artificial)</span></li>
+          <li><a href="https://posit.cloud/" class="doc-link" target="_blank" rel="noopener noreferrer">POSIT CLOUD</a> <span>(Plataforma RStudio)</span></li>
+        </ul>
       </div>
-      <div class="ped-step ped-4">
-        <h4 style="color:#9333ea;">Paso 4 · Decisión Crítica</h4>
-        <p>Elaboración de política metodológica o dictamen recomendando acción gubernamental, municipal o comunitaria sustentada.</p>
-      </div>
+
     </div>
   </div>
 
-  <div class="defensa-box" id="examen-final">
-    <h3>🎓 Semana 16: Defensa Final en Vivo (15%)</h3>
-    <p style="font-size:14px;color:rgba(255,255,255,0.7);max-width:800px;line-height:1.6;">
-      Es la culminación preparatoria hacia tu Candidatura. Durante los 4 sprints aprendiste a apalancar la I.A. de forma responsable, pero en esta semana crucial, defenderás oral e individualmente a los datos de la investigación **sin el apoyo de IA conversacional en tiempo real**. El fin es probar que el intelecto principal fue y es tu dominio analítico experto.
-    </p>
-    <div class="defensa-grid">
-      <div class="def-item">
-        <h4>Demo en Vivo de RStudio</h4>
-        <p>Deberás reproducir y modificar parte del código matriz de tu modelo frente al comité sin ChatGPT. Conocimiento en R basal es necesario.</p>
-      </div>
-      <div class="def-item">
-        <h4>Defensa Explicativa de Prompts</h4>
-        <p>Validación cruzada de tu Bitácora de Inteligencia Artificial; discutirás por qué decidiste confiar y por qué rechazaste correcciones de la IA.</p>
-      </div>
-      <div class="def-item">
-        <h4>Resumen Ejecutivo (1 Pág)</h4>
-        <p>Una única hoja entregada al jurado sintetizando lo cuantificable con tu marco cualitativo; simulando briefing a un ministro.</p>
-      </div>
-    </div>
-  </div>
-
-</div>
-</div>
-
-<!-- ══════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════
      SPRINT 1
 ══════════════════════════════════════════════════ -->
-<div id="sec-s1" class="sprint-section s1">
-<div class="container">
-  
-  <div class="sprint-header">
-    <div class="sprint-badge s1-badge">
-      <span class="s-n">SPRINT</span>
-      <span class="s-d">1</span>
-    </div>
-    <div class="sprint-header-text">
-      <h2>Diseño y Fundamentos de Datos</h2>
-      <div class="sprint-meta">SEMANAS 1–4 · 20% DE EVALUACIÓN</div>
-      <p class="sprint-desc">
-        Establecimiento de la Matriz de Variables de investigación y configuración computacional.
-      </p>
-    </div>
-  </div>
+  <div id="sec-s1" class="sprint-section s1">
+    <div class="container">
 
-  <div class="sprint-info-grid">
-    <div class="info-block" style="border-top:3px solid var(--s1)">
-      <h4>📖 Revisar en NotebookLM</h4>
-      <ul><li>Bases R / Tidyverse</li><li>Matriz Mixta</li><li>Wraggling Data</li></ul>
-    </div>
-    <div class="info-block" style="border-top:3px solid var(--s1)">
-      <h4>💻 Presencial Semanal</h4>
-      <ul><li>Taller de Prompt Engineering (Aprender a hablarle al GPT)</li><li>Revisión Matricial en pizarrón</li></ul>
-    </div>
-  </div>
-
-  <div class="deliverables-bar">
-    <span class="deliverables-bar-label">Ruta de Entregables S1 (sp-8502-giact... /sprint-1/)</span>
-    <ul>
-      <li>sprint1_reporte.Rmd <span>(Reporte Metodológico PDF)</span></li>
-      <li>script_limpieza.R <span>(Script ejecutable R)</span></li>
-      <li>Bitácora Inteligencia Artificial <span>(Anexo excel de Prompts éticos)</span></li>
-    </ul>
-  </div>
-
-  <!-- Aca empieza el breakdown Semanal -->
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 1</span> Planteamiento y Entorno Inicial</div>
-    <div class="week-body">
-      
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">00_setup_ambiente.R</div>
-          <p class="f-desc">Instala de golpe todas las bibliotecas virtuales requeridas (como tidyverse) y configura las carpetas en tu computadora.</p>
-          <div class="f-analogy"><strong>💡 Función Operativa:</strong> Equivalente a esterilizar toda el área del laboratorio y preparar las probetas antes del primer experimento.</div>
+      <div class="sprint-header">
+        <div class="sprint-badge s1-badge">
+          <span class="s-n">SPRINT</span>
+          <span class="s-d">1</span>
+        </div>
+        <div class="sprint-header-text">
+          <h2>Diseño y Fundamentos de Datos</h2>
+          <div class="sprint-meta">SEMANAS 1–4 · 20% DE EVALUACIÓN</div>
+          <p class="sprint-desc">
+            Establecimiento de la Matriz de Variables de investigación y configuración computacional.
+          </p>
         </div>
       </div>
 
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">01_planteamiento_y_matriz.R</div>
-          <p class="f-desc">Consolida tu pregunta de investigación central como un código en la Matriz Metodológica Mixta (MMR).</p>
-          <div class="f-analogy"><strong>💡 Razonamiento Ecológico:</strong> Construimos esta matriz para enmarcar a qué ecosistema/pobladores apuntamos, y el diseño mixto exige ir al mar a tomar mediciones en frascos (cuantitativo) pero a la vez escuchar vivencias locales (cualitativo).</div>
+      <div class="sprint-info-grid">
+        <div class="info-block" style="border-top:3px solid var(--s1)">
+          <h4>📖 Revisar en NotebookLM</h4>
+          <ul>
+            <li>Bases R / Tidyverse</li>
+            <li>Matriz Mixta</li>
+            <li>Wraggling Data</li>
+          </ul>
+        </div>
+        <div class="info-block" style="border-top:3px solid var(--s1)">
+          <h4>💻 Presencial Semanal</h4>
+          <ul>
+            <li>Taller de Prompt Engineering (Aprender a hablarle al GPT)</li>
+            <li>Revisión Matricial en pizarrón</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="deliverables-bar">
+        <span class="deliverables-bar-label">Ruta de Entregables S1 (sp-8502-giact... /sprint-1/)</span>
+        <ul>
+          <li>sprint1_reporte.Rmd <span>(Reporte Metodológico PDF)</span></li>
+          <li>script_limpieza.R <span>(Script ejecutable R)</span></li>
+          <li>Bitácora Inteligencia Artificial <span>(Anexo excel de Prompts éticos)</span></li>
+        </ul>
+      </div>
+
+      <!-- Aca empieza el breakdown Semanal -->
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 1</span> Planteamiento y Entorno Inicial</div>
+        <div class="week-body">
+
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">00_setup_ambiente.R</div>
+              <p class="f-desc">Instala de golpe todas las bibliotecas virtuales requeridas (como tidyverse) y configura
+                las carpetas en tu computadora.</p>
+              <div class="f-analogy"><strong>💡 Función Operativa:</strong> Equivalente a esterilizar toda el área del
+                laboratorio y preparar las probetas antes del primer experimento.</div>
+            </div>
+          </div>
+
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">01_planteamiento_y_matriz.R</div>
+              <p class="f-desc">Consolida tu pregunta de investigación central como un código en la Matriz Metodológica
+                Mixta (MMR).</p>
+              <div class="f-analogy"><strong>💡 Razonamiento Ecológico:</strong> Construimos esta matriz para enmarcar a
+                qué ecosistema/pobladores apuntamos, y el diseño mixto exige ir al mar a tomar mediciones en frascos
+                (cuantitativo) pero a la vez escuchar vivencias locales (cualitativo).</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 2</span> Generación Analítica de Problemas</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">02_datos_sinteticos_costeros.R</div>
+              <p class="f-desc">Simula de la nada 80 encuestas e inyecta intencionalmente 9 "errores típicos" (caps
+                cruzados, valores imposibles, celdas en blanco).</p>
+              <div class="f-analogy"><strong>💡 Naturaleza del Fenómeno:</strong> Los datos del mundo real son feos y
+                desordenados; te preparará para encuestas de campo reales donde un censista apuntó un nombre mal escrito
+                o la lluvia borró una casilla de ingresos.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-group" style="border-color:var(--ucr-dorado)">
+        <div class="week-header"><span class="w-badge" style="background:var(--ucr-dorado)">SEM 3</span> Tratamiento
+          Intensivo</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-star">R</div>
+            <div class="f-content">
+              <div class="f-title">script_limpieza.R <span class="entregable-tag">ENTREGABLE CÓDIGO</span></div>
+              <p class="f-desc">Escribe líneas lógicas que depuren (eliminen, conviertan, homogenicen) la suciedad de la
+                base de datos sin destruir tu data base original.</p>
+              <div class="f-analogy"><strong>💡 Procedimiento Clínico:</strong> Curar la tabla de datos erróneos de una
+                encuesta poblacional debe ser tan cuidadoso como purgar un tejido bajo el microscopio; el borrado
+                descuidado extirpa datos útiles.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 4</span> Análisis Preliminar e Informe</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">04_eda_sprint1.R</div>
+              <p class="f-desc">Realiza un Exploratory Data Analysis superficial sobre los datos ya limpios produciendo
+                las primeras medias y gráficas descriptivas.</p>
+            </div>
+          </div>
+          <div class="file-item">
+            <div class="f-icon f-rmd">Rmd</div>
+            <div class="f-content">
+              <div class="f-title">sprint1_reporte.Rmd <span class="entregable-tag">ENTREGABLE REPORTE</span></div>
+              <p class="f-desc">Empaqueta todos los outputs e investigaciones redactadas y mediante 'knitr' teje (pinta)
+                un PDF profesional pulido.</p>
+            </div>
+          </div>
         </div>
       </div>
 
     </div>
   </div>
 
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 2</span> Generación Analítica de Problemas</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">02_datos_sinteticos_costeros.R</div>
-          <p class="f-desc">Simula de la nada 80 encuestas e inyecta intencionalmente 9 "errores típicos" (caps cruzados, valores imposibles, celdas en blanco).</p>
-          <div class="f-analogy"><strong>💡 Naturaleza del Fenómeno:</strong> Los datos del mundo real son feos y desordenados; te preparará para encuestas de campo reales donde un censista apuntó un nombre mal escrito o la lluvia borró una casilla de ingresos.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="week-group" style="border-color:var(--ucr-dorado)">
-    <div class="week-header"><span class="w-badge" style="background:var(--ucr-dorado)">SEM 3</span> Tratamiento Intensivo</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-star">R</div>
-        <div class="f-content">
-          <div class="f-title">script_limpieza.R <span class="entregable-tag">ENTREGABLE CÓDIGO</span></div>
-          <p class="f-desc">Escribe líneas lógicas que depuren (eliminen, conviertan, homogenicen) la suciedad de la base de datos sin destruir tu data base original.</p>
-          <div class="f-analogy"><strong>💡 Procedimiento Clínico:</strong> Curar la tabla de datos erróneos de una encuesta poblacional debe ser tan cuidadoso como purgar un tejido bajo el microscopio; el borrado descuidado extirpa datos útiles.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 4</span> Análisis Preliminar e Informe</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">04_eda_sprint1.R</div>
-          <p class="f-desc">Realiza un Exploratory Data Analysis superficial sobre los datos ya limpios produciendo las primeras medias y gráficas descriptivas.</p>
-        </div>
-      </div>
-      <div class="file-item">
-        <div class="f-icon f-rmd">Rmd</div>
-        <div class="f-content">
-          <div class="f-title">sprint1_reporte.Rmd <span class="entregable-tag">ENTREGABLE REPORTE</span></div>
-          <p class="f-desc">Empaqueta todos los outputs e investigaciones redactadas y mediante 'knitr' teje (pinta) un PDF profesional pulido.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-</div>
-
-<!-- ══════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════
      SPRINT 2
 ══════════════════════════════════════════════════ -->
-<div id="sec-s2" class="sprint-section s2">
-<div class="container">
-  
-  <div class="sprint-header">
-    <div class="sprint-badge s2-badge">
-      <span class="s-n">SPRINT</span>
-      <span class="s-d">2</span>
-    </div>
-    <div class="sprint-header-text">
-      <h2>Trabajo de Campo y Muestreo</h2>
-      <div class="sprint-meta">SEMANAS 5–8 · 20% DE EVALUACIÓN</div>
-      <p class="sprint-desc">
-        Asignando el valor estadístico a la inferencia; diseño de instrumentos en la comunidad y validación ética y métrica de encuestas sociales.
-      </p>
-    </div>
-  </div>
+  <div id="sec-s2" class="sprint-section s2">
+    <div class="container">
 
-  <div class="sprint-info-grid">
-    <div class="info-block" style="border-top:3px solid var(--s2)">
-      <h4>📖 Revisar en NotebookLM</h4>
-      <ul><li>Bases Muestreo / Cochran</li><li>RDS</li><li>Alpha de Cronbach</li></ul>
-    </div>
-    <div class="info-block" style="border-top:3px solid var(--s2)">
-      <h4>💻 Presencial Semanal</h4>
-      <ul><li>Simulación Muestreo en Consola</li><li>Revisión de instrumentos manuales</li></ul>
-    </div>
-  </div>
-
-  <div class="deliverables-bar">
-    <span class="deliverables-bar-label">Ruta de Entregables S2 (sp-8502-giact... /sprint-2/)</span>
-    <ul>
-      <li>sprint2_reporte.Rmd <span>(Estrategia de Muestreo Validada PDF)</span></li>
-      <li>08_base_datos.R <span>(Base de Datos Preliminar Anonimizada)</span></li>
-      <li>Bitácora Inteligencia Artificial <span>(Anexo excel S2)</span></li>
-    </ul>
-  </div>
-
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 5</span> Cálculo Muestral Representativo</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">05_muestreo_probabilistico.R</div>
-          <p class="f-desc">Utiliza la fórmula de Cochran para calcular un tamaño 'n' poblacional necesario y simula extracción sistemática en bases estraficadas.</p>
-          <div class="f-analogy"><strong>💡 Paradigma Científico:</strong> Igual que testeando el agua del mar no ocupas drenar el Golfo entero para evaluar la acidez, Cochran nos regala el volumen perfecto numérico (ej. 80 encuestas aleatorias) para certificar sin fallas qué opina "todo el pueblo".</div>
+      <div class="sprint-header">
+        <div class="sprint-badge s2-badge">
+          <span class="s-n">SPRINT</span>
+          <span class="s-d">2</span>
+        </div>
+        <div class="sprint-header-text">
+          <h2>Trabajo de Campo y Muestreo</h2>
+          <div class="sprint-meta">SEMANAS 5–8 · 20% DE EVALUACIÓN</div>
+          <p class="sprint-desc">
+            Asignando el valor estadístico a la inferencia; diseño de instrumentos en la comunidad y validación ética y
+            métrica de encuestas sociales.
+          </p>
         </div>
       </div>
+
+      <div class="sprint-info-grid">
+        <div class="info-block" style="border-top:3px solid var(--s2)">
+          <h4>📖 Revisar en NotebookLM</h4>
+          <ul>
+            <li>Bases Muestreo / Cochran</li>
+            <li>RDS</li>
+            <li>Alpha de Cronbach</li>
+          </ul>
+        </div>
+        <div class="info-block" style="border-top:3px solid var(--s2)">
+          <h4>💻 Presencial Semanal</h4>
+          <ul>
+            <li>Simulación Muestreo en Consola</li>
+            <li>Revisión de instrumentos manuales</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="deliverables-bar">
+        <span class="deliverables-bar-label">Ruta de Entregables S2 (sp-8502-giact... /sprint-2/)</span>
+        <ul>
+          <li>sprint2_reporte.Rmd <span>(Estrategia de Muestreo Validada PDF)</span></li>
+          <li>08_base_datos.R <span>(Base de Datos Preliminar Anonimizada)</span></li>
+          <li>Bitácora Inteligencia Artificial <span>(Anexo excel S2)</span></li>
+        </ul>
+      </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 5</span> Cálculo Muestral Representativo</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">05_muestreo_probabilistico.R</div>
+              <p class="f-desc">Utiliza la fórmula de Cochran para calcular un tamaño 'n' poblacional necesario y simula
+                extracción sistemática en bases estraficadas.</p>
+              <div class="f-analogy"><strong>💡 Paradigma Científico:</strong> Igual que testeando el agua del mar no
+                ocupas drenar el Golfo entero para evaluar la acidez, Cochran nos regala el volumen perfecto numérico
+                (ej. 80 encuestas aleatorias) para certificar sin fallas qué opina "todo el pueblo".</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 6</span> Alcanzando Poblaciones Difíciles</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">06_rds_simulacion.R</div>
+              <p class="f-desc">Enseña a corregir modelos Matemáticos "Respondent-Driven Sampling" estimándolos mediante
+                'Volz-Heckathorn' sobre redes conectivas orgánicas.</p>
+              <div class="f-analogy"><strong>💡 En Práctica Biológica:</strong> Cuando rastreas cazadores ilegales o
+                pescadores "fantasma" que no habitan bases del INCOPESCA, tienes que usar bola-de-nieve, donde unos
+                pocos lideran a otros clústers de su propia red subyacente de confianza comunitaria.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 7</span> Creación Métrica del Instrumento</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">07_instrumento_encuesta.R</div>
+              <p class="f-desc">Mide si los "ítems" psicológicos o sociales de las hojas de campo miden bien lo que
+                aducen a través del índice Alpha Cronbach y fiabilidades Omega.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-group" style="border-color:var(--ucr-dorado)">
+        <div class="week-header"><span class="w-badge" style="background:var(--ucr-dorado)">SEM 8</span> Consolidación
+          Anonimizada</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-star">R</div>
+            <div class="f-content">
+              <div class="f-title">08_base_datos_preliminar.R <span class="entregable-tag">ENTREGABLE DATA</span></div>
+              <p class="f-desc">Filtra todo contacto humano (coordenadas 6-decimales son barridas y redondeadas a la
+                zona costera, nombres por Hash ID) originando nuestro pilar del sprint 3.</p>
+            </div>
+          </div>
+          <div class="file-item">
+            <div class="f-icon f-rmd">Rmd</div>
+            <div class="f-content">
+              <div class="f-title">sprint2_reporte.Rmd <span class="entregable-tag">ENTREGABLE REPORTE</span></div>
+              <p class="f-desc">El reporte Rmd que compila las simulaciones de muestreo S2 e infiere la confianza
+                métrica dictaminando "Aprobación" científica para continuar el análisis de S3.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 6</span> Alcanzando Poblaciones Difíciles</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">06_rds_simulacion.R</div>
-          <p class="f-desc">Enseña a corregir modelos Matemáticos "Respondent-Driven Sampling" estimándolos mediante 'Volz-Heckathorn' sobre redes conectivas orgánicas.</p>
-          <div class="f-analogy"><strong>💡 En Práctica Biológica:</strong> Cuando rastreas cazadores ilegales o pescadores "fantasma" que no habitan bases del INCOPESCA, tienes que usar bola-de-nieve, donde unos pocos lideran a otros clústers de su propia red subyacente de confianza comunitaria.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 7</span> Creación Métrica del Instrumento</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">07_instrumento_encuesta.R</div>
-          <p class="f-desc">Mide si los "ítems" psicológicos o sociales de las hojas de campo miden bien lo que aducen a través del índice Alpha Cronbach y fiabilidades Omega.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="week-group" style="border-color:var(--ucr-dorado)">
-    <div class="week-header"><span class="w-badge" style="background:var(--ucr-dorado)">SEM 8</span> Consolidación Anonimizada</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-star">R</div>
-        <div class="f-content">
-          <div class="f-title">08_base_datos_preliminar.R <span class="entregable-tag">ENTREGABLE DATA</span></div>
-          <p class="f-desc">Filtra todo contacto humano (coordenadas 6-decimales son barridas y redondeadas a la zona costera, nombres por Hash ID) originando nuestro pilar del sprint 3.</p>
-        </div>
-      </div>
-      <div class="file-item">
-        <div class="f-icon f-rmd">Rmd</div>
-        <div class="f-content">
-          <div class="f-title">sprint2_reporte.Rmd <span class="entregable-tag">ENTREGABLE REPORTE</span></div>
-          <p class="f-desc">El reporte Rmd que compila las simulaciones de muestreo S2 e infiere la confianza métrica dictaminando "Aprobación" científica para continuar el análisis de S3.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-</div>
-
-<!-- ══════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════
      SPRINT 3
 ══════════════════════════════════════════════════ -->
-<div id="sec-s3" class="sprint-section s3">
-<div class="container">
-  
-  <div class="sprint-header">
-    <div class="sprint-badge s3-badge">
-      <span class="s-n">SPRINT</span>
-      <span class="s-d">3</span>
-    </div>
-    <div class="sprint-header-text">
-      <h2>Análisis Profundo y Modelado</h2>
-      <div class="sprint-meta">SEMANAS 9–12 · 25% DE EVALUACIÓN</div>
-      <p class="sprint-desc">
-        Corazón Matemático: Cruce de codificaciones textuales con modelos y regresiones numéricas para responder definitivamente si nuestras hipótesis son verdaderas.
-      </p>
+  <div id="sec-s3" class="sprint-section s3">
+    <div class="container">
+
+      <div class="sprint-header">
+        <div class="sprint-badge s3-badge">
+          <span class="s-n">SPRINT</span>
+          <span class="s-d">3</span>
+        </div>
+        <div class="sprint-header-text">
+          <h2>Análisis Profundo y Modelado</h2>
+          <div class="sprint-meta">SEMANAS 9–12 · 25% DE EVALUACIÓN</div>
+          <p class="sprint-desc">
+            Corazón Matemático: Cruce de codificaciones textuales con modelos y regresiones numéricas para responder
+            definitivamente si nuestras hipótesis son verdaderas.
+          </p>
+        </div>
+      </div>
+
+      <div class="sprint-info-grid">
+        <div class="info-block" style="border-top:3px solid var(--s3)">
+          <h4>📖 Revisar en NotebookLM</h4>
+          <ul>
+            <li>Regresión OLS, Supuestos</li>
+            <li>Regresión Múltiple/Logit</li>
+            <li>Monte Carlo + Bootstrapping</li>
+          </ul>
+        </div>
+        <div class="info-block" style="border-top:3px solid var(--s3)">
+          <h4>💻 Presencial Semanal</h4>
+          <ul>
+            <li>"Clínica de Código" y Error hunting</li>
+            <li>Revisión gráficos de diagnóstico (VIF/Residuos)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="deliverables-bar">
+        <span class="deliverables-bar-label">Ruta de Entregables S3 (sp-8502-giact... /sprint-3/)</span>
+        <ul>
+          <li>sprint3_reporte.Rmd <span>(Informe Hallazgos)</span></li>
+          <li>script_analisis.R <span>(Ruta Unificada de Scripts)</span></li>
+          <li>Bitácora Inteligencia Artificial <span>(Anexo excel S3)</span></li>
+        </ul>
+      </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 9</span> Diagnósticos y Modelo Base</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">09_supuestos_regresion.R</div>
+              <p class="f-desc">Antes de "creerle" a los P-valores, testea Homocedasticidad (Breusch-Pagan) y Normalidad
+                matemática dictaminando salud sobre la base de datos.</p>
+              <div class="f-analogy"><strong>💡 Procedimiento Crítico:</strong> Es una negligencia grave recetar
+                medicamentos severos (inferencia analítica regresional) en la biología si la muestra ecosistémica está
+                plagada de sesgos sin testear los "Signos Vitales" que arroja el script 09.</div>
+            </div>
+          </div>
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">10_regresion_lineal.R</div>
+              <p class="f-desc">Produce "Ordinary Least Squares" secuenciales (Nulo a Parsimonioso) definiendo
+                R-Cuadrados sobre factores continuos predictivos.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 10</span> Variantes Logisticas y Social</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">11_regresion_logistica.R</div>
+              <p class="f-desc">Pivota el modelo logarítmicamente para predecir cosas puramente binarias a través de
+                "Odds Ratios" (Pescara o No, Pertenece al gremio o No).</p>
+            </div>
+          </div>
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">12_analisis_cualitativo.R</div>
+              <p class="f-desc">Tabula todas las respuestas narrativas libres de los pescadores convirtiendo sus relatos
+                en 17 códigos y luego jerarquizándolos en 5 Temáticas sociológicas madre.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 11</span> Remuestreo Intensivo Virtual</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">13_bootstrap_montecarlo.R</div>
+              <p class="f-desc">Iteraciones extremas donde extraemos mediante una computadora remuestreos cíclicos de
+                nuestras encuestas y promedios aleatorizados de escenarios ciegos.</p>
+              <div class="f-analogy"><strong>💡 Simulación Robusta:</strong> Usar 'Bootstrap' es como si virtualmente
+                pudieras retornar a la playa y recolectar por azar las encuestas 2,000 veces consecutivas; si las
+                métricas medias dan consistentemente en un margen, los hechos que comprobaste quedan herméticamente
+                certificados y "blindados" para tu tesis.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-group" style="border-color:var(--ucr-dorado)">
+        <div class="week-header"><span class="w-badge" style="background:var(--ucr-dorado)">SEM 12</span> Integración
+          Final de Reporte S3</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-star">R</div>
+            <div class="f-content">
+              <div class="f-title">script_analisis.R <span class="entregable-tag">ENTREGABLE CÓDIGO</span></div>
+              <p class="f-desc">Un único macro script "Ruta" limpio que ejecuta y llama de inicio a fin desde las
+                regresiones hasta el análisis bootstrap.</p>
+            </div>
+          </div>
+          <div class="file-item">
+            <div class="f-icon f-rmd">Rmd</div>
+            <div class="f-content">
+              <div class="f-title">sprint3_reporte.Rmd <span class="entregable-tag">ENTREGABLE REPORTE</span></div>
+              <p class="f-desc">Produce visualmente en PDF el Informe de Hallazgos puros dictaminado y compilando tablas
+                R-2 y los listados temáticos descifrados.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <div class="sprint-info-grid">
-    <div class="info-block" style="border-top:3px solid var(--s3)">
-      <h4>📖 Revisar en NotebookLM</h4>
-      <ul><li>Regresión OLS, Supuestos</li><li>Regresión Múltiple/Logit</li><li>Monte Carlo + Bootstrapping</li></ul>
-    </div>
-    <div class="info-block" style="border-top:3px solid var(--s3)">
-      <h4>💻 Presencial Semanal</h4>
-      <ul><li>"Clínica de Código" y Error hunting</li><li>Revisión gráficos de diagnóstico (VIF/Residuos)</li></ul>
-    </div>
-  </div>
-
-  <div class="deliverables-bar">
-    <span class="deliverables-bar-label">Ruta de Entregables S3 (sp-8502-giact... /sprint-3/)</span>
-    <ul>
-      <li>sprint3_reporte.Rmd <span>(Informe Hallazgos)</span></li>
-      <li>script_analisis.R <span>(Ruta Unificada de Scripts)</span></li>
-      <li>Bitácora Inteligencia Artificial <span>(Anexo excel S3)</span></li>
-    </ul>
-  </div>
-
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 9</span> Diagnósticos y Modelo Base</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">09_supuestos_regresion.R</div>
-          <p class="f-desc">Antes de "creerle" a los P-valores, testea Homocedasticidad (Breusch-Pagan) y Normalidad matemática dictaminando salud sobre la base de datos.</p>
-          <div class="f-analogy"><strong>💡 Procedimiento Crítico:</strong> Es una negligencia grave recetar medicamentos severos (inferencia analítica regresional) en la biología si la muestra ecosistémica está plagada de sesgos sin testear los "Signos Vitales" que arroja el script 09.</div>
-        </div>
-      </div>
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">10_regresion_lineal.R</div>
-          <p class="f-desc">Produce "Ordinary Least Squares" secuenciales (Nulo a Parsimonioso) definiendo R-Cuadrados sobre factores continuos predictivos.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 10</span> Variantes Logisticas y Social</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">11_regresion_logistica.R</div>
-          <p class="f-desc">Pivota el modelo logarítmicamente para predecir cosas puramente binarias a través de "Odds Ratios" (Pescara o No, Pertenece al gremio o No).</p>
-        </div>
-      </div>
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">12_analisis_cualitativo.R</div>
-          <p class="f-desc">Tabula todas las respuestas narrativas libres de los pescadores convirtiendo sus relatos en 17 códigos y luego jerarquizándolos en 5 Temáticas sociológicas madre.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 11</span> Remuestreo Intensivo Virtual</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">13_bootstrap_montecarlo.R</div>
-          <p class="f-desc">Iteraciones extremas donde extraemos mediante una computadora remuestreos cíclicos de nuestras encuestas y promedios aleatorizados de escenarios ciegos.</p>
-          <div class="f-analogy"><strong>💡 Simulación Robusta:</strong> Usar 'Bootstrap' es como si virtualmente pudieras retornar a la playa y recolectar por azar las encuestas 2,000 veces consecutivas; si las métricas medias dan consistentemente en un margen, los hechos que comprobaste quedan herméticamente certificados y "blindados" para tu tesis.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="week-group" style="border-color:var(--ucr-dorado)">
-    <div class="week-header"><span class="w-badge" style="background:var(--ucr-dorado)">SEM 12</span> Integración Final de Reporte S3</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-star">R</div>
-        <div class="f-content">
-          <div class="f-title">script_analisis.R <span class="entregable-tag">ENTREGABLE CÓDIGO</span></div>
-          <p class="f-desc">Un único macro script "Ruta" limpio que ejecuta y llama de inicio a fin desde las regresiones hasta el análisis bootstrap.</p>
-        </div>
-      </div>
-      <div class="file-item">
-        <div class="f-icon f-rmd">Rmd</div>
-        <div class="f-content">
-          <div class="f-title">sprint3_reporte.Rmd <span class="entregable-tag">ENTREGABLE REPORTE</span></div>
-          <p class="f-desc">Produce visualmente en PDF el Informe de Hallazgos puros dictaminado y compilando tablas R-2 y los listados temáticos descifrados.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-</div>
-
-<!-- ══════════════════════════════════════════════
+  <!-- ══════════════════════════════════════════════
      SPRINT 4
 ══════════════════════════════════════════════════ -->
-<div id="sec-s4" class="sprint-section s4">
-<div class="container">
-  
-  <div class="sprint-header">
-    <div class="sprint-badge s4-badge">
-      <span class="s-n">SPRINT</span>
-      <span class="s-d">4</span>
-    </div>
-    <div class="sprint-header-text">
-      <h2>Comunicación y Toma de Decisiones</h2>
-      <div class="sprint-meta">SEMANAS 13–15 · 20% DE EVALUACIÓN</div>
-      <p class="sprint-desc">
-        La ciencia muda es estadística muerta. Transformarás las conclusiones del Sprint 3 en herramientas gráficas formales que movilicen recursos e inspiren edictos y políticas del estado de conservación.
-      </p>
-    </div>
-  </div>
+  <div id="sec-s4" class="sprint-section s4">
+    <div class="container">
 
-  <div class="sprint-info-grid">
-    <div class="info-block" style="border-top:3px solid var(--s4)">
-      <h4>📖 Revisar en NotebookLM</h4>
-      <ul><li>"Gramática de gráficos" de ggplot</li><li>Storytelling directivo</li><li>Policy Brief design</li></ul>
-    </div>
-    <div class="info-block" style="border-top:3px solid var(--s4)">
-      <h4>💻 Presencial Semanal</h4>
-      <ul><li>Taller reducción ruido e inteligibilidad (chartjunk)</li><li>Foro cruzado de borradores ejecutivos</li></ul>
-    </div>
-  </div>
-
-  <div class="deliverables-bar">
-    <span class="deliverables-bar-label">Ruta de Entregables S4 (sp-8502-giact... /sprint-4/)</span>
-    <ul>
-      <li>policy_brief.Rmd <span>(Brief Político PDF Final Executivo)</span></li>
-      <li>presentacion_ejecutiva.Rmd <span>(Diapositivas)</span></li>
-      <li>Archivos .PNG visuales</li>
-      <li>Bitácora de IA S4 Integral</li>
-    </ul>
-  </div>
-
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 13</span> Narrativa Visual Gde. (ggplot2)</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">14_visualizacion_ggplot2.R</div>
-          <p class="f-desc">Convierte variables matriciales incomprensibles en 6 gráficas estéticas de alto impacto usando directivas anti-daltonismo y enfocando el descubrimiento ("El modelo impactó positivamente...").</p>
-          <div class="f-analogy"><strong>💡 Storytelling al Gestor Ambiental:</strong> Un Ministro o Alcaldía rara vez va a detenerse en los tableros logísticos sobre la Varianza. Si le pintamos los datos en paneles de barras limpias que revelen por qué la Inversión disparará la calidad de vida pesquera (ejemplo), lograremos la atención política requerida.</div>
+      <div class="sprint-header">
+        <div class="sprint-badge s4-badge">
+          <span class="s-n">SPRINT</span>
+          <span class="s-d">4</span>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="week-group">
-    <div class="week-header"><span class="w-badge">SEM 14</span> Georreferenciación (sf)</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">15_mapas_sf.R</div>
-          <p class="f-desc">Soporte computacional topológico `Simple Features` (sf) que captura latitudes/longitudes para localizar superposiciones marinas/comunitarias que ggplot ilustra en el plano cartográfico.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="week-group" style="border-color:var(--ucr-dorado)">
-    <div class="week-header"><span class="w-badge" style="background:var(--ucr-dorado)">SEM 15</span> Convergencia y Redacción Ejecutiva</div>
-    <div class="week-body">
-      <div class="file-item">
-        <div class="f-icon f-r">R</div>
-        <div class="f-content">
-          <div class="f-title">16_joint_display.R</div>
-          <p class="f-desc">Una macro tabla unificadora: pone hombro-a-hombro el frío dato estadístico con un fragmento de la frase social relatada en la comunidad, evidenciando huecos cualitativos (Ej: un programa no crece estadisticamente porque "existe un miedo profundo rural").</p>
+        <div class="sprint-header-text">
+          <h2>Comunicación y Toma de Decisiones</h2>
+          <div class="sprint-meta">SEMANAS 13–15 · 20% DE EVALUACIÓN</div>
+          <p class="sprint-desc">
+            La ciencia muda es estadística muerta. Transformarás las conclusiones del Sprint 3 en herramientas gráficas
+            formales que movilicen recursos e inspiren edictos y políticas del estado de conservación.
+          </p>
         </div>
       </div>
 
-      <div class="file-item">
-        <div class="f-icon f-rmd">Rmd</div>
-        <div class="f-content">
-          <div class="f-title">policy_brief.Rmd <span class="entregable-tag">ENTREGABLE OFICIAL SINTÉTICO</span></div>
-          <p class="f-desc">El arma maestra. Un PDF altamente conciso (3-4 páginas) exento de "jerga universitaria académica", enfocado netamente hacia proponer políticas concretas municipales orientadas al desarrollo en terreno.</p>
+      <div class="sprint-info-grid">
+        <div class="info-block" style="border-top:3px solid var(--s4)">
+          <h4>📖 Revisar en NotebookLM</h4>
+          <ul>
+            <li>"Gramática de gráficos" de ggplot</li>
+            <li>Storytelling directivo</li>
+            <li>Policy Brief design</li>
+          </ul>
+        </div>
+        <div class="info-block" style="border-top:3px solid var(--s4)">
+          <h4>💻 Presencial Semanal</h4>
+          <ul>
+            <li>Taller reducción ruido e inteligibilidad (chartjunk)</li>
+            <li>Foro cruzado de borradores ejecutivos</li>
+          </ul>
         </div>
       </div>
-      
-      <div class="file-item">
-        <div class="f-icon f-rmd">Rmd</div>
-        <div class="f-content">
-          <div class="f-title">presentacion_ejecutiva.Rmd <span class="entregable-tag">ENTREGABLE PPT</span></div>
-          <p class="f-desc">Diapositivas extraídas de tus gráficas base (S13, S14) para exponer durante 12-15 minutos en el auditorio final ante tus mentores los logros y métricas de acción política (S15).</p>
+
+      <div class="deliverables-bar">
+        <span class="deliverables-bar-label">Ruta de Entregables S4 (sp-8502-giact... /sprint-4/)</span>
+        <ul>
+          <li>policy_brief.Rmd <span>(Brief Político PDF Final Executivo)</span></li>
+          <li>presentacion_ejecutiva.Rmd <span>(Diapositivas)</span></li>
+          <li>Archivos .PNG visuales</li>
+          <li>Bitácora de IA S4 Integral</li>
+        </ul>
+      </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 13</span> Narrativa Visual Gde. (ggplot2)</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">14_visualizacion_ggplot2.R</div>
+              <p class="f-desc">Convierte variables matriciales incomprensibles en 6 gráficas estéticas de alto impacto
+                usando directivas anti-daltonismo y enfocando el descubrimiento ("El modelo impactó positivamente...").
+              </p>
+              <div class="f-analogy"><strong>💡 Storytelling al Gestor Ambiental:</strong> Un Ministro o Alcaldía rara
+                vez va a detenerse en los tableros logísticos sobre la Varianza. Si le pintamos los datos en paneles de
+                barras limpias que revelen por qué la Inversión disparará la calidad de vida pesquera (ejemplo),
+                lograremos la atención política requerida.</div>
+            </div>
+          </div>
         </div>
       </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge">SEM 14</span> Georreferenciación (sf)</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">15_mapas_sf.R</div>
+              <p class="f-desc">Soporte computacional topológico `Simple Features` (sf) que captura latitudes/longitudes
+                para localizar superposiciones marinas/comunitarias que ggplot ilustra en el plano cartográfico.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-group" style="border-color:var(--ucr-dorado)">
+        <div class="week-header"><span class="w-badge" style="background:var(--ucr-dorado)">SEM 15</span> Convergencia y
+          Redacción Ejecutiva</div>
+        <div class="week-body">
+          <div class="file-item">
+            <div class="f-icon f-r">R</div>
+            <div class="f-content">
+              <div class="f-title">16_joint_display.R</div>
+              <p class="f-desc">Una macro tabla unificadora: pone hombro-a-hombro el frío dato estadístico con un
+                fragmento de la frase social relatada en la comunidad, evidenciando huecos cualitativos (Ej: un programa
+                no crece estadisticamente porque "existe un miedo profundo rural").</p>
+            </div>
+          </div>
+
+          <div class="file-item">
+            <div class="f-icon f-rmd">Rmd</div>
+            <div class="f-content">
+              <div class="f-title">policy_brief.Rmd <span class="entregable-tag">ENTREGABLE OFICIAL SINTÉTICO</span>
+              </div>
+              <p class="f-desc">El arma maestra. Un PDF altamente conciso (3-4 páginas) exento de "jerga universitaria
+                académica", enfocado netamente hacia proponer políticas concretas municipales orientadas al desarrollo
+                en terreno.</p>
+            </div>
+          </div>
+
+          <div class="file-item">
+            <div class="f-icon f-rmd">Rmd</div>
+            <div class="f-content">
+              <div class="f-title">presentacion_ejecutiva.Rmd <span class="entregable-tag">ENTREGABLE PPT</span></div>
+              <p class="f-desc">Diapositivas extraídas de tus gráficas base (S13, S14) para exponer durante 12-15
+                minutos en el auditorio final ante tus mentores los logros y métricas de acción política (S15).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-</div>
-</div>
+  <!-- ══════════════════════════════════════════════
+     EJEMPLOS / DOCUMENTOS BASE DE CONSULTA
+══════════════════════════════════════════════════ -->
+  <div id="sec-ejemplos" class="sprint-section ejemplos">
+    <div class="container">
 
-<script>
-  function show(id, btn) {
-    document.querySelectorAll('.sprint-section').forEach(el => el.classList.remove('visible'));
-    document.getElementById('sec-' + id).classList.add('visible');
-    
-    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-  }
-</script>
+      <div class="sprint-header">
+        <div class="sprint-badge"
+          style="background: rgba(212,160,23,0.1); color: var(--ucr-dorado); border: 2px solid rgba(212,160,23,0.25);">
+          <span class="s-n">DOCS</span>
+          <span class="s-d" style="font-size:22px;">📚</span>
+        </div>
+        <div class="sprint-header-text">
+          <h2>Documentos Base de Consulta</h2>
+          <div class="sprint-meta">REFERENCIAS METODOLÓGICAS</div>
+          <p class="sprint-desc">
+            Consulta y previsualiza los ejemplos base para cada una de las metodologías utilizadas. Haz clic en las
+            imágenes para ampliarlas.
+          </p>
+        </div>
+      </div>
 
+      <div class="deliverables-bar" style="margin-bottom: 32px; border-left-color: var(--ucr-azul);">
+        <span class="deliverables-bar-label">Guía Principal</span>
+        <ul>
+          <li><a href="Guia_Sustantiva_Sprints_SP8502.docx" class="doc-link" download>Guia_Sustantiva_Sprints_SP8502.docx</a> <span>(Documento Base Fundamental)</span></li>
+        </ul>
+      </div>
+
+      <div class="ejemplos-grid">
+        <!-- Cualitativo -->
+        <div class="ejemplo-card">
+          <h3>Ejemplo Cualitativo</h3>
+          <div class="ejemplo-card-info">
+            <div><strong>Documento:</strong> <br/><a href="Ejemplo_Cualitativo_DESARROLLADO_SP8502.docx" download>Ejemplo_Cualitativo_DESARROLLADO_SP8502.docx</a></div>
+            <div><strong>Ref:</strong> <br/><a href="SP8502_Cualitativo_Lab_Autodirigido.Rmd" download>SP8502_Cualitativo_Lab_Autodirigido.Rmd</a></div>
+          </div>
+          <img src="Cualitativo.png" alt="Ejemplo Cualitativo" class="img-preview" onclick="openModal(this.src)">
+        </div>
+
+        <!-- Cuantitativo -->
+        <div class="ejemplo-card">
+          <h3>Ejemplo Cuantitativo</h3>
+          <div class="ejemplo-card-info">
+            <div><strong>Documento:</strong> <br/><a href="Ejemplo_Cuantitativo_DESARROLLADO_SP8502.docx" download>Ejemplo_Cuantitativo_DESARROLLADO_SP8502.docx</a></div>
+            <div><strong>Ref:</strong> <br/><a href="SP8502_Cuantitativo_LAB_AUTODIRIGIDO_v1.Rmd" download>SP8502_Cuantitativo_LAB_AUTODIRIGIDO_v1.Rmd</a></div>
+          </div>
+          <img src="Cuantitativo.png" alt="Ejemplo Cuantitativo" class="img-preview" onclick="openModal(this.src)">
+        </div>
+
+        <!-- Mixto -->
+        <div class="ejemplo-card">
+          <h3>Ejemplo Mixto</h3>
+          <div class="ejemplo-card-info">
+            <div><strong>Documento:</strong> <br/><a href="Ejemplo_Mixto_DESARROLLADO_SP8502.docx" download>Ejemplo_Mixto_DESARROLLADO_SP8502.docx</a></div>
+            <div><strong>Ref:</strong> <br/><a href="SP8502_Mixto_LAB_AUTODIRIGIDO_FINAL.Rmd" download>SP8502_Mixto_LAB_AUTODIRIGIDO_FINAL.Rmd</a></div>
+          </div>
+          <img src="Mixta.png" alt="Ejemplo Mixto" class="img-preview" onclick="openModal(this.src)">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+     LABORATORIOS PYTHON
+══════════════════════════════════════════════════ -->
+  <div id="sec-python" class="sprint-section python">
+    <div class="container">
+
+      <div class="sprint-header">
+        <div class="sprint-badge"
+          style="background: rgba(27,79,114,0.1); color: #1B4F72; border: 2px solid rgba(27,79,114,0.3);">
+          <span class="s-n">LABS</span>
+          <span class="s-d" style="font-size:22px;">🐍</span>
+        </div>
+        <div class="sprint-header-text">
+          <h2>Laboratorios Autoadministrados Python</h2>
+          <div class="sprint-meta">GOOGLE COLAB · MÉTODOS ESTADÍSTICOS</div>
+          <p class="sprint-desc">
+            Archivos Jupyter Notebook (.ipynb) para trabajar directamente en Google Colab, acompañados de guías y presentaciones explicativas.
+          </p>
+        </div>
+      </div>
+
+      <div class="deliverables-bar" style="margin-bottom: 32px; border-left-color: #1A8CAB; background: rgba(26,140,171,0.05);">
+        <span class="deliverables-bar-label" style="color: #1A5276;">Material de Apoyo General</span>
+        <ul>
+          <li><a href="Python/Guia_Laboratorios_Python_GIACT_2026.docx" class="doc-link" download>Guía de Laboratorios Python (.docx)</a> <span>(Instrucciones paso a paso)</span></li>
+          <li><a href="Python/Metodos_Analisis_Cuantitativo.pptx" class="doc-link" download>Métodos de Análisis Cuantitativo (.pptx)</a> <span>(Presentación Teórica)</span></li>
+        </ul>
+      </div>
+
+      <div class="week-group">
+        <div class="week-header"><span class="w-badge" style="background: #1B4F72;">COLAB</span> Cuadernos de Trabajo Interactivos</div>
+        <div class="week-body">
+          <p style="font-size: 14px; color: var(--ink-light); margin-bottom: 16px;">
+            Haz clic en cualquiera de los siguientes archivos para descargarlo y poder subirlo a Google Colab.
+          </p>
+          <div class="ejemplos-grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 16px; margin-top: 0;">
+            <div class="ejemplo-card" style="padding: 20px; text-align: left; background: #D6EAF8; border-left: 4px solid #1A8CAB; border-top: none; border-right: none; border-bottom: none;">
+              <h4 style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #1A5276; margin-bottom: 8px; letter-spacing: 0.5px;">Codificación y Modelos Base</h4>
+              <ul style="list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 8px;"><a href="Python/CodifiacióPreguntasAbiertas.ipynb" class="doc-link" download>CodificacióPreguntasAbiertas.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Redes_Neuronales.ipynb" class="doc-link" download>Redes_Neuronales.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Teoría_y_aplicación_NAIVE_BAYES.ipynb" class="doc-link" download>Teoría_y_aplicación_NAIVE_BAYES.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_GIACT_2026_Teorema_del_Límite_Central.ipynb" class="doc-link" download>Teorema_del_Límite_Central.ipynb</a></li>
+              </ul>
+            </div>
+            <div class="ejemplo-card" style="padding: 20px; text-align: left; background: #D1F2EB; border-left: 4px solid #1E8449; border-top: none; border-right: none; border-bottom: none;">
+              <h4 style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #1E8449; margin-bottom: 8px; letter-spacing: 0.5px;">Multivariate Analysis (Short Course)</h4>
+              <ul style="list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Short_Course_on_Multivariate_Analysis_ANOVA.ipynb" class="doc-link" download>ANOVA.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Short_Course_on_Multivariate_Analysis_Cluster.ipynb" class="doc-link" download>Cluster.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Short_Course_on_Multivariate_Analysis_Experiment_Design_Principles.ipynb" class="doc-link" download>Experiment_Design.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Short_Course_on_Multivariate_Analysis_Multiple_regression.ipynb" class="doc-link" download>Multiple_regression.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Short_Course_on_Multivariate_Analysis_PCA.ipynb" class="doc-link" download>PCA.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Short_Course_on_Multivariate_Analysis_Time_Series.ipynb" class="doc-link" download>Time_Series.ipynb</a></li>
+              </ul>
+            </div>
+            <div class="ejemplo-card" style="padding: 20px; text-align: left; background: #FAD7A0; border-left: 4px solid #A04000; border-top: none; border-right: none; border-bottom: none;">
+              <h4 style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #A04000; margin-bottom: 8px; letter-spacing: 0.5px;">Casos de Uso Ecológicos / Data</h4>
+              <ul style="list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Case_Use_Analyzing_Variation_in_Plankton_Populations_Across_Different_Marine_Regions.ipynb" class="doc-link" download>Plankton_Populations.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Case_Use_Assessing_the_Effect_of_Light_Intensity_on_Algal_Growth_Rates.ipynb" class="doc-link" download>Algal_Growth_Rates.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Case_Use_Forecasting_Monthly_Rainfall_for_Agricultural_Planning.ipynb" class="doc-link" download>Forecasting_Rainfall.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Case_Use_Identifying_Distinct_Fish_Habitats_Based_on_Environmental_Conditions.ipynb" class="doc-link" download>Distinct_Fish_Habitats.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Case_Use_Predicting_the_Impact_of_Environmental_Variables_on_Fish_Migration_Patterns.ipynb" class="doc-link" download>Fish_Migration_Patterns.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Valoración_Praderas_Marinas_Costa.ipynb" class="doc-link" download>Valoración_Praderas.ipynb</a></li>
+              </ul>
+            </div>
+            <div class="ejemplo-card" style="padding: 20px; text-align: left; background: #F9E79F; border-left: 4px solid #7D6608; border-top: none; border-right: none; border-bottom: none;">
+              <h4 style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #7D6608; margin-bottom: 8px; letter-spacing: 0.5px;">Recolección y Árboles</h4>
+              <ul style="list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Extracción_de_datos_WEB_y_Análisis_de_Sentimiento_ipynb.ipynb" class="doc-link" download>Extracción_Datos_Web_y_Sentimiento.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_GIACT_2026_webscraping_news.ipynb" class="doc-link" download>Webscraping_news.ipynb</a></li>
+                <li style="margin-bottom: 8px;"><a href="Python/SP-8502 · GIACT_Teoría_y_Aplicación_del_Árbol_de_Decisiones_en_la_Gestión_Marino_Costera.ipynb" class="doc-link" download>Árbol_Decisiones_Marino_Costero.ipynb</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sprint-header" style="margin-top: 48px;">
+        <div class="sprint-header-text">
+          <h2 style="font-size: 24px;">Demostraciones Visuales</h2>
+          <p class="sprint-desc" style="font-size: 14px;">Ilustraciones de conceptos interactivos.</p>
+        </div>
+      </div>
+      <div class="ejemplos-grid" style="margin-top: 16px;">
+        <div class="ejemplo-card">
+          <h3 style="font-size: 16px;">Simulación Cola M/M/1</h3>
+          <img src="Python/mm1_queue_simulation.png" alt="M/M/1 Queue" class="img-preview" onclick="openModal(this.src)">
+        </div>
+        <div class="ejemplo-card">
+          <h3 style="font-size: 16px;">Teorema del Límite Central</h3>
+          <img src="Python/tlc_demonstration.png" alt="TLC Demo" class="img-preview" onclick="openModal(this.src)">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal para imágenes flotantes -->
+  <div id="imgModal" class="img-modal" onclick="closeModal()">
+    <span class="img-modal-close">&times;</span>
+    <img class="img-modal-content" id="modalImage">
+  </div>
+
+  <script>
+    function show(id, btn) {
+      document.querySelectorAll('.sprint-section').forEach(el => el.classList.remove('visible'));
+      document.getElementById('sec-' + id).classList.add('visible');
+
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    function openModal(src) {
+      document.getElementById('imgModal').style.display = "block";
+      document.getElementById('modalImage').src = src;
+    }
+
+    function closeModal() {
+      document.getElementById('imgModal').style.display = "none";
+    }
+  </script>
+
+  </div>
 </body>
+
 </html>

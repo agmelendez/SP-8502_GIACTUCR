@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprint 2 · Teoría del Muestreo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2035;
+            --bg-card-hover: #1e2640;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(255,255,255,0.06);
+            --border-accent: rgba(59,130,246,0.3);
+            --shadow-glow: 0 0 40px rgba(59,130,246,0.1);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        .bg-grid {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0; pointer-events: none;
+        }
+        .bg-orb {
+            position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.15; z-index: 0; pointer-events: none;
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+        .bg-orb-1 { width: 600px; height: 600px; background: var(--accent-blue); top: -200px; right: -100px; }
+        .bg-orb-2 { width: 500px; height: 500px; background: var(--accent-purple); bottom: -150px; left: -100px; animation-delay: -10s; }
+        .bg-orb-3 { width: 400px; height: 400px; background: var(--accent-cyan); top: 50%; left: 50%; animation-delay: -5s; }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+        .container {
+            position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem;
+        }
+        .header { text-align: center; padding: 3rem 0 2rem; }
+        .header-badge {
+            display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px;
+            background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 100px; font-size: 0.8rem; font-weight: 600; color: var(--accent-cyan);
+            text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 1.5rem;
+            animation: fadeSlideDown 0.6s ease-out;
+        }
+        .pulse-dot { width: 8px; height: 8px; background: var(--accent-emerald); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
+        .header h1 {
+            font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: fadeSlideUp 0.7s ease-out;
+        }
+        .header h1 .accent {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .header-sub {
+            font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0.75rem auto 0;
+            animation: fadeSlideUp 0.8s ease-out;
+        }
+        .header-date {
+            display: inline-flex; align-items: center; gap: 8px; margin-top: 1.2rem; padding: 8px 20px;
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 100px;
+            font-size: 0.85rem; color: var(--text-secondary); animation: fadeSlideUp 0.9s ease-out;
+        }
+        .header-date svg { width: 16px; height: 16px; color: var(--accent-amber); }
+        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeSlideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* NAVIGATION */
+        .nav-tabs {
+            display: flex; gap: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: var(--radius); padding: 6px; margin-bottom: 2rem; overflow-x: auto; scrollbar-width: none;
+        }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+        .nav-tab {
+            flex-shrink: 0; padding: 10px 20px; border-radius: var(--radius-sm); border: none; background: transparent;
+            color: var(--text-muted); font-family: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            transition: all 0.3s ease; white-space: nowrap;
+        }
+        .nav-tab:hover { color: var(--text-secondary); background: rgba(255,255,255,0.03); }
+        .nav-tab.active { background: var(--accent-blue); color: #fff; box-shadow: 0 4px 15px rgba(59,130,246,0.3); }
+
+        /* Panels */
+        .panel { display: none; }
+        .panel.active { display: block; animation: panelFadeIn 0.3s ease-out; }
+        @keyframes panelFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius);
+            padding: 1.75rem; margin-bottom: 1.25rem; transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .card:hover { border-color: var(--border-accent); background: var(--bg-card-hover); transform: translateY(-2px); }
+        .card:hover::before { opacity: 1; }
+        .card-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 1rem; }
+        .card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .card-icon.blue { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+        .card-icon.cyan { background: rgba(6,182,212,0.15); color: var(--accent-cyan); }
+        .card-icon.purple { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+        .card-icon.emerald { background: rgba(16,185,129,0.15); color: var(--accent-emerald); }
+        .card-icon.amber { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+        .card-icon.rose { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
+        .card-icon svg { width: 22px; height: 22px; }
+        .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 2px; }
+        .card-subtitle { font-size: 0.8rem; color: var(--text-muted); }
+        .card-body p { color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 0.75rem; }
+        .card-body ul { list-style: none; padding: 0; }
+        .card-body ul li { position: relative; padding-left: 20px; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.9rem; }
+        .card-body ul li::before { content: ''; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-blue); }
+
+        .session-banner {
+            display: flex; align-items: center; gap: 16px; padding: 1.25rem 1.5rem;
+            background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+            border: 1px solid rgba(59,130,246,0.15); border-radius: var(--radius); margin-bottom: 1.5rem;
+        }
+        .session-banner .session-icon { width: 48px; height: 48px; background: rgba(59,130,246,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .session-banner .session-icon svg { width: 24px; height: 24px; color: var(--accent-blue); }
+        .session-banner .session-text h3 { font-size: 1rem; font-weight: 700; }
+        .session-banner .session-text p { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .theory-section { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.75rem; margin-bottom: 1.25rem; }
+        .theory-section h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 10px; }
+        .theory-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; flex-shrink: 0; }
+        .theory-num.b { background: rgba(59,130,246,0.2); color: var(--accent-blue); }
+        .theory-num.c { background: rgba(6,182,212,0.2); color: var(--accent-cyan); }
+        .theory-num.p { background: rgba(139,92,246,0.2); color: var(--accent-purple); }
+        .theory-num.e { background: rgba(16,185,129,0.2); color: var(--accent-emerald); }
+        .theory-num.r { background: rgba(244,63,94,0.2); color: var(--accent-rose); }
+        .theory-section p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.75rem; }
+
+        .theory-highlight {
+            background: rgba(59,130,246,0.06); border-left: 3px solid var(--accent-blue);
+            padding: 1rem 1.25rem; border-radius: 0 var(--radius-xs) var(--radius-xs) 0; margin: 1rem 0;
+        }
+        .theory-highlight p { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.65; }
+        .theory-highlight strong { color: var(--text-primary); }
+
+        .formula-block { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.15); border-radius: var(--radius-sm); padding: 1.25rem; margin: 1rem 0; text-align: center; }
+        .formula-block .formula { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 600; color: var(--accent-cyan); margin-bottom: 0.5rem; }
+        .formula-block .formula-desc { font-size: 0.8rem; color: var(--text-muted); }
+        .formula-block.green { background: rgba(16,185,129,0.05); border-color: rgba(16,185,129,0.15); }
+        .formula-block.green .formula { color: var(--accent-emerald); }
+        .formula-block.purple { background: rgba(139,92,246,0.05); border-color: rgba(139,92,246,0.15); }
+        .formula-block.purple .formula { color: var(--accent-purple); }
+
+        .definition-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .def-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1.25rem; }
+        .def-card h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .def-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+
+        .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+        .comparison-table th { text-align: left; padding: 10px 12px; color: var(--accent-blue); border-bottom: 2px solid var(--border-color); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .comparison-table td { padding: 10px 12px; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); }
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .comparison-table td:first-child { font-weight: 600; color: var(--text-primary); }
+
+        .steps-container { counter-reset: step-counter; }
+        .step-item { counter-increment: step-counter; display: flex; gap: 14px; margin-bottom: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+        .step-item::before { content: counter(step-counter); flex-shrink: 0; width: 32px; height: 32px; background: var(--accent-blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; margin-top: 2px; }
+        .step-item h4 { font-size: 0.92rem; font-weight: 600; margin-bottom: 4px; }
+        .step-item p { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.6; }
+
+        .applied-block { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.75rem; margin-bottom: 1.25rem; }
+        .applied-block h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 10px; }
+        .applied-block p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.75rem; }
+        .applied-block h3 .step-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; flex-shrink: 0; }
+        .applied-block h3 .step-num.e { background: rgba(16,185,129,0.2); color: var(--accent-emerald); }
+        .applied-block h3 .step-num.b { background: rgba(59,130,246,0.2); color: var(--accent-blue); }
+        .applied-block h3 .step-num.p { background: rgba(139,92,246,0.2); color: var(--accent-purple); }
+        .applied-block h3 .step-num.a { background: rgba(245,158,11,0.2); color: var(--accent-amber); }
+        .applied-block h3 .step-num.r { background: rgba(244,63,94,0.2); color: var(--accent-rose); }
+
+        .criteria-list { list-style: none; padding: 0; }
+        .criteria-list li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+        .criteria-list li:last-child { border-bottom: none; }
+        .criteria-icon { flex-shrink: 0; width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; margin-top: 2px; }
+        .criteria-icon.y { background: rgba(16,185,129,0.15); color: var(--accent-emerald); }
+        .criteria-icon.i { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+
+        .info-box { display: flex; gap: 12px; padding: 1rem 1.25rem; border-radius: var(--radius-sm); margin: 1rem 0; }
+        .info-box.tip { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); }
+        .info-box.warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+        .info-box.note { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); }
+        .info-box-icon { flex-shrink: 0; font-size: 1.2rem; margin-top: 2px; }
+        .info-box p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+        .info-box strong { color: var(--text-primary); }
+
+        /* Calculator */
+        .calc-panel { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.25rem; }
+        .calc-panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .calc-panel h3 svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+        .calc-tabs { display: flex; gap: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 1.25rem; }
+        .calc-tab { flex: 1; padding: 10px 16px; border-radius: 8px; border: none; background: transparent; color: var(--text-muted); font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-align: center; }
+        .calc-tab:hover { color: var(--text-secondary); }
+        .calc-tab.active { background: var(--accent-blue); color: #fff; box-shadow: 0 3px 10px rgba(59,130,246,0.3); }
+
+        .calc-module { display: none; }
+        .calc-module.active { display: block; animation: panelFadeIn 0.3s ease-out; }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.82rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 14px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-xs); color: var(--text-primary); font-family: inherit; font-size: 0.9rem; transition: border-color 0.3s ease; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent-blue); }
+        .form-group select { cursor: pointer; }
+        .form-group select option { background: var(--bg-secondary); }
+        .form-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+        .btn-calc { width: 100%; padding: 12px; border: none; border-radius: var(--radius-xs); background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); color: #fff; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; margin-top: 0.5rem; }
+        .btn-calc:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.3); }
+
+        .result-box { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: var(--radius-sm); padding: 1.25rem; text-align: center; margin-top: 1rem; }
+        .result-number { font-size: 2.5rem; font-weight: 900; color: var(--accent-emerald); font-family: 'JetBrains Mono', monospace; }
+        .result-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+        .result-details { margin-top: 1rem; text-align: left; }
+        .result-detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-color); font-size: 0.82rem; }
+        .result-detail-row:last-child { border: none; }
+        .result-detail-row .lbl { color: var(--text-muted); }
+        .result-detail-row .val { color: var(--text-primary); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+        .code-block { background: #0d1117; border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm); overflow: hidden; margin-top: 1rem; }
+        .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .code-header span { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+        .code-copy-btn { padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border-color); background: transparent; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; font-family: inherit; transition: all 0.2s ease; }
+        .code-copy-btn:hover { color: var(--text-primary); border-color: var(--accent-blue); }
+        .code-content { padding: 1rem; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.7; color: #c9d1d9; white-space: pre; }
+
+        .strata-row { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: end; margin-bottom: 8px; padding: 10px; background: var(--bg-secondary); border-radius: var(--radius-xs); }
+        .strata-row .form-group { margin-bottom: 0; }
+        .strata-row input { padding: 8px 10px; font-size: 0.85rem; }
+        .remove-strata-btn { width: 36px; height: 36px; border-radius: var(--radius-xs); border: 1px solid rgba(244,63,94,0.3); background: rgba(244,63,94,0.1); color: var(--accent-rose); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+        .remove-strata-btn:hover { background: rgba(244,63,94,0.2); }
+        .add-strata-btn { padding: 8px 16px; border-radius: var(--radius-xs); border: 1px dashed var(--border-color); background: transparent; color: var(--text-muted); font-family: inherit; font-size: 0.82rem; cursor: pointer; transition: all 0.2s ease; margin-top: 8px; }
+        .add-strata-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+        .strata-results { margin-top: 1rem; }
+        .strata-result-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-secondary); border-radius: var(--radius-xs); margin-bottom: 4px; font-size: 0.85rem; }
+        .strata-result-row .sname { color: var(--text-primary); font-weight: 600; }
+        .strata-result-row .sn { color: var(--accent-emerald); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+        .toggle-row label { font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; }
+        .toggle-switch { position: relative; width: 44px; height: 24px; cursor: pointer; }
+        .toggle-switch input { display: none; }
+        .toggle-slider { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 100px; transition: all 0.3s ease; }
+        .toggle-slider::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: all 0.3s ease; }
+        .toggle-switch input:checked + .toggle-slider { background: var(--accent-emerald); }
+        .toggle-switch input:checked + .toggle-slider::after { transform: translateX(20px); }
+
+        /* Checklist */
+        .checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 1rem 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 8px; cursor: pointer; transition: all 0.3s ease; user-select: none; }
+        .checklist-item:hover { border-color: var(--border-accent); }
+        .checklist-item.checked { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); }
+        .check-box { width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--text-muted); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; margin-top: 1px; }
+        .checklist-item.checked .check-box { background: var(--accent-emerald); border-color: var(--accent-emerald); }
+        .check-box svg { width: 14px; height: 14px; color: white; opacity: 0; transform: scale(0.5); transition: all 0.3s ease; }
+        .checklist-item.checked .check-box svg { opacity: 1; transform: scale(1); }
+        .check-content h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; transition: color 0.3s ease; }
+        .checklist-item.checked .check-content h4 { color: var(--accent-emerald); text-decoration: line-through; text-decoration-color: rgba(16,185,129,0.5); }
+        .check-content p { font-size: 0.82rem; color: var(--text-muted); }
+        .checklist-progress { display: flex; align-items: center; gap: 12px; padding: 1rem 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 1rem; }
+        .progress-bar-bg { flex: 1; height: 8px; background: rgba(255,255,255,0.05); border-radius: 100px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-emerald), var(--accent-cyan)); border-radius: 100px; transition: width 0.5s ease; width: 0%; }
+        .progress-text { font-size: 0.8rem; font-weight: 600; color: var(--accent-emerald); white-space: nowrap; }
+
+        .reading-item { display: flex; align-items: center; gap: 14px; padding: 1rem 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 8px; transition: all 0.3s ease; }
+        .reading-item:hover { border-color: var(--border-accent); }
+        .reading-type { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .reading-type.core { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+        .reading-type.ref { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+        .reading-type.comp { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+        .reading-info h4 { font-size: 0.92rem; font-weight: 600; margin-bottom: 2px; }
+        .reading-info p { font-size: 0.78rem; color: var(--text-muted); }
+
+        .bitacora-item { padding: 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 8px; }
+        .bitacora-item .prompt-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-amber); margin-bottom: 4px; }
+        .bitacora-item .prompt-text { font-size: 0.85rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: var(--radius-xs); line-height: 1.5; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .header { padding: 2rem 0 1rem; }
+            .card, .theory-section, .applied-block { padding: 1.25rem; }
+            .two-col, .three-col { grid-template-columns: 1fr; }
+            .strata-row { grid-template-columns: 1fr; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 100px; }
+    </style>
+    <style>
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(10, 14, 26, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <a href="Sprints.html" class="back-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Sprints
+    </a>
+    <div class="bg-grid"></div>
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-badge"><span class="pulse-dot"></span> Sprint 2 · En curso</div>
+            <h1>Teoría del <span class="accent">Muestreo</span></h1>
+            <p class="header-sub">Sesión 5 · Muestreo Probabilístico y cálculo de tamaño de muestra</p>
+            <div class="header-date">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+                Lun 13 → Dom 19 de abril, 2026
+            </div>
+        </header>
+
+        <!-- MAIN NAV -->
+        <nav class="nav-tabs" id="mainNav">
+            <button type="button" class="nav-tab active" data-panel="p-overview">📋 Resumen</button>
+            <button type="button" class="nav-tab" data-panel="p-concepts">📐 Teoría</button>
+            <button type="button" class="nav-tab" data-panel="p-applied">🔬 Enfoque Aplicado</button>
+            <button type="button" class="nav-tab" data-panel="p-calc">🧮 Calculadora n</button>
+            <button type="button" class="nav-tab" data-panel="p-check">✅ Checklist</button>
+            <button type="button" class="nav-tab" data-panel="p-read">📚 Lecturas</button>
+        </nav>
+
+        <!-- PANEL: Resumen -->
+        <div id="p-overview" class="panel active">
+            <div class="session-banner">
+                <div class="session-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>
+                </div>
+                <div class="session-text">
+                    <h3>Sesión 5 · Lunes 13 de abril</h3>
+                    <p>Foco: Teoría del Muestreo y Muestreo Probabilístico. Producto clave: script en R para calcular tamaño de muestra.</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.5rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">MAS</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">Muestreo Aleatorio Simple. Base teórica de todos los diseños probabilísticos.</p>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.5rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">Sistemático</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">Selección cada k-ésima unidad con arranque aleatorio. Eficiente y práctico.</p>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.5rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔀</div>
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">Estratificado</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">División en subgrupos homogéneos. Mayor precisión con heterogeneidad.</p>
+                </div>
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.5rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📐</div>
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">Tamaño de muestra</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">Cálculo de n con precisión, confianza, error y corrección por población finita.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon amber">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div><div class="card-title">Semana del Sprint 2</div><div class="card-subtitle">Lun 13 → Dom 19 de abril</div></div>
+                </div>
+                <div style="padding-left: 8px;">
+                    <div style="display: flex; gap: 16px; margin-bottom: 1rem;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent-blue); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem; font-weight: 700; box-shadow: 0 0 15px rgba(59,130,246,0.4);">L</div>
+                        <div><h4 style="font-size: 0.9rem; font-weight: 600;">Sesión 5 · Teoría del Muestreo</h4><p style="font-size: 0.8rem; color: var(--text-muted);">Lunes 13 · Sesión sincrónica</p></div>
+                    </div>
+                    <div style="display: flex; gap: 16px; margin-bottom: 1rem;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem; font-weight: 700;">M</div>
+                        <div><h4 style="font-size: 0.9rem; font-weight: 600;">Trabajo individual</h4><p style="font-size: 0.8rem; color: var(--text-muted);">Definir población, marco y unidad de muestreo</p></div>
+                    </div>
+                    <div style="display: flex; gap: 16px; margin-bottom: 1rem;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem; font-weight: 700;">X</div>
+                        <div><h4 style="font-size: 0.9rem; font-weight: 600;">Script en R</h4><p style="font-size: 0.8rem; color: var(--text-muted);">Calcular tamaño de muestra para tu proyecto</p></div>
+                    </div>
+                    <div style="display: flex; gap: 16px;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--border-color); color: var(--text-muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem; font-weight: 700;">D</div>
+                        <div><h4 style="font-size: 0.9rem; font-weight: 600;">Entregables semanales</h4><p style="font-size: 0.8rem; color: var(--text-muted);">Checklist completo · Bitácora IA actualizada</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL: Teoría -->
+        <div id="p-concepts" class="panel">
+            <div class="theory-section">
+                <h3><span class="theory-num b">1</span> Fundamentos del Muestreo Probabilístico</h3>
+                <p>El <strong>muestreo probabilístico</strong> es un conjunto de técnicas de selección donde cada elemento de la población tiene una <strong>probabilidad de inclusión conocida y no nula</strong>. Esta característica permite hacer inferencia estadística válida: podemos cuantificar el error de estimación y construir intervalos de confianza.</p>
+                <div class="theory-highlight">
+                    <p><strong>Principio fundamental:</strong> Si cada unidad tiene una probabilidad πᵢ > 0 de ser incluida en la muestra, y conocemos πᵢ, entonces podemos construir estimadores insesgados de los parámetros poblacionales (media, total, proporción).</p>
+                </div>
+                <p>A diferencia del muestreo no probabilístico (por conveniencia, cuotas, bola de nieve/RDS), el muestreo probabilístico garantiza que el proceso de selección está gobernado por el azar controlado, no por la accesibilidad o juicio del investigador.</p>
+            </div>
+
+            <div class="theory-section">
+                <h3><span class="theory-num c">2</span> Conceptos Fundamentales</h3>
+                <div class="definition-grid">
+                    <div class="def-card">
+                        <h4>🎯 Población Objetivo (N)</h4>
+                        <p>Conjunto completo de unidades sobre las que queremos hacer inferencia. Debe definirse con precisión en términos de contenido, extensión geográfica y tiempo.</p>
+                    </div>
+                    <div class="def-card">
+                        <h4>📋 Marco Muestral</h4>
+                        <p>La lista o registro real del cual se extrae la muestra. Debe cubrir toda la población (completitud), no incluir unidades fuera (pureza), y no duplicar (unicidad).</p>
+                    </div>
+                    <div class="def-card">
+                        <h4>🔢 Unidad de Muestreo</h4>
+                        <p>La entidad individual que se selecciona. Puede ser una persona, hogar, embarcación, segmento de costa, etc. No confundir con unidad de análisis.</p>
+                    </div>
+                    <div class="def-card">
+                        <h4>📐 Probabilidad de Inclusión (πᵢ)</h4>
+                        <p>Probabilidad de que la unidad i sea incluida en la muestra. En MAS: πᵢ = n/N. Debe ser conocida para todos los diseños probabilísticos.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h3><span class="theory-num b">3</span> Muestreo Aleatorio Simple (MAS)</h3>
+                <p>Se seleccionan n unidades de una población de tamaño N de tal forma que <strong>cada combinación posible de n unidades tiene la misma probabilidad</strong> de ser elegida.</p>
+                <div class="formula-block"><div class="formula">πᵢ = n / N</div><div class="formula-desc">Probabilidad de inclusión de cada unidad en MAS</div></div>
+                <div class="formula-block green"><div class="formula">Var(ȳ) = (1 - f) · S² / n</div><div class="formula-desc">Varianza del estimador de la media · f = n/N · S² = varianza poblacional</div></div>
+                <div class="formula-block purple"><div class="formula">ȳ = (1/n) Σ yᵢ &nbsp;&nbsp; · &nbsp;&nbsp; p̂ = (1/n) Σ aᵢ</div><div class="formula-desc">Estimador de la media muestral y de la proporción muestral</div></div>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="position: relative; padding-left: 20px; margin-bottom: 6px; color: var(--text-secondary); font-size: 0.88rem;"><span style="position: absolute; left: 0; color: var(--accent-emerald);">✓</span> Población relativamente homogénea</li>
+                    <li style="position: relative; padding-left: 20px; margin-bottom: 6px; color: var(--text-secondary); font-size: 0.88rem;"><span style="position: absolute; left: 0; color: var(--accent-emerald);">✓</span> Marco muestral completo y accesible</li>
+                    <li style="position: relative; padding-left: 20px; margin-bottom: 6px; color: var(--text-secondary); font-size: 0.88rem;"><span style="position: absolute; left: 0; color: var(--accent-rose);">✗</span> No conviene si población muy dispersa geográficamente</li>
+                </ul>
+            </div>
+
+            <div class="theory-section">
+                <h3><span class="theory-num c">4</span> Muestreo Sistemático</h3>
+                <p>Se ordena la población de 1 a N, se calcula <strong>k = N/n</strong>, se elige un número aleatorio r entre 1 y k (arranque), y se seleccionan las unidades en r, r+k, r+2k, …</p>
+                <div class="formula-block"><div class="formula">k = ⌊N / n⌋ → unidades en: r, r+k, r+2k, …</div><div class="formula-desc">Intervalo de selección · r = arranque aleatorio entre 1 y k</div></div>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="position: relative; padding-left: 20px; margin-bottom: 6px; color: var(--text-secondary); font-size: 0.88rem;"><span style="position: absolute; left: 0; color: var(--accent-emerald);">✓</span> Más fácil de implementar que MAS en campo</li>
+                    <li style="position: relative; padding-left: 20px; margin-bottom: 6px; color: var(--text-secondary); font-size: 0.88rem;"><span style="position: absolute; left: 0; color: var(--accent-emerald);">✓</span> Garantiza distribución uniforme a lo largo del marco</li>
+                    <li style="position: relative; padding-left: 20px; margin-bottom: 6px; color: var(--text-secondary); font-size: 0.88rem;"><span style="position: absolute; left: 0; color: var(--accent-amber);">⚠</span> Si el marco tiene periodicidad coincidente con k, introduce sesgo grave</li>
+                </ul>
+                <div class="info-box note">
+                    <span class="info-box-icon">💡</span>
+                    <p>El sistemático es equivalente a MAS cuando el orden del marco es aleatorio. Es más preciso que MAS cuando hay tendencia, y peor si hay periodicidad.</p>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h3><span class="theory-num p">5</span> Muestreo Estratificado</h3>
+                <p>Se divide la población en <strong>H estratos</strong> mutuamente excluyentes y exhaustivos. Luego se extrae una muestra independiente de cada estrato, generalmente mediante MAS dentro de cada estrato.</p>
+                <div class="formula-block purple"><div class="formula">N = N₁ + N₂ + … + Nₕ &nbsp;&nbsp; · &nbsp;&nbsp; n = n₁ + n₂ + … + nₕ</div><div class="formula-desc">La población y la muestra se descomponen por estrato</div></div>
+                <p><strong>Tipos de asignación:</strong></p>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="position: relative; padding-left: 20px; margin-bottom: 6px; color: var(--text-secondary); font-size: 0.88rem;"><span style="position: absolute; left: 0; color: var(--accent-blue);">●</span> <strong>Proporcional:</strong> nₕ = n · (Nₕ/N). Cada estrato aporta proporcionalmente a su tamaño.</li>
+                    <li style="position: relative; padding-left: 20px; margin-bottom: 6px; color: var(--text-secondary); font-size: 0.88rem;"><span style="position: absolute; left: 0; color: var(--accent-purple);">●</span> <strong>Óptima (Neyman):</strong> nₕ ∝ Nₕ · Sₕ. Asigna más muestra a estratos más grandes y más variables. Minimiza la varianza.</li>
+                    <li style="position: relative; padding-left: 20px; margin-bottom: 6px; color: var(--text-secondary); font-size: 0.88rem;"><span style="position: absolute; left: 0; color: var(--accent-cyan);">●</span> <strong>Costo-óptima:</strong> nₕ ∝ (Nₕ · Sₕ) / √cₕ. Incorpora el costo por unidad en cada estrato.</li>
+                </ul>
+                <div class="formula-block green"><div class="formula">Var(ȳ_st) = Σ (Wₕ² · Sₕ² / nₕ) · (1 - fₕ)</div><div class="formula-desc">Varianza del estimador estratificado · Wₕ = Nₕ/N · fₕ = nₕ/Nₕ</div></div>
+                <div class="info-box tip">
+                    <span class="info-box-icon">🎯</span>
+                    <p><strong>Regla de oro:</strong> Máxima homogeneidad dentro de cada estrato, máxima heterogeneidad entre estratos. Si los estratos no cumplen esto, el estratificado puede ser menos eficiente que el MAS.</p>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h3><span class="theory-num e">6</span> Tamaño de Muestra (n)</h3>
+                <p>El cálculo de n es un balance entre <strong>precisión deseada</strong> (margen de error), <strong>confianza</strong> (nivel de certeza), <strong>variabilidad</strong> y <strong>recursos disponibles</strong>.</p>
+                <div class="formula-block"><div class="formula">n₀ = (Z² · p · q) / e²</div><div class="formula-desc">Proporción, población infinita · Z: valor crítico · p: proporción · q = 1-p · e: error</div></div>
+                <div class="formula-block green"><div class="formula">n = n₀ / (1 + (n₀ - 1) / N)</div><div class="formula-desc">Corrección por población finita · Cuando f = n/N > 0.05, reduce n significativamente</div></div>
+                <div class="formula-block purple"><div class="formula">n₀ = (Z² · σ²) / e²</div><div class="formula-desc">Para estimar una media · σ²: varianza poblacional (se estima de estudios previos)</div></div>
+                <div class="info-box warn">
+                    <span class="info-box-icon">⚠️</span>
+                    <p><strong>Separar en tu tesis:</strong> <strong>n por precisión</strong> (fórmula estadística) vs <strong>n operativo</strong> (viabilidad, presupuesto, poder estadístico). Ambos deben justificarse explícitamente.</p>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h3><span class="theory-num r">7</span> Sesgos y Amenazas a la Validez</h3>
+                <div class="definition-grid">
+                    <div class="def-card"><h4>Sesgo de cobertura</h4><p>El marco no cubre toda la población. Ej: usar registro telefónico cuando parte no tiene teléfono.</p></div>
+                    <div class="def-card"><h4>Sesgo de no respuesta</h4><p>Unidades seleccionadas que no participan difieren sistemáticamente de las que sí.</p></div>
+                    <div class="def-card"><h4>Sesgo de selección</h4><p>El mecanismo de selección favorece ciertos tipos de unidades. Probabilidades de inclusión incorrectas.</p></div>
+                    <div class="def-card"><h4>Errores de medición</h4><p>La variable medida no refleja el constructo. Instrumento defectuoso o interpretación ambigua.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL: Enfoque Aplicado -->
+        <div id="p-applied" class="panel">
+            <div class="applied-block">
+                <h3><span class="step-num e">1</span> Definición de la Estructura Poblacional</h3>
+                <p>Antes de elegir cualquier diseño, definí con precisión los siguientes elementos. Cada uno requiere al menos un párrafo justificado:</p>
+                <div class="steps-container">
+                    <div class="step-item"><div><h4>Población Objetivo</h4><p>¿A quién querés inferir? Definí en términos de <strong>contenido</strong>, <strong>extensión geográfica</strong>, <strong>temporalidad</strong> y <strong>características</strong>. Ej: "Todos los pescadores artesanales inscritos en la caleta X con actividad extractiva ≥3 días/semana en el período estival 2025-2026."</p></div></div>
+                    <div class="step-item"><div><h4>Marco Muestral</h4><p>¿De dónde sale la lista? Identificá la fuente: padrón, registro SERNAPESCA, censo, etc. Evaluá: <strong>completitud</strong>, <strong>pureza</strong>, <strong>actualización</strong>, <strong>accesibilidad</strong>. Si es imperfecto, documentá las limitaciones.</p></div></div>
+                    <div class="step-item"><div><h4>Unidad de Muestreo</h4><p>¿Qué seleccionás en cada sorteo? Es la entidad que "entra en la urna". Diferenciá de la <strong>unidad de análisis</strong> y la <strong>unidad de observación</strong>. Pueden no coincidir.</p></div></div>
+                    <div class="step-item"><div><h4>Criterios de Inclusión y Exclusión</h4><p><strong>Inclusión:</strong> ¿Qué condiciones debe cumplir para ser elegible? <strong>Exclusión:</strong> ¿Bajo qué condiciones se descarta? Los criterios deben ser objetivos y aplicables consistentemente.</p></div></div>
+                </div>
+            </div>
+
+            <div class="applied-block">
+                <h3><span class="step-num b">2</span> Elección del Diseño Probabilístico</h3>
+                <p>La elección debe justificarse según las características de tu población, recursos y objetivos:</p>
+                <table class="comparison-table">
+                    <thead><tr><th>Criterio</th><th>MAS</th><th>Sistemático</th><th>Estratificado</th></tr></thead>
+                    <tbody>
+                        <tr><td>Heterogeneidad</td><td>Baja (homogénea)</td><td>Cualquiera</td><td>Alta (subgrupos claros)</td></tr>
+                        <tr><td>Marco muestral</td><td>Completo y accesible</td><td>Ordenado sin periodicidad</td><td>Con variable de estratificación</td></tr>
+                        <tr><td>Estimaciones por subgrupo</td><td>No garantizadas</td><td>No garantizadas</td><td>Garantizadas por estrato</td></tr>
+                        <tr><td>Costo logístico</td><td>Medio-Alto</td><td>Bajo</td><td>Medio</td></tr>
+                        <tr><td>Precisión relativa</td><td>Referencia base</td><td>Similar o superior a MAS</td><td>Superior si estratos bien definidos</td></tr>
+                        <tr><td>Dispersión geográfica</td><td>Problema si muy dispersa</td><td>Distribución uniforme</td><td>Controlable por estrato</td></tr>
+                        <tr><td>Conocimiento previo</td><td>Mínimo</td><td>Conocer patrón del marco</td><td>Nₕ y preferentemente Sₕ</td></tr>
+                    </tbody>
+                </table>
+                <div class="info-box tip">
+                    <span class="info-box-icon">🔬</span>
+                    <p><strong>Para contexto costero/territorial:</strong> Si tu población tiene diferencias por zona geográfica (caletas, sectores), el estratificado geográfico suele ser la mejor opción. Cada caleta es un estrato, y dentro aplicás MAS.</p>
+                </div>
+            </div>
+
+            <div class="applied-block">
+                <h3><span class="step-num p">3</span> Justificación del Tamaño de Muestra</h3>
+                <p>En tu tesis debés separar claramente:</p>
+                <div class="two-col" style="margin: 1rem 0;">
+                    <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1.25rem;">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--accent-emerald); margin-bottom: 0.5rem;">📐 n por Precisión</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">El que sale de la fórmula. Se basa en: nivel de confianza (95%), margen de error (±5%), proporción esperada, y corrección por población finita. Es el "n ideal" estadístico.</p>
+                    </div>
+                    <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1.25rem;">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--accent-amber); margin-bottom: 0.5rem;">⚙️ n Operativo</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">El que realmente podés alcanzar. Considera: presupuesto, tiempo, accesibilidad, tasa de no respuesta, poder estadístico para análisis posteriores. Es el "n real" factible.</p>
+                    </div>
+                </div>
+                <div class="info-box warn">
+                    <span class="info-box-icon">⚠️</span>
+                    <p><strong>Si n operativo &lt; n por precisión:</strong> Explicitá las consecuencias (mayor error real, menor poder) y justificá por qué el análisis sigue siendo válido.</p>
+                </div>
+            </div>
+
+            <div class="applied-block">
+                <h3><span class="step-num a">4</span> Identificación de Sesgos y Mitigaciones</h3>
+                <ul class="criteria-list" style="margin-top: 0.75rem;">
+                    <li><span class="criteria-icon y">1</span><span><strong>Sesgo de cobertura:</strong> ¿El marco excluye algún subgrupo? Mitigación: triangular fuentes para construir un marco más completo.</span></li>
+                    <li><span class="criteria-icon y">2</span><span><strong>No respuesta:</strong> ¿Qué porcentaje esperás? Mitigación: sobre-muestreo compensatorio, protocolos de seguimiento.</span></li>
+                    <li><span class="criteria-icon y">3</span><span><strong>Efecto del entrevistador:</strong> ¿La medición depende de quién aplica? Mitigación: estandarización del instrumento, capacitación.</span></li>
+                    <li><span class="criteria-icon y">4</span><span><strong>Autoselección:</strong> ¿Solo responden los más motivados? Mitigación: incentivos, múltiples intentos de contacto.</span></li>
+                </ul>
+            </div>
+
+            <div class="applied-block">
+                <h3><span class="step-num r">5</span> Producto Técnico: Script en R</h3>
+                <p>El script debe ser reproducible, documentado y con variables editables:</p>
+                <ul class="criteria-list" style="margin-top: 0.75rem;">
+                    <li><span class="criteria-icon i">📝</span><span>Comentarios explicando cada bloque y justificación de parámetros</span></li>
+                    <li><span class="criteria-icon i">📝</span><span>Cálculo de n₀ (sin corrección) y n (con corrección por población finita)</span></li>
+                    <li><span class="criteria-icon i">📝</span><span>Si es estratificado: asignación por estrato (proporcional y/u óptima de Neyman)</span></li>
+                    <li><span class="criteria-icon i">📝</span><span>Impresión clara de resultados con etiquetas descriptivas</span></li>
+                    <li><span class="criteria-icon i">📝</span><span>Variables al inicio del script para fácil edición</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- PANEL: Calculadora -->
+        <div id="p-calc" class="panel">
+            <div class="calc-panel">
+                <h3><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="color: var(--accent-cyan);"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V13.5zm0 2.25h.008v.008H8.25v-.008zm0 2.25h.008v.008H8.25V18zm2.498-6.75h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V13.5zm0 2.25h.007v.008h-.007v-.008zm0 2.25h.007v.008h-.007V18zm2.504-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zm0 2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V18zm2.498-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V13.5zM8.25 6h7.5v2.25h-7.5V6zM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.65 4.5 4.757V19.5a2.25 2.25 0 002.25 2.25h10.5a2.25 2.25 0 002.25-2.25V4.757c0-1.108-.806-2.057-1.907-2.185A48.507 48.507 0 0012 2.25z" /></svg> Calculadora de Tamaño de Muestra</h3>
+                <div class="calc-tabs" id="calcTabs">
+                    <button type="button" class="calc-tab active" data-calc="mod-mas">MAS</button>
+                    <button type="button" class="calc-tab" data-calc="mod-sis">Sistemático</button>
+                    <button type="button" class="calc-tab" data-calc="mod-est">Estratificado</button>
+                </div>
+
+                <!-- MAS Module -->
+                <div id="mod-mas" class="calc-module active">
+                    <h3>🎯 Muestreo Aleatorio Simple</h3>
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">Cálculo de n para estimar proporción o media con MAS.</p>
+                    <div class="two-col">
+                        <div class="form-group"><label>N (Población)</label><input type="number" id="mas_N" value="500" min="1"><div class="form-hint">Vacío si N muy grande o desconocida</div></div>
+                        <div class="form-group"><label>Tipo de estimación</label><select id="mas_type"><option value="proporcion">Proporción</option><option value="media">Media</option></select></div>
+                        <div class="form-group"><label>Nivel de confianza</label><select id="mas_Z"><option value="1.645">90% (Z=1.645)</option><option value="1.96" selected>95% (Z=1.96)</option><option value="2.576">99% (Z=2.576)</option></select></div>
+                        <div class="form-group"><label>Margen de error (e)</label><input type="number" id="mas_error" value="0.05" step="0.01" min="0.005" max="0.5"></div>
+                        <div class="form-group"><label id="mas_p_label">Proporción esperada (p)</label><input type="number" id="mas_p" value="0.5" step="0.05" min="0.01" max="0.99"><div class="form-hint" id="mas_hint">0.5 = máxima variabilidad</div></div>
+                    </div>
+                    <div class="toggle-row"><label>Corrección por población finita</label><div class="toggle-switch"><input type="checkbox" id="mas_fpc" checked><div class="toggle-slider"></div></div></div>
+                    <button class="btn-calc" id="btnCalcMAS">Calcular n (MAS)</button>
+                    <div id="masResult" style="display:none;"></div>
+                </div>
+
+                <!-- Sistemático Module -->
+                <div id="mod-sis" class="calc-module">
+                    <h3>📊 Muestreo Sistemático</h3>
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">Calcula n y el intervalo de selección k.</p>
+                    <div class="two-col">
+                        <div class="form-group"><label>N (Población)</label><input type="number" id="sis_N" value="500" min="1"></div>
+                        <div class="form-group"><label>Tipo de estimación</label><select id="sis_type"><option value="proporcion">Proporción</option><option value="media">Media</option></select></div>
+                        <div class="form-group"><label>Nivel de confianza</label><select id="sis_Z"><option value="1.645">90%</option><option value="1.96" selected>95%</option><option value="2.576">99%</option></select></div>
+                        <div class="form-group"><label>Margen de error (e)</label><input type="number" id="sis_error" value="0.05" step="0.01" min="0.005" max="0.5"></div>
+                        <div class="form-group"><label id="sis_p_label">Proporción esperada (p)</label><input type="number" id="sis_p" value="0.5" step="0.05" min="0.01" max="0.99"></div>
+                        <div class="form-group"><label>¿Periodicidad en el marco?</label><select id="sis_period"><option value="no">No / No sé</option><option value="si">Sí, hay patrón cíclico</option></select></div>
+                    </div>
+                    <div class="toggle-row"><label>Corrección por población finita</label><div class="toggle-switch"><input type="checkbox" id="sis_fpc" checked><div class="toggle-slider"></div></div></div>
+                    <button class="btn-calc" id="btnCalcSis">Calcular n y k (Sistemático)</button>
+                    <div id="sisResult" style="display:none;"></div>
+                </div>
+
+                <!-- Estratificado Module -->
+                <div id="mod-est" class="calc-module">
+                    <h3>🔀 Muestreo Estratificado</h3>
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">Configurá los estratos con Nₕ y Sₕ. Se calcula n total y asignación por estrato.</p>
+                    <div class="three-col" style="margin-bottom: 1rem;">
+                        <div class="form-group"><label>Nivel de confianza</label><select id="est_Z"><option value="1.645">90%</option><option value="1.96" selected>95%</option><option value="2.576">99%</option></select></div>
+                        <div class="form-group"><label>Margen de error (e)</label><input type="number" id="est_error" value="0.05" step="0.01" min="0.005" max="0.5"></div>
+                        <div class="form-group"><label>Asignación</label><select id="est_asign"><option value="proporcional">Proporcional</option><option value="neyman">Neyman (óptima)</option></select></div>
+                    </div>
+                    <h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary);">Estratos</h4>
+                    <div id="strataContainer">
+                        <div class="strata-row">
+                            <div class="form-group"><label>Nombre</label><input type="text" value="Estrato 1" class="strata-name"></div>
+                            <div class="form-group"><label>Nₕ</label><input type="number" value="200" class="strata-Nh" min="1"></div>
+                            <div class="form-group"><label>Sₕ</label><input type="number" value="0.5" class="strata-Sh" step="0.05" min="0.01"></div>
+                            <button class="remove-strata-btn" title="Eliminar">✕</button>
+                        </div>
+                        <div class="strata-row">
+                            <div class="form-group"><label>Nombre</label><input type="text" value="Estrato 2" class="strata-name"></div>
+                            <div class="form-group"><label>Nₕ</label><input type="number" value="150" class="strata-Nh" min="1"></div>
+                            <div class="form-group"><label>Sₕ</label><input type="number" value="0.4" class="strata-Sh" step="0.05" min="0.01"></div>
+                            <button class="remove-strata-btn" title="Eliminar">✕</button>
+                        </div>
+                        <div class="strata-row">
+                            <div class="form-group"><label>Nombre</label><input type="text" value="Estrato 3" class="strata-name"></div>
+                            <div class="form-group"><label>Nₕ</label><input type="number" value="150" class="strata-Nh" min="1"></div>
+                            <div class="form-group"><label>Sₕ</label><input type="number" value="0.6" class="strata-Sh" step="0.05" min="0.01"></div>
+                            <button class="remove-strata-btn" title="Eliminar">✕</button>
+                        </div>
+                    </div>
+                    <button class="add-strata-btn" id="btnAddStrata">+ Agregar estrato</button>
+                    <div class="toggle-row" style="margin-top: 1rem;"><label>Corrección por población finita</label><div class="toggle-switch"><input type="checkbox" id="est_fpc" checked><div class="toggle-slider"></div></div></div>
+                    <button class="btn-calc" id="btnCalcEst">Calcular n estratificado</button>
+                    <div id="estResult" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- R Code -->
+            <div class="calc-panel">
+                <h3><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="color: var(--accent-purple);"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg> Script en R Generado</h3>
+                <div class="code-block">
+                    <div class="code-header"><span id="codeFilename">calculo_mas.R</span><button class="code-copy-btn" id="btnCopy">Copiar</button></div>
+                    <div class="code-content" id="rCodeOutput"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL: Checklist -->
+        <div id="p-check" class="panel">
+            <div style="margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.25rem;">Checklist Semanal</h2>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Marque las tareas completadas · Sprint 2 · Semana 1</p>
+            </div>
+            <div class="checklist-progress">
+                <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Progreso</span>
+                <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+                <span class="progress-text" id="progressText">0/7</span>
+            </div>
+            <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div><div class="check-content"><h4>Definir población objetivo</h4><p>1 párrafo describiendo el universo</p></div></div>
+            <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div><div class="check-content"><h4>Definir marco muestral</h4><p>Fuente, completitud, actualización</p></div></div>
+            <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div><div class="check-content"><h4>Definir unidad de muestreo</h4><p>Qué es lo que seleccionás</p></div></div>
+            <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div><div class="check-content"><h4>Elegir diseño probabilístico</h4><p>2–4 bullets defendiendo la elección</p></div></div>
+            <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div><div class="check-content"><h4>Correr script de n en R</h4><p>Variables editables y comentarios</p></div></div>
+            <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div><div class="check-content"><h4>Identificar posibles sesgos</h4><p>Amenazas y mitigaciones</p></div></div>
+            <div class="checklist-item" onclick="toggleCheck(this)"><div class="check-box"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div><div class="check-content"><h4>Registrar en Bitácora IA</h4><p>Prompts usados (obligatorio)</p></div></div>
+        </div>
+
+        <!-- PANEL: Lecturas -->
+        <div id="p-read" class="panel">
+            <div class="card">
+                <div class="card-header"><div class="card-icon blue"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg></div><div><div class="card-title">Lecturas Base · Sprint 2</div><div class="card-subtitle">Bibliografía clave para NotebookLM</div></div></div>
+                <div class="card-body"><p>Esta semana el foco es muestreo probabilístico. Las referencias de RDS son para comparar enfoques.</p></div>
+            </div>
+            <div class="reading-item"><div class="reading-type core">Core</div><div class="reading-info"><h4>Teoría del Muestreo (Sesión 5)</h4><p>Material del curso</p></div></div>
+            <div class="reading-item"><div class="reading-type ref">Ref</div><div class="reading-info"><h4>Heckathorn, D. D. (1997)</h4><p>Respondent-Driven Sampling: A New Approach to the Study of Hidden Populations</p></div></div>
+            <div class="reading-item"><div class="reading-type ref">Ref</div><div class="reading-info"><h4>Salganik & Heckathorn (2004)</h4><p>Sampling and Estimation in Hidden Populations Using RDS</p></div></div>
+            <div class="reading-item"><div class="reading-type ref">Ref</div><div class="reading-info"><h4>Gile, K. J. et al. (2015)</h4><p>Improved inference for respondent-driven sampling data</p></div></div>
+            <div class="card" style="margin-top: 1.5rem;">
+                <div class="card-header"><div class="card-icon amber"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" /></svg></div><div><div class="card-title">Bitácora IA</div><div class="card-subtitle">Prompts para registrar (obligatorio)</div></div></div>
+                <div class="bitacora-item"><div class="prompt-label">Prompt #1</div><div class="prompt-text">"Ayudame a definir la población objetivo, marco muestral y unidad de muestreo para un estudio sobre [tu tema]."</div></div>
+                <div class="bitacora-item"><div class="prompt-label">Prompt #2</div><div class="prompt-text">"Escribí un script en R para calcular el tamaño de muestra con N=[valor], confianza=[95%], error=[5%], p=[0.5]."</div></div>
+                <div class="bitacora-item"><div class="prompt-label">Prompt #3</div><div class="prompt-text">"Compará MAS vs estratificado para un estudio con [N] unidades en [contexto]."</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // ==================== MAIN NAVIGATION ====================
+        var mainNav = document.getElementById('mainNav');
+        if (mainNav) {
+            mainNav.addEventListener('click', function(e) {
+                var tab = e.target.closest('.nav-tab');
+                if (!tab) return;
+                e.preventDefault();
+
+                // Remove active from all tabs
+                var allTabs = mainNav.querySelectorAll('.nav-tab');
+                for (var i = 0; i < allTabs.length; i++) {
+                    allTabs[i].classList.remove('active');
+                }
+                // Activate clicked tab
+                tab.classList.add('active');
+
+                // Hide all panels
+                var allPanels = document.querySelectorAll('.panel');
+                for (var j = 0; j < allPanels.length; j++) {
+                    allPanels[j].classList.remove('active');
+                }
+
+                // Show target panel
+                var targetId = tab.getAttribute('data-panel');
+                if (targetId) {
+                    var targetPanel = document.getElementById(targetId);
+                    if (targetPanel) {
+                        targetPanel.classList.add('active');
+                    }
+                }
+            });
+        }
+
+        // ==================== CALCULATOR TABS ====================
+        var calcTabs = document.getElementById('calcTabs');
+        if (calcTabs) {
+            calcTabs.addEventListener('click', function(e) {
+                var tab = e.target.closest('.calc-tab');
+                if (!tab) return;
+                e.preventDefault();
+
+                var allTabs = calcTabs.querySelectorAll('.calc-tab');
+                for (var i = 0; i < allTabs.length; i++) {
+                    allTabs[i].classList.remove('active');
+                }
+                tab.classList.add('active');
+
+                var allMods = document.querySelectorAll('.calc-module');
+                for (var j = 0; j < allMods.length; j++) {
+                    allMods[j].classList.remove('active');
+                }
+
+                var targetMod = tab.getAttribute('data-calc');
+                if (targetMod) {
+                    var modEl = document.getElementById(targetMod);
+                    if (modEl) modEl.classList.add('active');
+                }
+            });
+        }
+
+        // ==================== TYPE SELECTOR HINTS ====================
+        var masType = document.getElementById('mas_type');
+        if (masType) {
+            masType.addEventListener('change', function() {
+                var label = document.getElementById('mas_p_label');
+                var hint = document.getElementById('mas_hint');
+                if (this.value === 'proporcion') {
+                    label.textContent = 'Proporción esperada (p)';
+                    hint.textContent = '0.5 = máxima variabilidad';
+                } else {
+                    label.textContent = 'Desviación estándar (σ)';
+                    hint.textContent = 'De estudios previos o piloto';
+                }
+            });
+        }
+
+        var sisType = document.getElementById('sis_type');
+        if (sisType) {
+            sisType.addEventListener('change', function() {
+                var label = document.getElementById('sis_p_label');
+                if (this.value === 'proporcion') {
+                    label.textContent = 'Proporción esperada (p)';
+                } else {
+                    label.textContent = 'Desviación estándar (σ)';
+                }
+            });
+        }
+
+        // ==================== STRATA MANAGEMENT ====================
+        var btnAdd = document.getElementById('btnAddStrata');
+        if (btnAdd) {
+            btnAdd.addEventListener('click', function() {
+                var container = document.getElementById('strataContainer');
+                var count = container.children.length + 1;
+                var row = document.createElement('div');
+                row.className = 'strata-row';
+                row.innerHTML = '<div class="form-group"><label>Nombre</label><input type="text" value="Estrato ' + count + '" class="strata-name"></div><div class="form-group"><label>Nₕ</label><input type="number" value="100" class="strata-Nh" min="1"></div><div class="form-group"><label>Sₕ</label><input type="number" value="0.5" class="strata-Sh" step="0.05" min="0.01"></div><button class="remove-strata-btn" title="Eliminar">✕</button>';
+                container.appendChild(row);
+            });
+        }
+
+        // Event delegation for remove strata buttons
+        var strataContainer = document.getElementById('strataContainer');
+        if (strataContainer) {
+            strataContainer.addEventListener('click', function(e) {
+                var btn = e.target.closest('.remove-strata-btn');
+                if (!btn) return;
+                if (strataContainer.children.length > 1) {
+                    btn.closest('.strata-row').remove();
+                }
+            });
+        }
+
+        // ==================== CHECKLIST ====================
+        function updateProgress() {
+            var items = document.querySelectorAll('.checklist-item');
+            var checked = document.querySelectorAll('.checklist-item.checked');
+            var pct = (checked.length / items.length) * 100;
+            var fill = document.getElementById('progressFill');
+            var text = document.getElementById('progressText');
+            if (fill) fill.style.width = pct + '%';
+            if (text) text.textContent = checked.length + '/' + items.length;
+        }
+
+        window.toggleCheck = function(item) {
+            item.classList.toggle('checked');
+            updateProgress();
+        };
+
+        // ==================== CALCULATOR FUNCTIONS ====================
+        function confFromZ(z) {
+            if (Math.abs(z - 1.96) < 0.01) return 0.95;
+            if (Math.abs(z - 2.576) < 0.01) return 0.99;
+            return 0.90;
+        }
+
+        function syntaxHighlight(code) {
+            return code
+                .replace(/(#.*)/g, '<span class="comment">$1</span>')
+                .replace(/("(?:[^"\\]|\\.)*")/g, '<span class="string">$1</span>')
+                .replace(/\b(cat|ceiling|qnorm|sqrt|sum|round|floor|print|sprintf|data\.frame|c)\b/g, '<span class="func">$1</span>')
+                .replace(/\b(<=|>=|<-|==|!=)\b/g, '<span class="keyword">$1</span>')
+                .replace(/\b(N|Z|p|q|e|f|alpha|n0|n|sigma|S|W|k|r|H|Wh|Nh|Sh|nh|confianza|error|asignacion|N_total)\b/g, '<span class="param">$1</span>');
+        }
+
+        function updateCodeBlock(code, filename) {
+            var output = document.getElementById('rCodeOutput');
+            var fname = document.getElementById('codeFilename');
+            if (output) output.innerHTML = syntaxHighlight(code);
+            if (fname) fname.textContent = filename || 'calculo.R';
+        }
+
+        // MAS Calculator
+        var btnCalcMAS = document.getElementById('btnCalcMAS');
+        if (btnCalcMAS) {
+            btnCalcMAS.addEventListener('click', function() {
+                var Nval = document.getElementById('mas_N').value;
+                var N = Nval ? parseFloat(Nval) : null;
+                var Z = parseFloat(document.getElementById('mas_Z').value);
+                var e = parseFloat(document.getElementById('mas_error').value);
+                var pOrSigma = parseFloat(document.getElementById('mas_p').value);
+                var estType = document.getElementById('mas_type').value;
+                var useFPC = document.getElementById('mas_fpc').checked;
+
+                var n0;
+                if (estType === 'proporcion') {
+                    var q = 1 - pOrSigma;
+                    n0 = Math.ceil((Z * Z * pOrSigma * q) / (e * e));
+                } else {
+                    n0 = Math.ceil((Z * Z * pOrSigma * pOrSigma) / (e * e));
+                }
+
+                var n = (N && useFPC) ? Math.ceil(n0 / (1 + (n0 - 1) / N)) : n0;
+
+                var resDiv = document.getElementById('masResult');
+                resDiv.style.display = 'block';
+                resDiv.innerHTML = '<div class="result-box"><div class="result-number">n = ' + n + '</div><div class="result-label">unidades a muestrear (MAS)</div></div><div class="result-details"><div class="result-detail-row"><span class="lbl">Sin corrección (n₀)</span><span class="val">' + n0 + '</span></div>' +
+                    (N ? '<div class="result-detail-row"><span class="lbl">Población (N)</span><span class="val">' + N + '</span></div>' : '') +
+                    (N ? '<div class="result-detail-row"><span class="lbl">Con corrección FPC</span><span class="val">' + (useFPC ? n : 'No') + '</span></div>' : '') +
+                    '<div class="result-detail-row"><span class="lbl">Confianza</span><span class="val">' + (confFromZ(Z)*100).toFixed(0) + '% (Z=' + Z + ')</span></div>' +
+                    '<div class="result-detail-row"><span class="lbl">Margen de error</span><span class="val">±' + (e*100).toFixed(1) + '%</span></div>' +
+                    '<div class="result-detail-row"><span class="lbl">Tipo</span><span class="val">' + (estType === 'proporcion' ? 'Proporción (p=' + pOrSigma + ')' : 'Media (σ=' + pOrSigma + ')') + '</span></div>' +
+                    (N ? '<div class="result-detail-row"><span class="lbl">πᵢ (prob. inclusión)</span><span class="val">' + (n/N).toFixed(4) + '</span></div>' : '') +
+                    '</div>';
+
+                var Nstr = N !== null ? N : 'Inf';
+                var paramLabel = estType === 'proporcion' ? 'p' : 'sigma';
+                var paramDesc = estType === 'proporcion' ? 'Proporción esperada' : 'Desviación estándar';
+                var qExpr = estType === 'proporcion' ? 'q         <- 1 - p\nn0 <- (Z^2 * p * q) / (error^2)' : 'n0 <- (Z^2 * sigma^2) / (error^2)';
+                var piExpr = N ? 'cat("Probabilidad de inclusión πᵢ =", n, "/", N, "=", round(' + (n/N).toFixed(4) + ', 4), "\\n")' : '';
+
+                var code = '# ============================================\n# Cálculo de tamaño de muestra — MAS\n# Diseño: Muestreo Aleatorio Simple\n# Sprint 2 · Sesión 5\n# ============================================\n\n# --- Parámetros editables ---\nN         <- ' + Nstr + '    # Población total\nconfianza <- ' + confFromZ(Z) + '  # Nivel de confianza\nerror     <- ' + e + '  # Margen de error\n' + paramLabel + '         <- ' + pOrSigma + '   # ' + paramDesc + '\n\n# --- Valor Z según confianza ---\nalpha <- 1 - confianza\nZ     <- qnorm(1 - alpha / 2)\n\n# --- n sin corrección (población infinita) ---\n' + qExpr + '\nn0 <- ceiling(n0)\n\n# --- n con corrección por población finita ---\nn <- n0 / (1 + (n0 - 1) / N)\nn <- ceiling(n)\n\n# --- Resultados ---\ncat("=== MUESTREO ALEATORIO SIMPLE ===\\n")\ncat("n sin corrección (infinita):", n0, "\\n")\ncat("n con corrección (finita):  ", n, "\\n")' + (piExpr ? '\n' + piExpr : '') + '';
+
+                updateCodeBlock(code, 'calculo_mas.R');
+            });
+        }
+
+        // Sistemático Calculator
+        var btnCalcSis = document.getElementById('btnCalcSis');
+        if (btnCalcSis) {
+            btnCalcSis.addEventListener('click', function() {
+                var N = parseFloat(document.getElementById('sis_N').value);
+                var Z = parseFloat(document.getElementById('sis_Z').value);
+                var e = parseFloat(document.getElementById('sis_error').value);
+                var pOrSigma = parseFloat(document.getElementById('sis_p').value);
+                var estType = document.getElementById('sis_type').value;
+                var useFPC = document.getElementById('sis_fpc').checked;
+                var hasPeriod = document.getElementById('sis_period').value === 'si';
+
+                var n0;
+                if (estType === 'proporcion') {
+                    var q = 1 - pOrSigma;
+                    n0 = Math.ceil((Z * Z * pOrSigma * q) / (e * e));
+                } else {
+                    n0 = Math.ceil((Z * Z * pOrSigma * pOrSigma) / (e * e));
+                }
+
+                var n = (N && useFPC) ? Math.ceil(n0 / (1 + (n0 - 1) / N)) : n0;
+                var k = Math.floor(N / n);
+
+                var warnMsg = hasPeriod ? '<div class="info-box warn" style="margin-top:1rem;"><span class="info-box-icon">⚠️</span><p><strong>Atención:</strong> El marco tiene periodicidad. El sistemático puede introducir sesgo si k coincide con el patrón cíclico. Considerá MAS o reordenar el marco.</p></div>' : '';
+
+                var resDiv = document.getElementById('sisResult');
+                resDiv.style.display = 'block';
+                resDiv.innerHTML = '<div class="result-box"><div class="result-number">n = ' + n + '</div><div class="result-label">unidades · Intervalo k = ' + k + '</div></div><div class="result-details"><div class="result-detail-row"><span class="lbl">Sin corrección (n₀)</span><span class="val">' + n0 + '</span></div><div class="result-detail-row"><span class="lbl">Población (N)</span><span class="val">' + N + '</span></div><div class="result-detail-row"><span class="lbl">Intervalo (k)</span><span class="val">' + k + '</span></div><div class="result-detail-row"><span class="lbl">Arranque aleatorio</span><span class="val">r ∈ [1, ' + k + ']</span></div><div class="result-detail-row"><span class="lbl">Confianza</span><span class="val">' + (confFromZ(Z)*100).toFixed(0) + '% (Z=' + Z + ')</span></div><div class="result-detail-row"><span class="lbl">Margen de error</span><span class="val">±' + (e*100).toFixed(1) + '%</span></div><div class="result-detail-row"><span class="lbl">Tipo</span><span class="val">' + (estType === 'proporcion' ? 'Proporción' : 'Media') + '</span></div></div>' + warnMsg;
+
+                var paramLabel = estType === 'proporcion' ? 'p' : 'sigma';
+                var paramDesc = estType === 'proporcion' ? 'Proporción esperada' : 'Desviación estándar';
+                var qExpr = estType === 'proporcion' ? 'q         <- 1 - p\nn0 <- (Z^2 * p * q) / (error^2)' : 'n0 <- (Z^2 * sigma^2) / (error^2)';
+                var periodComment = hasPeriod ? '\n# ⚠️ ADVERTENCIA: El marco tiene periodicidad.\n# Considerá usar MAS o reordenar el marco.' : '';
+
+                var code = '# ============================================\n# Cálculo de tamaño de muestra — Sistemático\n# Diseño: Muestreo Sistemático\n# Sprint 2 · Sesión 5\n# ============================================\n\n# --- Parámetros editables ---\nN         <- ' + N + '    # Población total\nconfianza <- ' + confFromZ(Z) + '  # Nivel de confianza\nerror     <- ' + e + '  # Margen de error\n' + paramLabel + '         <- ' + pOrSigma + '   # ' + paramDesc + periodComment + '\n\n# --- Valor Z según confianza ---\nalpha <- 1 - confianza\nZ     <- qnorm(1 - alpha / 2)\n\n# --- n sin corrección ---\n' + qExpr + '\nn0 <- ceiling(n0)\n\n# --- n con corrección por población finita ---\nn <- n0 / (1 + (n0 - 1) / N)\nn <- ceiling(n)\n\n# --- Intervalo de selección ---\nk <- floor(N / n)\nr <- sample(1:k, 1)  # Arranque aleatorio\n\n# --- Resultados ---\ncat("=== MUESTREO SISTEMÁTICO ===\\n")\ncat("n requerido:", n, "\\n")\ncat("Intervalo k:", k, "\\n")\ncat("Arranque aleatorio r =", r, "\\n")\ncat("Posiciones: r, r+k, r+2k, ...\\n")';
+
+                updateCodeBlock(code, 'calculo_sistematico.R');
+            });
+        }
+
+        // Estratificado Calculator
+        var btnCalcEst = document.getElementById('btnCalcEst');
+        if (btnCalcEst) {
+            btnCalcEst.addEventListener('click', function() {
+                var Z = parseFloat(document.getElementById('est_Z').value);
+                var e = parseFloat(document.getElementById('est_error').value);
+                var asignType = document.getElementById('est_asign').value;
+                var useFPC = document.getElementById('est_fpc').checked;
+
+                var rows = strataContainer.querySelectorAll('.strata-row');
+                var strataData = [];
+                var totalN = 0;
+
+                for (var i = 0; i < rows.length; i++) {
+                    var name = rows[i].querySelector('.strata-name').value;
+                    var Nh = parseFloat(rows[i].querySelector('.strata-Nh').value);
+                    var Sh = parseFloat(rows[i].querySelector('.strata-Sh').value);
+                    strataData.push({ name: name, Nh: Nh, Sh: Sh });
+                    totalN += Nh;
+                }
+
+                var H = strataData.length;
+                if (H < 1) { alert('Agregá al menos un estrato.'); return; }
+
+                var n0;
+                if (asignType === 'proporcional') {
+                    var sumWSh2 = 0;
+                    for (var j = 0; j < H; j++) {
+                        var Wh = strataData[j].Nh / totalN;
+                        sumWSh2 += Wh * strataData[j].Sh * strataData[j].Sh;
+                    }
+                    n0 = Math.ceil((Z * Z * sumWSh2) / (e * e));
+                } else {
+                    var sumWS = 0;
+                    for (var k2 = 0; k2 < H; k2++) {
+                        sumWS += (strataData[k2].Nh / totalN) * strataData[k2].Sh;
+                    }
+                    n0 = Math.ceil((Z * Z * sumWS * sumWS) / (e * e));
+                }
+
+                var n = (useFPC && totalN > 0) ? Math.ceil(n0 / (1 + (n0 - 1) / totalN)) : n0;
+
+                var allocation = [];
+                if (asignType === 'proporcional') {
+                    for (var m = 0; m < H; m++) {
+                        allocation.push({ name: strataData[m].name, nh: Math.ceil(n * (strataData[m].Nh / totalN)), Nh: strataData[m].Nh, Sh: strataData[m].Sh });
+                    }
+                } else {
+                    var totalNS = 0;
+                    for (var p2 = 0; p2 < H; p2++) { totalNS += strataData[p2].Nh * strataData[p2].Sh; }
+                    for (var q2 = 0; q2 < H; q2++) {
+                        allocation.push({ name: strataData[q2].name, nh: Math.ceil(n * (strataData[q2].Nh * strataData[q2].Sh) / totalNS), Nh: strataData[q2].Nh, Sh: strataData[q2].Sh });
+                    }
+                }
+
+                var sumNH = 0;
+                for (var r2 = 0; r2 < allocation.length; r2++) { sumNH += allocation[r2].nh; }
+                if (sumNH !== n && sumNH > 0) {
+                    allocation[allocation.length - 1].nh += (n - sumNH);
+                }
+
+                var strataHTML = '<div class="strata-results"><h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-secondary);">Asignación por estrato</h4>';
+                for (var s = 0; s < allocation.length; s++) {
+                    var a = allocation[s];
+                    strataHTML += '<div class="strata-result-row"><span class="sname">' + a.name + ' (Nₕ=' + a.Nh + ', Sₕ=' + a.Sh + ')</span><span class="sn">nₕ = ' + a.nh + '</span></div>';
+                }
+                strataHTML += '<div class="strata-result-row" style="border-top: 2px solid var(--border-accent); margin-top: 8px; padding-top: 8px;"><span class="sname">Total</span><span class="sn">n = ' + n + '</span></div></div>';
+
+                var resDiv = document.getElementById('estResult');
+                resDiv.style.display = 'block';
+                resDiv.innerHTML = '<div class="result-box"><div class="result-number">n = ' + n + '</div><div class="result-label">unidades totales (' + (asignType === 'proporcional' ? 'Proporcional' : 'Neyman') + ')</div></div><div class="result-details"><div class="result-detail-row"><span class="lbl">Sin corrección (n₀)</span><span class="val">' + n0 + '</span></div><div class="result-detail-row"><span class="lbl">Población total (N)</span><span class="val">' + totalN + '</span></div><div class="result-detail-row"><span class="lbl">Nº estratos (H)</span><span class="val">' + H + '</span></div><div class="result-detail-row"><span class="lbl">Confianza</span><span class="val">' + (confFromZ(Z)*100).toFixed(0) + '% (Z=' + Z + ')</span></div><div class="result-detail-row"><span class="lbl">Margen de error</span><span class="val">±' + (e*100).toFixed(1) + '%</span></div><div class="result-detail-row"><span class="lbl">Asignación</span><span class="val">' + (asignType === 'proporcional' ? 'Proporcional' : 'Neyman') + '</span></div></div>' + strataHTML;
+
+                // Build R code
+                var nhValues = [];
+                var NhValues = [];
+                var ShValues = [];
+                for (var t = 0; t < allocation.length; t++) {
+                    NhValues.push(allocation[t].Nh);
+                    ShValues.push(allocation[t].Sh);
+                }
+                var resultLines = '';
+                for (var u = 0; u < allocation.length; u++) {
+                    resultLines += '  cat(sprintf("Estrato %d: Nₕ=%d, Sₕ=%.2f → nₕ=%d\\n", ' + (u+1) + ', Nh[' + (u+1) + '], Sh[' + (u+1) + '], nh[' + (u+1) + ']))\n';
+                }
+
+                var code = '# ============================================\n# Cálculo de tamaño de muestra — Estratificado\n# Diseño: Muestreo Estratificado (' + (asignType === 'proporcional' ? 'Proporcional' : 'Neyman') + ')\n# Sprint 2 · Sesión 5\n# ============================================\n\n# --- Parámetros editables ---\nN_total   <- ' + totalN + '    # Población total\nH         <- ' + H + '    # Número de estratos\nNh        <- c(' + NhValues.join(', ') + ')    # Tamaños por estrato\nSh        <- c(' + ShValues.join(', ') + ')    # Desv. estándar por estrato\nWh        <- Nh / N_total    # Pesos de los estratos\nconfianza <- ' + confFromZ(Z) + '  # Nivel de confianza\nerror     <- ' + e + '  # Margen de error\nasignacion <- "' + asignType + '"  # "proporcional" o "neyman"\n\n# --- Valor Z según confianza ---\nalpha <- 1 - confianza\nZ     <- qnorm(1 - alpha / 2)\n\n# --- n sin corrección ---\nif (asignacion == "proporcional") {\n  n0 <- ceiling((Z^2 * sum(Wh * Sh^2)) / (error^2))\n} else {\n  n0 <- ceiling((Z^2 * (sum(Wh * Sh))^2) / (error^2))\n}\n\n# --- n con corrección por población finita ---\nn <- ceiling(n0 / (1 + (n0 - 1) / N_total))\n\n# --- Asignación por estrato ---\nif (asignacion == "proporcional") {\n  nh <- ceiling(n * Wh)\n} else {\n  nh <- ceiling(n * (Nh * Sh) / sum(Nh * Sh))\n}\n\ndiff <- n - sum(nh)\nnh[H] <- nh[H] + diff\n\n# --- Resultados ---\ncat("=== MUESTREO ESTRATIFICADO ===\\n")\ncat("Asignación:", asignacion, "\\n")\ncat("n total (con FPC):", n, "\\n\\n")\n' + resultLines;
+
+                updateCodeBlock(code, 'calculo_estratificado.R');
+            });
+        }
+
+        // ==================== COPY CODE ====================
+        var btnCopy = document.getElementById('btnCopy');
+        if (btnCopy) {
+            btnCopy.addEventListener('click', function() {
+                var codeEl = document.getElementById('rCodeOutput');
+                if (codeEl) {
+                    var text = codeEl.innerText;
+                    navigator.clipboard.writeText(text).then(function() {
+                        btnCopy.textContent = '✓ Copiado';
+                        btnCopy.style.color = 'var(--accent-emerald)';
+                        btnCopy.style.borderColor = 'var(--accent-emerald)';
+                        setTimeout(function() {
+                            btnCopy.textContent = 'Copiar';
+                            btnCopy.style.color = '';
+                            btnCopy.style.borderColor = '';
+                        }, 2000);
+                    });
+                }
+            });
+        }
+
+        // ==================== INIT ====================
+        updateProgress();
+
+        // Auto-run MAS calculation
+        if (btnCalcMAS) btnCalcMAS.click();
+    });
+    </script>
+</body>
+</html>
+

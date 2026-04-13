@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Métodos Estadísticos — Gestión Marino-Costera</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] },
+    startup: { typeset: true }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --deep:   #04122b;  --mid:  #072a56;  --surf:  #0e4d8c;
+    --teal:   #0a9396;  --tlt:  #94d2bd;  --sand:  #e9d8a6;
+    --coral:  #ee9b00;  --cd:   #ca6702;  --white: #f0f7ff;
+    --body:   #c8dff0;  --muted:#6da4c2;  --card:  rgba(7,42,86,.55);
+    --cbord:  rgba(10,147,150,.3);        --codebg:rgba(4,18,43,.85);
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family:'IBM Plex Sans',sans-serif; background:var(--deep); color:var(--body); line-height:1.75; }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 70% 50% at 15% 40%, rgba(10,147,150,.07) 0%,transparent 70%),
+      radial-gradient(ellipse 50% 60% at 85% 15%, rgba(14,77,140,.14) 0%,transparent 60%);
+  }
+
+  /* ── HEADER ── */
+  header { position:relative; z-index:10; padding:3.5rem 2rem 2.5rem; text-align:center;
+    border-bottom:1px solid var(--cbord);
+    background:linear-gradient(180deg,rgba(7,42,86,.8) 0%,transparent 100%); }
+  .badge { display:inline-block; font-size:.68rem; font-weight:600; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--teal); border:1px solid var(--teal);
+    padding:.2rem .9rem; border-radius:20px; margin-bottom:1.2rem; }
+  header h1 { font-family:'Playfair Display',serif; font-size:clamp(1.8rem,5vw,3.2rem);
+    font-weight:700; color:var(--white); line-height:1.2; margin-bottom:.5rem; }
+  header h1 em { color:var(--tlt); font-style:italic; }
+  header p { font-size:.9rem; color:var(--muted); max-width:580px; margin:0 auto 1.8rem; font-weight:300; }
+
+  /* ── TABS ── */
+  nav.tabs { position:sticky; top:0; z-index:100; display:flex; flex-wrap:wrap;
+    background:rgba(4,18,43,.97); border-bottom:1px solid var(--cbord);
+    backdrop-filter:blur(10px); overflow-x:auto; }
+  nav.tabs button { flex:0 0 auto; padding:.8rem 1.3rem; background:transparent; border:none;
+    color:var(--muted); font-family:'IBM Plex Sans',sans-serif; font-size:.78rem; font-weight:500;
+    letter-spacing:.04em; cursor:pointer; border-bottom:2px solid transparent;
+    transition:all .25s ease; white-space:nowrap; }
+  nav.tabs button:hover { color:var(--tlt); }
+  nav.tabs button.active { color:var(--teal); border-bottom-color:var(--teal); background:rgba(10,147,150,.08); }
+
+  /* ── MAIN ── */
+  main { position:relative; z-index:5; max-width:1080px; margin:0 auto; padding:2.5rem 2rem 5rem; }
+  .section { display:none; animation:fadeIn .4s ease; }
+  .section.active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── SECTION HEADER ── */
+  .sec-header { display:flex; align-items:flex-start; gap:1.2rem; margin-bottom:1.5rem;
+    padding-bottom:1.2rem; border-bottom:1px solid var(--cbord); }
+  .sec-icon { font-size:2.2rem; line-height:1; flex-shrink:0; margin-top:.2rem; }
+  .sec-header h2 { font-family:'Playfair Display',serif; font-size:1.9rem; color:var(--white); margin-bottom:.3rem; }
+  .sec-header p { color:var(--muted); font-size:.88rem; max-width:680px; }
+
+  /* ── CONTEXT BOX ── */
+  .ctx-box { background:rgba(10,147,150,.07); border:1px solid rgba(10,147,150,.22);
+    border-left:4px solid var(--teal); border-radius:0 10px 10px 0;
+    padding:1.2rem 1.5rem; margin-bottom:2rem; }
+  .ctx-box .ctx-title { font-size:.68rem; font-weight:600; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--teal); margin-bottom:.5rem; }
+  .ctx-box p { font-size:.87rem; color:var(--body); margin-bottom:.7rem; }
+  .ctx-box p:last-child { margin-bottom:0; }
+  .ctx-tags { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.6rem; }
+  .ctx-tag { font-size:.72rem; font-weight:500; padding:.18rem .7rem; border-radius:20px;
+    background:rgba(10,147,150,.15); color:var(--tlt); border:1px solid rgba(10,147,150,.3); }
+
+  /* ── CARDS ── */
+  .card { background:var(--card); border:1px solid var(--cbord); border-radius:12px;
+    padding:1.6rem 1.8rem; margin-bottom:1.4rem; backdrop-filter:blur(4px); }
+  .card h3 { font-family:'Playfair Display',serif; font-size:1.18rem; color:var(--tlt);
+    margin-bottom:.9rem; display:flex; align-items:center; gap:.6rem; }
+  .card h3 .num { background:var(--teal); color:var(--deep); font-family:'IBM Plex Mono',monospace;
+    font-size:.66rem; font-weight:500; padding:.12rem .45rem; border-radius:4px; }
+  .card h4 { font-size:.73rem; font-weight:600; letter-spacing:.13em; text-transform:uppercase;
+    color:var(--coral); margin:1.3rem 0 .5rem; }
+  .card h4:first-of-type { margin-top:.2rem; }
+  .card p { font-size:.875rem; color:var(--body); margin-bottom:.6rem; }
+  .card p:last-child { margin-bottom:0; }
+
+  /* ── MATH DISPLAY ── */
+  .math-block { background:var(--codebg); border-left:3px solid var(--teal);
+    border-radius:0 8px 8px 0; padding:1rem 1.4rem; margin:.9rem 0;
+    overflow-x:auto; text-align:center; color:var(--sand); }
+  .math-block.left { text-align:left; }
+  .math-block .MJX-TEX { color:var(--sand); }
+
+  /* ── TABLES ── */
+  .tbl-wrap { overflow-x:auto; margin:.9rem 0; }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; }
+  thead th { background:rgba(10,147,150,.18); color:var(--tlt); padding:.65rem .9rem;
+    text-align:left; font-weight:600; letter-spacing:.04em; border-bottom:1px solid var(--cbord); }
+  tbody td { padding:.55rem .9rem; border-bottom:1px solid rgba(10,147,150,.09);
+    color:var(--body); vertical-align:top; }
+  tbody tr:hover { background:rgba(10,147,150,.05); }
+  td.mono, th.mono { font-family:'IBM Plex Mono',monospace; font-size:.79rem; color:var(--sand); }
+  td.ok { color:#6dd5a8; }
+  td.warn { color:var(--coral); }
+
+  /* ── PILLS ── */
+  .pill-row { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.7rem; }
+  .pill { font-size:.72rem; font-weight:500; padding:.18rem .7rem; border-radius:20px; }
+  .pill-t { background:rgba(10,147,150,.18); color:var(--tlt); border:1px solid rgba(10,147,150,.35); }
+  .pill-c { background:rgba(238,155,0,.12); color:var(--coral); border:1px solid rgba(238,155,0,.3); }
+  .pill-s { background:rgba(233,216,166,.1); color:var(--sand); border:1px solid rgba(233,216,166,.25); }
+
+  /* ── ALERTS ── */
+  .alert { border-radius:8px; padding:.9rem 1.2rem; margin:.9rem 0; font-size:.84rem;
+    display:flex; gap:.7rem; align-items:flex-start; }
+  .alert-icon { font-size:1rem; flex-shrink:0; margin-top:.05rem; }
+  .at { background:rgba(10,147,150,.1); border:1px solid rgba(10,147,150,.25); }
+  .ac { background:rgba(238,155,0,.09); border:1px solid rgba(238,155,0,.25); }
+
+  /* ── GRID ── */
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+  @media(max-width:680px){ .g2{ grid-template-columns:1fr; } }
+
+  /* ── LIST ── */
+  ul.sl { list-style:none; margin:.4rem 0; }
+  ul.sl li { padding:.28rem 0 .28rem 1.3rem; position:relative; font-size:.86rem; }
+  ul.sl li::before { content:'◆'; position:absolute; left:0; color:var(--teal); font-size:.45rem; top:.6rem; }
+
+  /* ── EXAMPLE CARD ── */
+  .ex-card { background:rgba(12,32,65,.75); border:1px solid rgba(238,155,0,.25);
+    border-top:3px solid var(--coral); border-radius:12px; padding:1.8rem;
+    margin-top:2.2rem; }
+  .ex-card h3 { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--coral);
+    margin-bottom:.2rem; display:flex; align-items:center; gap:.6rem; }
+  .ex-card h3 svg { width:20px; height:20px; flex-shrink:0; }
+  .ex-sub { font-size:.78rem; color:var(--muted); font-style:italic; margin-bottom:1.3rem; }
+  .ex-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-top:1rem; }
+  @media(max-width:720px){ .ex-grid{ grid-template-columns:1fr; } }
+  .ex-chart-wrap { position:relative; height:280px; }
+  .ex-chart-wrap canvas { position:absolute; inset:0; }
+  .ex-stats { background:var(--codebg); border-radius:8px; padding:1rem 1.2rem; }
+  .ex-stats h4 { font-size:.68rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--coral); margin-bottom:.7rem; }
+  .stat-row { display:flex; justify-content:space-between; align-items:center;
+    padding:.3rem 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:.82rem; }
+  .stat-row:last-child { border-bottom:none; }
+  .stat-label { color:var(--muted); }
+  .stat-val { font-family:'IBM Plex Mono',monospace; font-weight:500; color:var(--sand); }
+  .stat-sig { font-family:'IBM Plex Mono',monospace; color:#6dd5a8; font-size:.9rem; }
+  .stat-ns  { font-family:'IBM Plex Mono',monospace; color:var(--muted); font-size:.9rem; }
+  .ex-interp { font-size:.84rem; color:var(--body); margin-top:1rem; line-height:1.65;
+    padding:.8rem 1rem; background:rgba(10,147,150,.07); border-radius:6px; border-left:2px solid var(--teal); }
+  .ex-btn { display:inline-block; margin-top:1rem; padding:.45rem 1.1rem; border:1px solid var(--coral);
+    background:transparent; color:var(--coral); font-family:'IBM Plex Sans',sans-serif;
+    font-size:.78rem; cursor:pointer; border-radius:6px; transition:all .2s; }
+  .ex-btn:hover { background:rgba(238,155,0,.15); }
+
+  /* Heatmap */
+  .hmap { width:100%; border-collapse:collapse; font-size:.78rem; }
+  .hmap th { padding:.4rem .6rem; color:var(--tlt); font-weight:500; text-align:center; font-size:.74rem; }
+  .hmap td { padding:.35rem .5rem; text-align:center; font-family:'IBM Plex Mono',monospace; 
+    font-size:.78rem; border:1px solid rgba(10,147,150,.12); border-radius:3px; }
+
+  /* ── FOOTER ── */
+  footer { text-align:center; padding:2rem; color:var(--muted); font-size:.76rem;
+    border-top:1px solid var(--cbord); position:relative; z-index:5; }
+  .back-btn {
+    position: fixed; top: 20px; left: 20px; z-index: 1000;
+    background: rgba(4,18,43,.85); backdrop-filter: blur(10px);
+    border: 1px solid var(--cbord); color: var(--body);
+    padding: .6rem 1rem; border-radius: 30px; font-size: .78rem; font-weight: 600;
+    text-decoration: none; display: flex; align-items: center; gap: .5rem;
+    transition: all .25s ease; font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .back-btn:hover { color: var(--tlt); border-color: var(--teal); transform: translateY(-2px); }
+</style>
+</head>
+<body>
+
+<a href="Sprints.html" class="back-btn">
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+  Sprints
+</a>
+
+<header>
+  <div class="badge">Compendio Metodológico · Nivel Doctoral</div>
+  <h1>Métodos Estadísticos en<br><em>Gestión Marino-Costera</em></h1>
+  <p>Definiciones formales, supuestos, pruebas de diagnóstico e interpretación aplicada — con ejemplos generados aleatoriamente.</p>
+</header>
+
+<nav class="tabs">
+  <button class="active" onclick="show('correlacion',this)">① Correlación</button>
+  <button onclick="show('regresion',this)">② Regresión Múltiple</button>
+  <button onclick="show('doe',this)">③ Diseño de Experimentos</button>
+  <button onclick="show('ac',this)">④ Análisis de Correspondencia</button>
+  <button onclick="show('ts',this)">⑤ Series de Tiempo</button>
+</nav>
+
+<main>
+
+<!-- ═══════════════════ 1. CORRELACIÓN ═══════════════════ -->
+<div id="correlacion" class="section active">
+  <div class="sec-header">
+    <div class="sec-icon">🔗</div>
+    <div>
+      <h2>Análisis de Correlación</h2>
+      <p>Medidas de la dirección y magnitud de la asociación entre pares de variables. Punto de partida del análisis exploratorio en datos ecológicos, oceanográficos y socioeconómicos costeros.</p>
+    </div>
+  </div>
+
+  <div class="ctx-box">
+    <div class="ctx-title">Contexto de aplicación</div>
+    <p>Úsese cuando el objetivo es cuantificar la <strong>fuerza y dirección</strong> de la asociación entre dos variables <em>sin establecer causalidad</em>. En gestión marino-costera es el punto de partida para explorar relaciones entre variables oceanográficas (temperatura superficial del mar —TSM—, salinidad, oxígeno disuelto), indicadores biológicos (cobertura coralina, índices de diversidad \(\alpha\) y \(\beta\), biomasa pesquera) y variables socioeconómicas (esfuerzo pesquero, ingresos de comunidades costeras). La elección entre Pearson, Spearman o Kendall depende del nivel de medición y la distribución subyacente.</p>
+    <div class="ctx-tags">
+      <span class="ctx-tag">Análisis exploratorio bivariado</span>
+      <span class="ctx-tag">Selección de predictores para RLM</span>
+      <span class="ctx-tag">Monitoreo de indicadores oceanográficos</span>
+      <span class="ctx-tag">Relación TSM–blanqueamiento coralino</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">1.1</span> Correlación de Pearson (\(r\))</h3>
+    <h4>Definición formal</h4>
+    <p>Covarianza estandarizada entre dos variables cuantitativas continuas. Mide exclusivamente la relación <strong>lineal</strong>:</p>
+    <div class="math-block">
+      \[ r = \frac{\displaystyle\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\displaystyle\sum_{i=1}^{n}(x_i - \bar{x})^2 \cdot \sum_{i=1}^{n}(y_i - \bar{y})^2}} = \frac{\text{Cov}(X,Y)}{\sigma_X \,\sigma_Y}, \qquad r \in [-1,\;1] \]
+    </div>
+    <h4>Prueba de significancia</h4>
+    <div class="math-block">
+      \[ H_0{:}\;\rho = 0 \quad \text{vs.} \quad H_1{:}\;\rho \neq 0 \qquad \Rightarrow \qquad t = \frac{r\sqrt{n-2}}{\sqrt{1-r^2}} \;\sim\; t_{(n-2)} \]
+    </div>
+    <p>Para construir intervalos de confianza se aplica la transformación de Fisher, que estabiliza la varianza:</p>
+    <div class="math-block">
+      \[ Z = \operatorname{arctanh}(r) = \frac{1}{2}\ln\!\left(\frac{1+r}{1-r}\right) \;\sim\; \mathcal{N}\!\left(\operatorname{arctanh}(\rho),\;\frac{1}{n-3}\right) \]
+    </div>
+    <h4>Magnitud (Cohen, 1988)</h4>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>\(|r|\)</th><th>Fuerza</th><th>Ejemplo marino-costero</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">0.80–1.00</td><td class="ok">Muy fuerte</td><td>TSM vs. tasa de blanqueamiento coralino</td></tr>
+        <tr><td class="mono">0.60–0.79</td><td class="ok">Fuerte</td><td>Salinidad vs. abundancia larval de peces</td></tr>
+        <tr><td class="mono">0.40–0.59</td><td>Moderada</td><td>Cobertura de manglar vs. captura artesanal</td></tr>
+        <tr><td class="mono">0.20–0.39</td><td>Débil</td><td>pH vs. diversidad de macroinvertebrados</td></tr>
+        <tr><td class="mono">0.00–0.19</td><td class="warn">Despreciable</td><td>Viento en tierra vs. densidad de zooplancton</td></tr>
+      </tbody>
+    </table></div>
+    <h4>Supuestos</h4>
+    <ul class="sl">
+      <li>Normalidad bivariada: ambas variables \(\sim \mathcal{N}(\mu, \sigma^2)\)</li>
+      <li>Homoscedasticidad: \(\text{Var}(Y \mid X = x)\) constante en \(x\)</li>
+      <li>Linealidad de la relación (verificar con diagrama de dispersión)</li>
+      <li>Independencia de las observaciones — <em>crítico</em> en datos espacio-temporales costeros</li>
+    </ul>
+    <div class="alert ac">
+      <div class="alert-icon">⚠</div>
+      <div><strong>Autocorrelación espaciotemporal:</strong> series de monitoreo continuo inflan el \(n\) efectivo. Usar \(n_\text{ef} = n\big/(1 + 2\sum_{k=1}^{\infty}\hat{\rho}_k)\) o la prueba de Clifford et al. (1989) para datos georreferenciados.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">1.2</span> Correlación de Spearman (\(\rho_s\))</h3>
+    <h4>Definición formal</h4>
+    <p>Correlación de Pearson aplicada a los <em>rangos</em> de las observaciones. Captura relaciones <strong>monótonas no necesariamente lineales</strong>; robusta frente a distribuciones sesgadas y valores atípicos:</p>
+    <div class="math-block">
+      \[ \rho_s = 1 - \frac{6\displaystyle\sum_{i=1}^{n} d_i^2}{n(n^2-1)}, \qquad d_i = R(x_i) - R(y_i) \]
+    </div>
+    <p>La expresión anterior es exacta cuando no hay empates; en presencia de empates usar la fórmula general de Pearson sobre los rangos promediados.</p>
+    <h4>Prueba de significancia</h4>
+    <div class="math-block">
+      \[ t = \frac{\rho_s\sqrt{n-2}}{\sqrt{1-\rho_s^2}} \;\sim\; t_{(n-2)} \quad (n > 10) \]
+    </div>
+    <h4>Supuestos</h4>
+    <ul class="sl">
+      <li>Variables al menos en escala ordinal</li>
+      <li>Relación monótona (creciente o decreciente) entre \(X\) e \(Y\)</li>
+      <li>Independencia de los pares observados</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">1.3</span> Tau de Kendall (\(\tau_b\))</h3>
+    <p>Mide la concordancia entre el orden de rangos en dos variables. Más robusto que Spearman ante empates y muestras pequeñas (\(n < 30\)):</p>
+    <div class="math-block">
+      \[ \tau_b = \frac{P - Q}{\sqrt{(P + Q + T_X)(P + Q + T_Y)}} \]
+    </div>
+    <p>donde \(P\) = pares concordantes, \(Q\) = discordantes, \(T_X, T_Y\) = empates en cada variable.</p>
+    <h4>Guía de selección</h4>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Situación</th><th>Coeficiente</th></tr></thead>
+      <tbody>
+        <tr><td>Datos continuos normales, linealidad confirmada</td><td class="ok">Pearson \(r\)</td></tr>
+        <tr><td>Distribución sesgada, variables ordinales, no linealidad leve</td><td class="ok">Spearman \(\rho_s\)</td></tr>
+        <tr><td>Muestra pequeña (\(n < 30\)) o muchos empates</td><td class="ok">Kendall \(\tau_b\)</td></tr>
+        <tr><td>Datos ecológicos de presencia–abundancia</td><td class="ok">Spearman / Kendall</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- EJEMPLO CORRELACIÓN -->
+  <div class="ex-card">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Ejemplo: TSM vs. Cobertura coralina
+    </h3>
+    <div class="ex-sub">Datos generados aleatoriamente · n = 45 transectos · Pacífico costarricense</div>
+    <div class="ex-grid">
+      <div class="ex-chart-wrap"><canvas id="chart-cor"></canvas></div>
+      <div>
+        <div class="ex-stats" id="stats-cor"></div>
+        <div class="ex-interp" id="interp-cor"></div>
+        <button class="ex-btn" onclick="buildCorChart()">⟳ Regenerar muestra</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ 2. REGRESIÓN ═══════════════════ -->
+<div id="regresion" class="section">
+  <div class="sec-header">
+    <div class="sec-icon">📈</div>
+    <div>
+      <h2>Regresión Lineal Múltiple (RLM)</h2>
+      <p>Modelo que relaciona una variable respuesta cuantitativa con múltiples covariables mediante estimación por Mínimos Cuadrados Ordinarios (MCO).</p>
+    </div>
+  </div>
+
+  <div class="ctx-box">
+    <div class="ctx-title">Contexto de aplicación</div>
+    <p>Apropiada cuando se busca <strong>explicar o predecir</strong> una variable cuantitativa continua (captura, cobertura, biomasa, nivel del mar) en función de múltiples covariables, <em>controlando simultáneamente</em> el efecto de cada una. En ecología costera, permite aislar el efecto neto de un factor (e.g. TSM) descontando la influencia de otros (e.g. surgencia, cobertura de manglar). Fundamento de los Modelos de Distribución de Especies (SDM), modelos de calidad de agua y proyecciones de captura pesquera.</p>
+    <div class="ctx-tags">
+      <span class="ctx-tag">Modelado de hábitat y SDM</span>
+      <span class="ctx-tag">Predicción de captura pesquera</span>
+      <span class="ctx-tag">Calidad del agua (índices multivariados)</span>
+      <span class="ctx-tag">Análisis de impacto de políticas costeras</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">2.1</span> Especificación del Modelo</h3>
+    <div class="math-block">
+      \[ \mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\varepsilon}, \qquad \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0},\; \sigma^2\mathbf{I}_n) \]
+    </div>
+    <p>El estimador MCO minimiza \(\boldsymbol{\varepsilon}'\boldsymbol{\varepsilon}\), con solución única si \(\mathbf{X}'\mathbf{X}\) es de rango completo:</p>
+    <div class="math-block">
+      \[ \hat{\boldsymbol{\beta}} = (\mathbf{X}'\mathbf{X})^{-1}\mathbf{X}'\mathbf{y}, \qquad \widehat{\mathbf{y}} = \mathbf{X}\hat{\boldsymbol{\beta}} = \mathbf{H}\mathbf{y} \]
+    </div>
+    <p>donde \(\mathbf{H} = \mathbf{X}(\mathbf{X}'\mathbf{X})^{-1}\mathbf{X}'\) es la matriz "sombrero" (hat matrix); los valores de palanca (leverage) son los elementos \(h_{ii}\) de su diagonal.</p>
+    <h4>Parámetros e indicadores</h4>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Parámetro</th><th>Expresión</th><th>Interpretación</th></tr></thead>
+      <tbody>
+        <tr><td>\(\hat{\beta}_j\)</td><td class="mono">Coeficiente parcial</td><td>Cambio esperado en \(Y\) por unidad de \(X_j\), <em>ceteris paribus</em></td></tr>
+        <tr><td>\(\beta_j^*\)</td><td class="mono">\(\hat{\beta}_j \cdot \sigma_{X_j}/\sigma_Y\)</td><td>Coeficiente estandarizado; importancia relativa</td></tr>
+        <tr><td>\(R^2\)</td><td class="mono">\(SC_{Reg}/SC_{Tot}\)</td><td>Proporción de varianza de \(Y\) explicada por el modelo</td></tr>
+        <tr><td>\(R^2_{adj}\)</td><td class="mono">\(1-(1-R^2)\frac{n-1}{n-k-1}\)</td><td>\(R^2\) penalizado por número de predictores</td></tr>
+        <tr><td>\(\hat{\sigma}\)</td><td class="mono">\(\sqrt{SC_{Res}/(n{-}k{-}1)}\)</td><td>Error estándar del modelo (unidades de \(Y\))</td></tr>
+        <tr><td>\(\text{VIF}_j\)</td><td class="mono">\(1/(1-R_j^2)\)</td><td>Inflación de varianza por multicolinealidad</td></tr>
+      </tbody>
+    </table></div>
+    <div class="math-block">
+      \[ R^2 = 1 - \frac{SC_{Res}}{SC_{Tot}}, \qquad R^2_{adj} = 1 - \frac{(1-R^2)(n-1)}{n-k-1} \]
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">2.2</span> Supuestos de Gauss-Markov (extendidos)</h3>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Supuesto</th><th>Notación formal</th><th>Prueba diagnóstica</th><th>Corrección</th></tr></thead>
+      <tbody>
+        <tr><td>Linealidad</td><td class="mono">\(E(\varepsilon_i)=0\)</td><td>Residuales vs. \(\hat{y}\); RESET de Ramsey</td><td>Términos cuadráticos, transformación</td></tr>
+        <tr><td>Independencia de errores</td><td class="mono">\(\text{Cov}(\varepsilon_i,\varepsilon_j)=0\)</td><td>Durbin-Watson, Ljung-Box</td><td>GLS, errores Newey-West</td></tr>
+        <tr><td>Homoscedasticidad</td><td class="mono">\(\text{Var}(\varepsilon_i)=\sigma^2\)</td><td>Breusch-Pagan, White</td><td>\(\log Y\), MCO ponderado</td></tr>
+        <tr><td>Normalidad de \(\hat{\varepsilon}\)</td><td class="mono">\(\varepsilon \sim \mathcal{N}(0,\sigma^2)\)</td><td>Shapiro-Wilk, gráfico Q-Q</td><td>Box-Cox, bootstrap</td></tr>
+        <tr><td>No multicolinealidad</td><td class="mono">\(\text{rng}(\mathbf{X})=k+1\)</td><td>VIF, número de condición</td><td>Ridge, PCA-regresión</td></tr>
+        <tr><td>Exogeneidad</td><td class="mono">\(\text{Cov}(\mathbf{X},\boldsymbol{\varepsilon})=\mathbf{0}\)</td><td>Prueba de Hausman</td><td>Variables instrumentales</td></tr>
+      </tbody>
+    </table></div>
+    <h4>Regla del Factor de Inflación de la Varianza</h4>
+    <div class="math-block">
+      \[ \text{VIF}_j = \frac{1}{1 - R_j^2} \qquad \begin{cases} > 10 & \text{problema grave} \\ 5\text{–}10 & \text{supervisar} \\ < 5 & \text{aceptable} \end{cases} \]
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">2.3</span> Pruebas de Significancia</h3>
+    <div class="g2">
+      <div>
+        <h4>Prueba \(F\) global</h4>
+        <div class="math-block">
+          \[ H_0{:}\;\beta_1=\cdots=\beta_k=0 \]
+          \[ F = \frac{R^2/k}{(1-R^2)/(n-k-1)} \sim F_{(k,\,n-k-1)} \]
+        </div>
+      </div>
+      <div>
+        <h4>Prueba \(t\) individual</h4>
+        <div class="math-block">
+          \[ H_0{:}\;\beta_j=0 \]
+          \[ t_j = \frac{\hat{\beta}_j}{SE(\hat{\beta}_j)} \sim t_{(n-k-1)} \]
+          \[ \text{IC}_{95\%}{:}\;\hat{\beta}_j \pm t_{\alpha/2}\cdot SE(\hat{\beta}_j) \]
+        </div>
+      </div>
+    </div>
+    <h4>Criterios de selección de modelos</h4>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Criterio</th><th>Fórmula</th><th>Preferir</th></tr></thead>
+      <tbody>
+        <tr><td>AIC</td><td class="mono">\(-2\ell(\hat{\theta}) + 2k\)</td><td>Valor más bajo; comparación modelos no anidados</td></tr>
+        <tr><td>BIC (SIC)</td><td class="mono">\(-2\ell(\hat{\theta}) + k\ln n\)</td><td>Penaliza más fuerte; \(n\) grande</td></tr>
+        <tr><td>\(R^2_{adj}\)</td><td class="mono">\(1-(1-R^2)(n-1)/(n-k-1)\)</td><td>Modelos anidados</td></tr>
+        <tr><td>\(C_p\) de Mallows</td><td class="mono">\(SC_{Res}/\hat{\sigma}^2 - n + 2k\)</td><td>\(C_p \approx k+1\) indica buen ajuste</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- EJEMPLO REGRESIÓN -->
+  <div class="ex-card">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Ejemplo: Captura de pargo en función de TSM, surgencia y manglar
+    </h3>
+    <div class="ex-sub">Datos generados aleatoriamente · n = 60 registros de sitios de pesca artesanal</div>
+    <div class="ex-grid">
+      <div class="ex-chart-wrap"><canvas id="chart-reg"></canvas></div>
+      <div>
+        <div class="ex-stats" id="stats-reg"></div>
+        <div class="ex-interp" id="interp-reg"></div>
+        <button class="ex-btn" onclick="buildRegChart()">⟳ Regenerar muestra</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ 3. DOE ═══════════════════ -->
+<div id="doe" class="section">
+  <div class="sec-header">
+    <div class="sec-icon">🧪</div>
+    <div>
+      <h2>Diseño de Experimentos (DOE)</h2>
+      <p>Marco para la asignación controlada de tratamientos. Únicamente el diseño experimental aleatorizado garantiza la inferencia causal sobre los efectos observados.</p>
+    </div>
+  </div>
+
+  <div class="ctx-box">
+    <div class="ctx-title">Contexto de aplicación</div>
+    <p>Indispensable cuando el diseño implica <strong>manipulación experimental controlada</strong> con asignación aleatoria de tratamientos. En investigación marino-costera: experimentos de mesocosmos (temperatura, acidificación, nutrientes), ensayos de restauración de arrecifes y manglares, experimentos de acuicultura (densidad, dieta, temperatura), y evaluación de efectividad de diferentes artes de pesca. Sin aleatorización, el análisis sigue siendo ANOVA pero <em>pierde la interpretación causal</em>.</p>
+    <div class="ctx-tags">
+      <span class="ctx-tag">Experimentos de mesocosmos</span>
+      <span class="ctx-tag">Restauración de corales y manglares</span>
+      <span class="ctx-tag">Acuicultura experimental</span>
+      <span class="ctx-tag">Efectividad de áreas marinas protegidas</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">3.1</span> ANOVA de un Factor</h3>
+    <h4>Modelo lineal</h4>
+    <div class="math-block">
+      \[ y_{ij} = \mu + \tau_i + \varepsilon_{ij}, \qquad \varepsilon_{ij} \sim \mathcal{N}(0,\sigma^2), \qquad \sum_{i=1}^{k}\tau_i = 0 \]
+    </div>
+    <h4>Tabla ANOVA</h4>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Fuente</th><th>SC</th><th>gl</th><th>CM</th><th>Estadístico</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Tratamientos</td>
+          <td class="mono">\(\sum_i n_i(\bar{y}_{i\cdot}-\bar{y})^2\)</td>
+          <td class="mono">\(k-1\)</td>
+          <td class="mono">\(SC_T/(k-1)\)</td>
+          <td class="mono" rowspan="2">\(F = CM_T/CM_E \sim F_{(k-1,\,N-k)}\)</td>
+        </tr>
+        <tr>
+          <td>Error (residual)</td>
+          <td class="mono">\(\sum_{ij}(y_{ij}-\bar{y}_{i\cdot})^2\)</td>
+          <td class="mono">\(N-k\)</td>
+          <td class="mono">\(SC_E/(N-k)\)</td>
+        </tr>
+        <tr><td><strong>Total</strong></td><td class="mono">\(SC_T+SC_E\)</td><td class="mono">\(N-1\)</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+    <h4>Supuestos y pruebas diagnósticas</h4>
+    <ul class="sl">
+      <li><strong>Normalidad por grupo:</strong> Shapiro-Wilk (\(n < 50\)); Kolmogorov-Smirnov-Lilliefors (\(n \geq 50\))</li>
+      <li><strong>Homocedasticidad:</strong> Levene (robusto a no-normalidad); Bartlett (más potente si hay normalidad)</li>
+      <li><strong>Independencia:</strong> garantizada por aleatorización; verificar con Durbin-Watson si hay orden temporal</li>
+    </ul>
+    <h4>Pruebas post-hoc</h4>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Prueba</th><th>Característica</th><th>Cuándo usar</th></tr></thead>
+      <tbody>
+        <tr><td>Tukey HSD</td><td>Controla FWER; grupos iguales</td><td>Comparaciones <em>all-pairs</em> con homocedasticidad</td></tr>
+        <tr><td>Bonferroni</td><td>Conservador; ajuste \(\alpha/m\)</td><td>Pocas comparaciones planeadas</td></tr>
+        <tr><td>Games-Howell</td><td>No asume varianzas iguales</td><td>Violación de homocedasticidad</td></tr>
+        <tr><td>Dunnett</td><td>Compara cada trat. vs. control</td><td>Zonas de manejo vs. sitio control</td></tr>
+        <tr><td>Kruskal-Wallis + Dunn</td><td>No paramétrico</td><td>Distribuciones muy sesgadas, n pequeño</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">3.2</span> ANOVA Factorial y Diseño en Bloques</h3>
+    <h4>Modelo de dos factores con interacción</h4>
+    <div class="math-block">
+      \[ y_{ijk} = \mu + \alpha_i + \beta_j + (\alpha\beta)_{ij} + \varepsilon_{ijk} \]
+    </div>
+    <p>donde \(\alpha_i\) = efecto del factor A (e.g. temperatura del agua), \(\beta_j\) = efecto del factor B (e.g. concentración de nutrientes), \((\alpha\beta)_{ij}\) = interacción: el efecto de A depende del nivel de B.</p>
+    <div class="alert ac">
+      <div class="alert-icon">⚠</div>
+      <div><strong>Regla fundamental:</strong> si la interacción \(AB\) es significativa (\(p < \alpha\)), NO interpretar los efectos principales de forma aislada. Analizar los efectos simples de A en cada nivel de B.</div>
+    </div>
+    <h4>Diseño en Bloques Completos Aleatorizados (DBCA)</h4>
+    <div class="math-block">
+      \[ y_{ij} = \mu + \tau_i + \beta_j + \varepsilon_{ij}, \qquad \varepsilon_{ij} \sim \mathcal{N}(0, \sigma^2) \]
+    </div>
+    <p>Los bloques \(\beta_j\) absorben fuentes de variación no controlables (e.g. sitios costeros con gradiente de profundidad). Aumentan la precisión al reducir \(CM_E\) sin consumir grados de libertad de tratamientos.</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">3.3</span> Tamaño del Efecto y Potencia Estadística</h3>
+    <div class="g2">
+      <div>
+        <h4>Eta cuadrado (\(\eta^2\)) y Omega cuadrado (\(\omega^2\))</h4>
+        <div class="math-block" style="text-align:left;">
+          \[ \eta^2 = \frac{SC_{Trat}}{SC_{Total}} \quad \text{(sesgado)} \]
+          \[ \omega^2 = \frac{SC_{Trat} - (k-1)CM_E}{SC_{Total} + CM_E} \quad \text{(insesgado)} \]
+        </div>
+      </div>
+      <div>
+        <h4>Cálculo de tamaño muestral</h4>
+        <div class="math-block" style="text-align:left;">
+          \[ n \approx \frac{(z_{\alpha/2} + z_{\beta})^2 \cdot 2\sigma^2}{\delta^2} \]
+          <br><small style="color:var(--muted)">\(\delta\) = diferencia mínima detectable; \(\sigma\) = desv. estándar del error</small>
+        </div>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Índice</th><th>Pequeño</th><th>Mediano</th><th>Grande</th></tr></thead>
+      <tbody>
+        <tr><td>\(\omega^2\) / \(\eta^2\)</td><td class="mono">0.01</td><td class="mono">0.06</td><td class="mono">0.14</td></tr>
+        <tr><td>\(d\) de Cohen (2 grupos)</td><td class="mono">0.20</td><td class="mono">0.50</td><td class="mono">0.80</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- EJEMPLO DOE -->
+  <div class="ex-card">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Ejemplo: Cobertura de coral vivo en 4 zonas de manejo marino
+    </h3>
+    <div class="ex-sub">Datos generados aleatoriamente · k = 4 grupos · n = 10 por grupo · Variable: % cobertura coralina</div>
+    <div class="ex-grid">
+      <div class="ex-chart-wrap"><canvas id="chart-doe"></canvas></div>
+      <div>
+        <div class="ex-stats" id="stats-doe"></div>
+        <div class="ex-interp" id="interp-doe"></div>
+        <button class="ex-btn" onclick="buildDoeChart()">⟳ Regenerar muestra</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ 4. CORRESPONDENCIA ═══════════════════ -->
+<div id="ac" class="section">
+  <div class="sec-header">
+    <div class="sec-icon">🗺</div>
+    <div>
+      <h2>Análisis de Correspondencia (AC)</h2>
+      <p>Reducción de dimensiones para tablas de contingencia. Revela y visualiza asociaciones entre categorías de filas y columnas en un espacio euclidiano de baja dimensión.</p>
+    </div>
+  </div>
+
+  <div class="ctx-box">
+    <div class="ctx-title">Contexto de aplicación</div>
+    <p>Idóneo para analizar asociaciones entre variables categóricas en tablas de frecuencia. En gestión costera: análisis de comunidades de macroinvertebrados por tipo de hábitat, distribución de artes de pesca por zona de captura, preferencia de hábitat de peces arrecifales, o caracterización de pescadores artesanales por perfil socioeconómico. Es la <em>alternativa visual y analítica</em> a la prueba \(\chi^2\): no solo indica si hay asociación, sino qué categorías específicas la generan y cuál es su patrón espacial en el biplot.</p>
+    <div class="ctx-tags">
+      <span class="ctx-tag">Análisis de comunidades biológicas</span>
+      <span class="ctx-tag">Preferencia de hábitat de peces</span>
+      <span class="ctx-tag">Perfiles de pescadores artesanales</span>
+      <span class="ctx-tag">Clasificación de usos del territorio costero</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">4.1</span> Análisis de Correspondencia Simple (ACS)</h3>
+    <h4>Fundamento matemático</h4>
+    <p>Dada la tabla de contingencia \(\mathbf{N}\) (\(I \times J\)), se define la matriz de frecuencias relativas \(\mathbf{P} = \mathbf{N}/n\) y los vectores de masa:</p>
+    <div class="math-block">
+      \[ \mathbf{r} = \mathbf{P}\mathbf{1}_J \quad (\text{masas de fila}), \qquad \mathbf{c} = \mathbf{P}'\mathbf{1}_I \quad (\text{masas de columna}) \]
+    </div>
+    <p>La inercia total (equivalente a \(\chi^2/n\)) se descompone mediante SVD de la matriz de residuos estandarizados:</p>
+    <div class="math-block">
+      \[ \mathbf{S} = \mathbf{D}_r^{-1/2}\!\left(\mathbf{P} - \mathbf{r}\mathbf{c}'\right)\!\mathbf{D}_c^{-1/2} = \mathbf{U}\boldsymbol{\Lambda}\mathbf{V}', \qquad \text{Inercia total} = \frac{\chi^2}{n} = \sum_k \lambda_k^2 \]
+    </div>
+    <p>Las coordenadas de filas en el biplot son \(\mathbf{F} = \mathbf{D}_r^{-1/2}\mathbf{U}\boldsymbol{\Lambda}\) y de columnas \(\mathbf{G} = \mathbf{D}_c^{-1/2}\mathbf{V}\boldsymbol{\Lambda}\) (representación simétrica).</p>
+    <h4>Prueba global de independencia</h4>
+    <div class="math-block">
+      \[ H_0{:}\;\text{filas y columnas son independientes} \qquad \chi^2 = \sum_{i,j}\frac{(n_{ij} - e_{ij})^2}{e_{ij}} \;\sim\; \chi^2_{(I-1)(J-1)} \]
+    </div>
+    <p>donde \(e_{ij} = n_{i\cdot}\, n_{\cdot j}/n\) son las frecuencias esperadas bajo independencia.</p>
+    <h4>Supuestos y condiciones</h4>
+    <ul class="sl">
+      <li>Datos de <strong>frecuencias o conteos</strong> no negativos (no porcentajes directos)</li>
+      <li>Al menos 5 celdas con frecuencias esperadas \(\geq 5\) (regla de Cochran)</li>
+      <li>Filas y columnas conceptualmente <strong>homogéneas</strong> (misma unidad de conteo)</li>
+      <li>Al menos 3 categorías en cada dimensión para representación gráfica informativa</li>
+      <li>No requiere normalidad multivariada (ventaja sobre PCA)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">4.2</span> Análisis de Correspondencia Múltiple (ACM)</h3>
+    <p>Extensión a \(J\) variables categóricas simultáneas. Opera sobre la Matriz de Indicadores \(\mathbf{Z}\) (\(n \times \sum_j J_j\)) o la Matriz de Burt \(\mathbf{B} = \mathbf{Z}'\mathbf{Z}\):</p>
+    <div class="math-block">
+      \[ \text{Inercia}_{ACM} = \frac{1}{J}\left(\sum_j J_j - J\right) \]
+    </div>
+    <p>La inercia explicada aparece inflada artificialmente; se aplica la <strong>corrección de Benzécri</strong>:</p>
+    <div class="math-block">
+      \[ \lambda_k^* = \left(\frac{J}{J-1}\right)^{\!2}\!\left(\lambda_k - \frac{1}{J}\right)^{\!2}, \qquad \text{si } \lambda_k > \frac{1}{J} \]
+    </div>
+    <h4>Diagnósticos de calidad de representación</h4>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Indicador</th><th>Umbral</th><th>Interpretación</th></tr></thead>
+      <tbody>
+        <tr><td>% Inercia acumulada (2 ejes)</td><td class="mono">&gt; 40%</td><td class="ok">Representación 2D aceptable</td></tr>
+        <tr><td>Coseno\(^2\) (calidad del punto)</td><td class="mono">&ge; 0.50</td><td class="ok">Punto bien representado en el plano</td></tr>
+        <tr><td>Coseno\(^2\) (calidad del punto)</td><td class="mono">&lt; 0.25</td><td class="warn">Interpretar con cautela</td></tr>
+        <tr><td>Contribución absoluta</td><td class="mono">&gt; 1/n_cat</td><td>Categoría influyente en el eje</td></tr>
+        <tr><td>Masa muy baja</td><td class="mono">—</td><td class="warn">Posible distorsión; categoría rara</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- EJEMPLO AC -->
+  <div class="ex-card">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Ejemplo: Frecuencia de 5 especies en 4 tipos de hábitat costero
+    </h3>
+    <div class="ex-sub">Tabla de contingencia generada aleatoriamente · Hábitats × Especies · Residuos de Pearson estandarizados</div>
+    <div style="margin-top:1rem;" id="ac-tables"></div>
+    <div class="ex-stats" id="stats-ac" style="margin-top:1rem;"></div>
+    <div class="ex-interp" id="interp-ac" style="margin-top:.8rem;"></div>
+    <button class="ex-btn" onclick="buildAcExample()">⟳ Regenerar tabla</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ 5. SERIES DE TIEMPO ═══════════════════ -->
+<div id="ts" class="section">
+  <div class="sec-header">
+    <div class="sec-icon">⏱</div>
+    <div>
+      <h2>Análisis de Series de Tiempo</h2>
+      <p>Modelado de observaciones secuenciales dependientes en el tiempo: temperatura superficial del mar, nivel del océano, capturas históricas, índices de blanqueamiento.</p>
+    </div>
+  </div>
+
+  <div class="ctx-box">
+    <div class="ctx-title">Contexto de aplicación</div>
+    <p>Necesario cuando las observaciones están <strong>ordenadas temporalmente</strong> y la dependencia serial es parte constitutiva del fenómeno (no un artefacto). En gestión marino-costera: análisis de tendencias en temperatura superficial del mar para detección de cambio climático, pronóstico de nivel oceánico para planificación de zonas costeras y protección de infraestructura, modelado de ciclos de abundancia pesquera asociados a El Niño-Oscilación Sur (ENOS), y evaluación del impacto de eventos disruptivos (derrames, terremotos, ciclones tropicales) mediante análisis de intervención.</p>
+    <div class="ctx-tags">
+      <span class="ctx-tag">Tendencias de TSM y cambio climático</span>
+      <span class="ctx-tag">Pronóstico de nivel del mar</span>
+      <span class="ctx-tag">Ciclos ENOS y abundancia pesquera</span>
+      <span class="ctx-tag">Análisis de intervención (impactos disruptivos)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">5.1</span> Componentes y Descomposición</h3>
+    <div class="math-block">
+      \[ Y_t = T_t + S_t + C_t + I_t \quad \text{(modelo aditivo)} \]
+      \[ Y_t = T_t \cdot S_t \cdot C_t \cdot I_t \quad \text{(modelo multiplicativo)} \]
+    </div>
+    <p>El modelo multiplicativo es apropiado cuando la amplitud estacional crece proporcionalmente al nivel de la serie (aplicable a TSM en regiones tropicales con calentamiento progresivo).</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Método</th><th>Descripción</th><th>Ventaja costera</th></tr></thead>
+      <tbody>
+        <tr><td>Medias móviles (MA)</td><td>Suaviza la tendencia</td><td>Índice de surgencia mensual</td></tr>
+        <tr><td>STL (Loess)</td><td>Estacionalidad cambiante, robusto</td><td>TSM con calentamiento progresivo</td></tr>
+        <tr><td>X-13-ARIMA-SEATS</td><td>Estándar oficial; ajuste calendario</td><td>Captura pesquera con efecto días-mes</td></tr>
+        <tr><td>EMD (Empírico)</td><td>No paramétrico; señales no estacionarias</td><td>Análisis de mareas y oleaje</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">5.2</span> Estacionariedad y Raíz Unitaria</h3>
+    <h4>Estacionariedad en covarianza (débil)</h4>
+    <div class="math-block">
+      \[ E(Y_t) = \mu, \quad \text{Var}(Y_t) = \sigma^2 &lt; \infty, \quad \text{Cov}(Y_t,\, Y_{t-h}) = \gamma(h) \quad \forall\, t \]
+    </div>
+    <h4>Pruebas de raíz unitaria</h4>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Prueba</th><th>\(H_0\)</th><th>\(H_1\)</th><th>Limitación</th></tr></thead>
+      <tbody>
+        <tr><td>ADF (Dickey-Fuller aumentado)</td><td>Raíz unitaria \(I(1)\)</td><td>Estacionaria</td><td>Baja potencia; sensible a rezagos</td></tr>
+        <tr><td>PP (Phillips-Perron)</td><td>Raíz unitaria</td><td>Estacionaria</td><td>Puede rechazar \(H_0\) con heterosc.</td></tr>
+        <tr><td>KPSS</td><td>Estacionaria</td><td>Raíz unitaria</td><td>\(H_0\) opuesta a ADF</td></tr>
+        <tr><td>Zivot-Andrews</td><td>Raíz unitaria</td><td>Estac. con quiebre estructural</td><td>Un quiebre endógeno</td></tr>
+      </tbody>
+    </table></div>
+    <div class="alert ac">
+      <div class="alert-icon">⚠</div>
+      <div><strong>Estrategia recomendada:</strong> aplicar ADF + KPSS. Si ADF rechaza \(H_0\) Y KPSS no rechaza \(H_0\) → evidencia fuerte de estacionariedad. Si ambos rechazan \(H_0\) → posible quiebre estructural; evaluar con Zivot-Andrews.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="num">5.3</span> Modelos ARIMA(\(p,d,q\))</h3>
+    <div class="math-block">
+      \[ \phi(B)\,\nabla^d Y_t = \theta(B)\,\varepsilon_t, \qquad \varepsilon_t \sim \text{RB}(0, \sigma_\varepsilon^2) \]
+    </div>
+    <div class="math-block" style="text-align:left; font-size:.9rem;">
+      \[ AR(p){:}\quad Y_t = \sum_{j=1}^{p}\phi_j Y_{t-j} + \varepsilon_t \qquad MA(q){:}\quad Y_t = \varepsilon_t - \sum_{j=1}^{q}\theta_j\varepsilon_{t-j} \]
+    </div>
+    <p>Para datos costeros con estacionalidad de periodo \(s\) (e.g. \(s = 12\) mensual), usar SARIMA:</p>
+    <div class="math-block">
+      \[ \phi(B)\,\Phi(B^s)\,\nabla^d\nabla_s^D Y_t = \theta(B)\,\Theta(B^s)\,\varepsilon_t \]
+    </div>
+    <h4>Diagnóstico de Ruido Blanco en residuales</h4>
+    <ul class="sl">
+      <li><strong>Ljung-Box \(Q\):</strong> \(H_0\): residuales son independientes hasta rezago \(m\) → deseable \(p > 0.05\)</li>
+      <li><strong>ACF de \(\hat{\varepsilon}_t\):</strong> ningún rezago significativo fuera de bandas \(\pm 1.96/\sqrt{n}\)</li>
+      <li><strong>ARCH-LM:</strong> detecta heterocedasticidad condicional → si falla, considerar GARCH</li>
+    </ul>
+    <h4>Métricas de evaluación de pronóstico</h4>
+    <div class="math-block" style="text-align:left; font-size:.88rem;">
+      \[ \text{MAE} = \frac{1}{n}\sum|e_t|, \quad \text{RMSE} = \sqrt{\frac{1}{n}\sum e_t^2}, \quad \text{MASE} = \frac{\text{MAE}}{\frac{1}{n-1}\sum_{t=2}^{n}|Y_t - Y_{t-1}|} \]
+    </div>
+  </div>
+
+  <!-- EJEMPLO TS -->
+  <div class="ex-card">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Ejemplo: TSM mensual — Estación Quepos (72 meses)
+    </h3>
+    <div class="ex-sub">Serie generada aleatoriamente con tendencia + estacionalidad + ruido · n = 72 observaciones mensuales</div>
+    <div style="margin-top:1rem; height:220px; position:relative;"><canvas id="chart-ts1"></canvas></div>
+    <div style="margin-top:1rem; height:170px; position:relative;"><canvas id="chart-ts2"></canvas></div>
+    <div class="ex-stats" id="stats-ts" style="margin-top:1rem;"></div>
+    <div class="ex-interp" id="interp-ts" style="margin-top:.8rem;"></div>
+    <button class="ex-btn" onclick="buildTsCharts()">⟳ Regenerar serie</button>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  Compendio Metodológico · Gestión Marino-Costera · Nivel Doctoral<br>
+  Requiere conexión a internet para renderizado de ecuaciones (MathJax) y gráficos (Chart.js)
+</footer>
+
+<script>
+/* ═══════════════════ UTILITIES ═══════════════════ */
+let _seed = 42;
+function rng() {
+  _seed = (_seed * 1664525 + 1013904223) & 0xffffffff;
+  return ((_seed >>> 0) / 0xffffffff);
+}
+function resetSeed(s) { _seed = s; }
+
+function mean(a) { return a.reduce((s,x)=>s+x,0)/a.length; }
+function std(a,bessel=false) {
+  const m=mean(a), n=bessel?a.length-1:a.length;
+  return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/n);
+}
+function sum(a) { return a.reduce((s,x)=>s+x,0); }
+function zip(a,b) { return a.map((x,i)=>[x,b[i]]); }
+
+/* ── PRNG normal (Box-Muller) ── */
+function randNorm(mu=0, sigma=1) {
+  const u1=rng(), u2=rng();
+  return mu + sigma * Math.sqrt(-2*Math.log(u1+1e-10)) * Math.cos(2*Math.PI*u2);
+}
+
+/* ── Matrix ops ── */
+function mT(A) { return A[0].map((_,j)=>A.map(r=>r[j])); }
+function mMul(A,B) {
+  return A.map(rA=>B[0].map((_,j)=>rA.reduce((s,a,k)=>s+a*B[k][j],0)));
+}
+function mInv(A) {
+  const n=A.length;
+  const aug=A.map((r,i)=>[...r,...Array.from({length:n},(_,j)=>i===j?1:0)]);
+  for(let c=0;c<n;c++){
+    let piv=c;
+    for(let r=c+1;r<n;r++) if(Math.abs(aug[r][c])>Math.abs(aug[piv][c])) piv=r;
+    [aug[c],aug[piv]]=[aug[piv],aug[c]];
+    const d=aug[c][c]; if(Math.abs(d)<1e-12) return null;
+    for(let j=0;j<2*n;j++) aug[c][j]/=d;
+    for(let r=0;r<n;r++) if(r!==c){ const f=aug[r][c]; for(let j=0;j<2*n;j++) aug[r][j]-=f*aug[c][j]; }
+  }
+  return aug.map(r=>r.slice(n));
+}
+
+/* ── Statistics ── */
+function logGamma(x) {
+  if(x<0.5) return Math.log(Math.PI/Math.sin(Math.PI*x))-logGamma(1-x);
+  x-=1;
+  const g=7, c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  let a=c[0]; for(let i=1;i<g+2;i++) a+=c[i]/(x+i);
+  const t=x+g+0.5;
+  return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);
+}
+function incBeta(a,b,x) {
+  if(x<=0) return 0; if(x>=1) return 1;
+  if(x>(a+1)/(a+b+2)) return 1-incBeta(b,a,1-x);
+  const lbeta=logGamma(a)+logGamma(b)-logGamma(a+b);
+  let c=1,d=1-(a+b)*x/(a+1);
+  if(Math.abs(d)<1e-30) d=1e-30; d=1/d; let h=d;
+  for(let m=1;m<=100;m++){
+    let aa=m*(b-m)*x/((a+2*m-1)*(a+2*m));
+    d=1+aa*d; c=1+aa/c;
+    if(Math.abs(d)<1e-30) d=1e-30; if(Math.abs(c)<1e-30) c=1e-30;
+    d=1/d; h*=d*c;
+    aa=-(a+m)*(a+b+m)*x/((a+2*m)*(a+2*m+1));
+    d=1+aa*d; c=1+aa/c;
+    if(Math.abs(d)<1e-30) d=1e-30; if(Math.abs(c)<1e-30) c=1e-30;
+    d=1/d; const del=d*c; h*=del;
+    if(Math.abs(del-1)<1e-10) break;
+  }
+  return Math.exp(a*Math.log(x)+b*Math.log(1-x)-lbeta)*h/a;
+}
+function tPVal(t,df) {
+  const x=df/(df+t*t);
+  return Math.max(1e-6, Math.min(1, incBeta(df/2,0.5,x)));
+}
+function fPVal(f,df1,df2) {
+  if(f<=0) return 1;
+  const x=df2/(df2+df1*f);
+  return Math.max(1e-6, Math.min(1, incBeta(df2/2,df1/2,x)));
+}
+function normalCDF(x) {
+  const a=[0.31938153,-0.356563782,1.781477937,-1.821255978,1.330274429];
+  const k=1/(1+0.2316419*Math.abs(x));
+  const poly=a.reduce((acc,ai)=>acc*k+ai,0)*k;
+  const p=1-Math.exp(-0.5*x*x)/Math.sqrt(2*Math.PI)*poly;
+  return x>=0?p:1-p;
+}
+function chiPVal(x2,df) {
+  if(x2<=0) return 1;
+  const h=1-2/(9*df);
+  const z=(Math.pow(x2/df,1/3)-h)/Math.sqrt(2/(9*df));
+  return Math.max(1e-6, 1-normalCDF(z));
+}
+function sigStar(p) {
+  if(p<0.001) return '***'; if(p<0.01) return '**'; if(p<0.05) return '*'; return 'ns';
+}
+function fmt(v,d=3) { return typeof v==='number'?v.toFixed(d):v; }
+function fmtP(p) {
+  if(p<0.001) return '< 0.001'; return p.toFixed(3);
+}
+
+function pearsonR(x,y) {
+  const mx=mean(x), my=mean(y);
+  let num=0, dx=0, dy=0;
+  for(let i=0;i<x.length;i++){ num+=(x[i]-mx)*(y[i]-my); dx+=(x[i]-mx)**2; dy+=(y[i]-my)**2; }
+  return num/Math.sqrt(dx*dy);
+}
+function rankArr(a) {
+  const n=a.length;
+  const idx=[...Array(n).keys()].sort((i,j)=>a[i]-a[j]);
+  const r=new Array(n);
+  let i=0;
+  while(i<n){
+    let j=i; while(j<n&&a[idx[j]]===a[idx[i]]) j++;
+    const avg=(i+j-1)/2+1;
+    for(let k=i;k<j;k++) r[idx[k]]=avg;
+    i=j;
+  }
+  return r;
+}
+function spearmanR(x,y) { return pearsonR(rankArr(x),rankArr(y)); }
+
+function ols(Xd,y) {
+  const n=y.length, k=Xd[0].length;
+  const X=Xd.map(r=>[1,...r]);
+  const p=k+1;
+  const Xt=mT(X);
+  const XtX=mMul(Xt,X);
+  const Xty=mMul(Xt,y.map(v=>[v]));
+  const XtXi=mInv(XtX);
+  if(!XtXi) return null;
+  const beta=mMul(XtXi,Xty).map(r=>r[0]);
+  const yhat=X.map(r=>r.reduce((s,x,j)=>s+x*beta[j],0));
+  const resid=y.map((v,i)=>v-yhat[i]);
+  const ybar=mean(y);
+  const sse=sum(resid.map(e=>e*e));
+  const sst=sum(y.map(v=>(v-ybar)**2));
+  const ssr=sst-sse;
+  const r2=Math.max(0,ssr/sst);
+  const r2adj=1-(1-r2)*(n-1)/(n-p);
+  const mse=sse/(n-p);
+  const se=XtXi.map((r,i)=>Math.sqrt(Math.max(0,mse*r[i])));
+  const tS=beta.map((b,i)=>b/se[i]);
+  const pT=tS.map(t=>tPVal(Math.abs(t),n-p));
+  const fS=(ssr/k)/mse;
+  const pF=fPVal(fS,k,n-p);
+  return {beta,yhat,resid,r2,r2adj,mse,se,tS,pT,fS,pF,sse,sst,n,k};
+}
+
+function anova(groups) {
+  const k=groups.length;
+  const all=groups.flat(), N=all.length;
+  const gm=mean(all);
+  const gmeans=groups.map(mean);
+  const gstds=groups.map(g=>{ const m=mean(g); return Math.sqrt(sum(g.map(x=>(x-m)**2))/g.length); });
+  const ssTreat=sum(groups.map((g,i)=>g.length*(gmeans[i]-gm)**2));
+  const ssErr=sum(groups.map(g=>{ const m=mean(g); return sum(g.map(x=>(x-m)**2)); }));
+  const dfT=k-1, dfE=N-k;
+  const msT=ssTreat/dfT, msE=ssErr/dfE;
+  const F=msT/msE;
+  const p=fPVal(F,dfT,dfE);
+  const eta2=ssTreat/(ssTreat+ssErr);
+  const omega2=(ssTreat-(k-1)*msE)/(ssTreat+ssErr+msE);
+  return {ssTreat,ssErr,dfT,dfE,msT,msE,F,p,eta2,omega2:Math.max(0,omega2),gmeans,gstds};
+}
+
+/* ── CHART DEFAULTS ── */
+Chart.defaults.color='#6da4c2';
+Chart.defaults.borderColor='rgba(10,147,150,.18)';
+const CLR=['#0a9396','#ee9b00','#94d2bd','#ca6702','#e9d8a6','#005f73'];
+const charts={};
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+
+/* ═══════════════════ 1. CORRELACIÓN ═══════════════════ */
+let corData = null;
+function genCorData() {
+  resetSeed(Date.now()&0xffff);
+  const n=45;
+  const tsm=[], coral=[];
+  for(let i=0;i<n;i++){
+    const t=26+rng()*6;
+    const c=Math.max(2, Math.min(95, 88-3.5*(t-27)+randNorm(0,12)));
+    tsm.push(+t.toFixed(2)); coral.push(+c.toFixed(1));
+  }
+  return {tsm, coral};
+}
+
+function buildCorChart() {
+  corData = genCorData();
+  const {tsm, coral} = corData;
+  const n=tsm.length;
+  const r=pearsonR(tsm,coral);
+  const rs=spearmanR(tsm,coral);
+  const t=r*Math.sqrt(n-2)/Math.sqrt(1-r*r);
+  const p=tPVal(Math.abs(t),n-2);
+  const Z=0.5*Math.log((1+r)/(1-r));
+  const zSE=1/Math.sqrt(n-3);
+  const rLow=Math.tanh(Z-1.96*zSE), rHigh=Math.tanh(Z+1.96*zSE);
+  const ts2=rs*Math.sqrt(n-2)/Math.sqrt(1-rs*rs);
+  const ps=tPVal(Math.abs(ts2),n-2);
+
+  // Regression line
+  const mx=mean(tsm), my=mean(coral);
+  let num=0,dx=0; tsm.forEach((x,i)=>{num+=(x-mx)*(coral[i]-my);dx+=(x-mx)**2;});
+  const slope=num/dx, intercept=my-slope*mx;
+  const xMin=Math.min(...tsm), xMax=Math.max(...tsm);
+  const lineData=[{x:xMin,y:intercept+slope*xMin},{x:xMax,y:intercept+slope*xMax}];
+
+  destroyChart('cor');
+  const ctx=document.getElementById('chart-cor').getContext('2d');
+  charts['cor']=new Chart(ctx,{
+    type:'scatter',
+    data:{
+      datasets:[
+        {label:'Transectos',data:tsm.map((x,i)=>({x,y:coral[i]})),
+          backgroundColor:'rgba(10,147,150,.7)',pointRadius:5,pointHoverRadius:7},
+        {label:`Regresión lineal (r = ${r.toFixed(2)})`,type:'line',data:lineData,
+          borderColor:'#ee9b00',borderWidth:2,pointRadius:0,fill:false}
+      ]
+    },
+    options:{
+      animation:{duration:300},
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{size:11},boxWidth:14}},
+        title:{display:true,text:'TSM (°C) vs. Cobertura coralina (%)',font:{size:12}}},
+      scales:{
+        x:{title:{display:true,text:'TSM (°C)',font:{size:11}},
+          ticks:{font:{size:10}},grid:{color:'rgba(10,147,150,.12)'}},
+        y:{title:{display:true,text:'Cobertura coralina (%)',font:{size:11}},
+          ticks:{font:{size:10}},grid:{color:'rgba(10,147,150,.12)'}}
+      }
+    }
+  });
+
+  const sig=p<0.05;
+  document.getElementById('stats-cor').innerHTML=`
+    <h4>Resultados estadísticos (n = ${n})</h4>
+    <div class="stat-row"><span class="stat-label">Pearson <em>r</em></span><span class="stat-val">${r.toFixed(3)}</span></div>
+    <div class="stat-row"><span class="stat-label">Estadístico <em>t</em></span><span class="stat-val">${t.toFixed(3)}</span></div>
+    <div class="stat-row"><span class="stat-label">Valor <em>p</em> (bilateral)</span><span class="stat-val">${fmtP(p)} <span class="${sig?'stat-sig':'stat-ns'}">${sigStar(p)}</span></span></div>
+    <div class="stat-row"><span class="stat-label">IC 95% (Fisher Z)</span><span class="stat-val">[${rLow.toFixed(3)}, ${rHigh.toFixed(3)}]</span></div>
+    <div class="stat-row"><span class="stat-label">Spearman ρ<sub>s</sub></span><span class="stat-val">${rs.toFixed(3)} <span class="${ps<0.05?'stat-sig':'stat-ns'}">${sigStar(ps)}</span></span></div>
+    <div class="stat-row"><span class="stat-label">R² (varianza explicada)</span><span class="stat-val">${(r*r*100).toFixed(1)} %</span></div>
+  `;
+  const mag=Math.abs(r)>0.6?'fuerte':Math.abs(r)>0.4?'moderada':'débil';
+  const dir=r<0?'negativa':'positiva';
+  document.getElementById('interp-cor').innerHTML=
+    sig
+    ? `Existe una correlación ${mag} y ${dir} entre la TSM y la cobertura coralina (<em>r</em> = ${r.toFixed(2)}, <em>p</em> ${fmtP(p)}). Aproximadamente el ${(r*r*100).toFixed(0)}% de la variabilidad en la cobertura es explicada linealmente por la temperatura. El IC de Fisher al 95% [${rLow.toFixed(2)}, ${rHigh.toFixed(2)}] no incluye cero, confirmando significancia.`
+    : `La correlación observada (<em>r</em> = ${r.toFixed(2)}) no es estadísticamente significativa a α = 0.05 en esta muestra. No hay evidencia suficiente de asociación lineal entre TSM y cobertura coralina con n = ${n}.`;
+}
+
+/* ═══════════════════ 2. REGRESIÓN ═══════════════════ */
+function buildRegChart() {
+  resetSeed(Date.now()&0xffff);
+  const n=60;
+  const X1=[], X2=[], X3=[], Y=[];
+  for(let i=0;i<n;i++){
+    const x1=26+rng()*6;      // TSM (°C)
+    const x2=0.5+rng()*3;     // Índice surgencia
+    const x3=10+rng()*80;     // Cobertura manglar (%)
+    const y=Math.max(5, 180 - 3.8*(x1-27) + 12*x2 + 0.6*x3 + randNorm(0,18));
+    X1.push(+x1.toFixed(2)); X2.push(+x2.toFixed(2)); X3.push(+x3.toFixed(1)); Y.push(+y.toFixed(1));
+  }
+  const res=ols(zip(X1,zip(X2,X3).map(([a,b])=>[a,b])).map(([a,[b,c]])=>[a,b,c]), Y);
+  if(!res) return;
+  const {beta,yhat,r2,r2adj,fS,pF,tS,pT,se,n:rn,k} = res;
+
+  destroyChart('reg');
+  const ctx=document.getElementById('chart-reg').getContext('2d');
+  const mn=Math.min(...Y,...yhat), mx=Math.max(...Y,...yhat);
+  charts['reg']=new Chart(ctx,{
+    type:'scatter',
+    data:{datasets:[
+      {label:'Observado vs. Ajustado',data:yhat.map((h,i)=>({x:h,y:Y[i]})),
+        backgroundColor:'rgba(10,147,150,.65)',pointRadius:5},
+      {label:'Línea 1:1',type:'line',data:[{x:mn,y:mn},{x:mx,y:mx}],
+        borderColor:'#ee9b00',borderDash:[5,3],borderWidth:1.5,pointRadius:0,fill:false}
+    ]},
+    options:{
+      animation:{duration:300},
+      responsive:true, maintainAspectRatio:false,
+      plugins:{title:{display:true,text:'Valores Observados vs. Ajustados (Ŷ)',font:{size:12}}},
+      scales:{
+        x:{title:{display:true,text:'Ŷ (captura ajustada, kg)',font:{size:11}},
+          grid:{color:'rgba(10,147,150,.12)'},ticks:{font:{size:10}}},
+        y:{title:{display:true,text:'Y (captura observada, kg)',font:{size:11}},
+          grid:{color:'rgba(10,147,150,.12)'},ticks:{font:{size:10}}}
+      }
+    }
+  });
+
+  const varNames=['Intercepto','TSM (β₁)','Surgencia (β₂)','Manglar (β₃)'];
+  document.getElementById('stats-reg').innerHTML=`
+    <h4>Tabla de coeficientes MCO (n = ${n})</h4>
+    ${varNames.map((v,i)=>`<div class="stat-row">
+      <span class="stat-label">${v}</span>
+      <span class="stat-val">${beta[i].toFixed(2)} <small style="color:var(--muted)">(SE=${se[i].toFixed(2)})</small> <span class="${pT[i]<0.05?'stat-sig':'stat-ns'}">${sigStar(pT[i])}</span></span>
+    </div>`).join('')}
+    <div class="stat-row"><span class="stat-label">R²</span><span class="stat-val">${r2.toFixed(3)}</span></div>
+    <div class="stat-row"><span class="stat-label">R² ajustado</span><span class="stat-val">${r2adj.toFixed(3)}</span></div>
+    <div class="stat-row"><span class="stat-label">F (${k}, ${rn-k-1})</span><span class="stat-val">${fS.toFixed(2)} <span class="${pF<0.05?'stat-sig':'stat-ns'}">${sigStar(pF)}</span></span></div>
+  `;
+  const sig=pF<0.05;
+  document.getElementById('interp-reg').innerHTML=
+    `El modelo explica el ${(r2*100).toFixed(0)}% de la varianza en la captura (R² = ${r2.toFixed(3)}, R²adj = ${r2adj.toFixed(3)}). La prueba F${sig?' es significativa':' no es significativa'} (F(${k},${rn-k-1}) = ${fS.toFixed(2)}, p ${fmtP(pF)}). Los coeficientes con mayor evidencia son: ${varNames.filter((_,i)=>i>0&&pT[i]<0.05).join(', ')||'ninguno'}.`;
+}
+
+/* ═══════════════════ 3. DOE ═══════════════════ */
+const groupNames=['Reserva marina','Zona buffer','Pesca artesanal','Sin restricción'];
+const groupMuTrue=[62,50,38,26];
+
+function buildDoeChart() {
+  resetSeed(Date.now()&0xffff);
+  const ng=10;
+  const groups=groupMuTrue.map(mu=>Array.from({length:ng},()=>Math.max(2,Math.min(98,mu+randNorm(0,9)))));
+  const av=anova(groups);
+
+  destroyChart('doe');
+  const ctx=document.getElementById('chart-doe').getContext('2d');
+  const allPts=[];
+  groups.forEach((g,gi)=>g.forEach(v=>allPts.push({x:gi+1+(rng()-.5)*.4,y:+v.toFixed(1),gi})));
+
+  charts['doe']=new Chart(ctx,{
+    type:'scatter',
+    data:{datasets:[
+      ...groups.map((g,i)=>({
+        label:`${groupNames[i]} (μ̂=${av.gmeans[i].toFixed(1)})`,
+        data:g.map(v=>({x:i+1+(rng()-.5)*.4,y:+v.toFixed(1)})),
+        backgroundColor:CLR[i]+'bb', pointRadius:6, pointHoverRadius:8
+      })),
+      {label:'Media del grupo',type:'line',data:av.gmeans.map((m,i)=>({x:i+1,y:m})),
+        borderColor:'#ffffff55',borderWidth:1.5,pointStyle:'line',
+        pointRadius:0,fill:false,showLine:false}
+    ]},
+    options:{
+      animation:{duration:300},
+      responsive:true, maintainAspectRatio:false,
+      plugins:{title:{display:true,text:'Cobertura coralina (%) por zona de manejo',font:{size:12}},
+        legend:{labels:{font:{size:10},boxWidth:12}}},
+      scales:{
+        x:{title:{display:true,text:'Zona de manejo',font:{size:11}},
+          ticks:{font:{size:10},callback:(_,i)=>groupNames[i]||''},
+          min:.4,max:4.6,grid:{color:'rgba(10,147,150,.1)'}},
+        y:{title:{display:true,text:'Cobertura coralina (%)',font:{size:11}},
+          min:0,max:100,grid:{color:'rgba(10,147,150,.12)'},ticks:{font:{size:10}}}
+      }
+    }
+  });
+
+  const sig=av.p<0.05;
+  document.getElementById('stats-doe').innerHTML=`
+    <h4>Tabla ANOVA (k = 4, N = ${ng*4})</h4>
+    <div class="stat-row"><span class="stat-label">SC Tratamientos</span><span class="stat-val">${av.ssTreat.toFixed(2)}</span></div>
+    <div class="stat-row"><span class="stat-label">SC Error</span><span class="stat-val">${av.ssErr.toFixed(2)}</span></div>
+    <div class="stat-row"><span class="stat-label">CM Trat / CM Error</span><span class="stat-val">${av.msT.toFixed(2)} / ${av.msE.toFixed(2)}</span></div>
+    <div class="stat-row"><span class="stat-label">F (${av.dfT}, ${av.dfE})</span><span class="stat-val">${av.F.toFixed(2)} <span class="${sig?'stat-sig':'stat-ns'}">${sigStar(av.p)}</span></span></div>
+    <div class="stat-row"><span class="stat-label">Valor p</span><span class="stat-val">${fmtP(av.p)}</span></div>
+    <div class="stat-row"><span class="stat-label">η² / ω²</span><span class="stat-val">${av.eta2.toFixed(3)} / ${av.omega2.toFixed(3)}</span></div>
+  `;
+  const efMag=av.omega2>0.14?'grande':av.omega2>0.06?'mediano':'pequeño';
+  document.getElementById('interp-doe').innerHTML=
+    sig
+    ? `El ANOVA detecta diferencias significativas entre zonas (F(${av.dfT},${av.dfE}) = ${av.F.toFixed(2)}, p ${fmtP(av.p)}). El tamaño del efecto ω² = ${av.omega2.toFixed(2)} indica un efecto ${efMag} del tipo de manejo sobre la cobertura coralina. Se recomienda aplicar prueba post-hoc (Tukey HSD) para identificar qué pares difieren.`
+    : `No se detectan diferencias significativas entre zonas a α = 0.05 (F(${av.dfT},${av.dfE}) = ${av.F.toFixed(2)}, p = ${fmtP(av.p)}) en esta muestra. Considerar aumentar n o verificar si existe heterocedasticidad entre grupos.`;
+}
+
+/* ═══════════════════ 4. CORRESPONDENCIA ═══════════════════ */
+const habitats=['Coral vivo','Coral muerto','Pastos marinos','Roca'];
+const species=['Pargo','Corvina','Mero','Burro','Pez loro'];
+function buildAcExample() {
+  resetSeed(Date.now()&0xffff);
+  // Generate contingency table with some structure
+  const bases=[[40,6,4,14,8],[6,38,12,10,22],[4,8,30,24,28],[12,16,18,20,16]];
+  const tbl=bases.map(row=>row.map(v=>Math.max(1,Math.round(v+randNorm(0,v*0.2)))));
+  const rowS=tbl.map(r=>sum(r));
+  const colS=species.map((_,j)=>sum(tbl.map(r=>r[j])));
+  const n=sum(rowS);
+  // Expected and Pearson residuals
+  let chi2=0;
+  const res=tbl.map((row,i)=>row.map((o,j)=>{
+    const e=rowS[i]*colS[j]/n;
+    chi2+=(o-e)**2/e;
+    return (o-e)/Math.sqrt(e);
+  }));
+  const df=(tbl.length-1)*(tbl[0].length-1);
+  const p=chiPVal(chi2,df);
+  const inertia=chi2/n;
+
+  // Color scale for heatmap
+  function cellColor(r,isRes=false) {
+    if(!isRes){ const v=r; const t=Math.min(1,v/60); return `rgba(10,147,150,${0.1+t*0.7})`; }
+    const v=Math.abs(r); const t=Math.min(1,v/3);
+    return r>0?`rgba(10,147,150,${0.1+t*0.65})`:`rgba(238,155,0,${0.1+t*0.65})`;
+  }
+
+  document.getElementById('ac-tables').innerHTML=`
+    <div class="g2">
+      <div>
+        <p style="font-size:.75rem;color:var(--muted);margin-bottom:.4rem;">TABLA DE FRECUENCIAS OBSERVADAS</p>
+        <div class="tbl-wrap"><table class="hmap">
+          <thead><tr><th></th>${species.map(s=>`<th>${s}</th>`).join('')}<th>Total</th></tr></thead>
+          <tbody>
+            ${tbl.map((row,i)=>`<tr><th style="text-align:left;color:var(--tlt)">${habitats[i]}</th>
+              ${row.map((v,j)=>`<td style="background:${cellColor(v)}">${v}</td>`).join('')}
+              <td style="color:var(--muted)">${rowS[i]}</td></tr>`).join('')}
+            <tr><th style="text-align:left;color:var(--muted)">Total</th>${colS.map(c=>`<td style="color:var(--muted)">${c}</td>`).join('')}<td style="color:var(--muted)">${n}</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div>
+        <p style="font-size:.75rem;color:var(--muted);margin-bottom:.4rem;">RESIDUOS ESTANDARIZADOS DE PEARSON (azul=sobre esperado, naranja=bajo esperado)</p>
+        <div class="tbl-wrap"><table class="hmap">
+          <thead><tr><th></th>${species.map(s=>`<th>${s}</th>`).join('')}</tr></thead>
+          <tbody>
+            ${res.map((row,i)=>`<tr><th style="text-align:left;color:var(--tlt)">${habitats[i]}</th>
+              ${row.map(v=>`<td style="background:${cellColor(v,true)}">${v.toFixed(2)}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+  `;
+  document.getElementById('stats-ac').innerHTML=`
+    <h4>Prueba de independencia χ²</h4>
+    <div class="stat-row"><span class="stat-label">χ² calculado</span><span class="stat-val">${chi2.toFixed(2)}</span></div>
+    <div class="stat-row"><span class="stat-label">Grados de libertad</span><span class="stat-val">${df}</span></div>
+    <div class="stat-row"><span class="stat-label">Valor p</span><span class="stat-val">${fmtP(p)} <span class="${p<0.05?'stat-sig':'stat-ns'}">${sigStar(p)}</span></span></div>
+    <div class="stat-row"><span class="stat-label">Inercia total (χ²/n)</span><span class="stat-val">${inertia.toFixed(4)}</span></div>
+  `;
+  const maxRes=res.flat().map((v,i)=>({v,hab:habitats[Math.floor(i/5)],sp:species[i%5]})).sort((a,b)=>Math.abs(b.v)-Math.abs(a.v));
+  document.getElementById('interp-ac').innerHTML=
+    `La prueba χ² indica ${p<0.05?'asociación significativa':'independencia estadística'} entre hábitat y especie (χ²(${df}) = ${chi2.toFixed(1)}, p ${fmtP(p)}). La inercia total = ${inertia.toFixed(3)} resumiría la magnitud de la asociación a representar en el biplot. Los residuos más extremos (asociaciones más fuertes): <strong>${maxRes[0].hab} – ${maxRes[0].sp}</strong> (${maxRes[0].v.toFixed(2)}) y <strong>${maxRes[1].hab} – ${maxRes[1].sp}</strong> (${maxRes[1].v.toFixed(2)}).`;
+}
+
+/* ═══════════════════ 5. SERIES DE TIEMPO ═══════════════════ */
+function buildTsCharts() {
+  resetSeed(Date.now()&0xffff);
+  const n=72;
+  const trend=0.025+rng()*0.02; // ~0.03°C/mes
+  const amp=1.2+rng()*0.8;
+  const phase=rng()*Math.PI*2;
+  const Yt=[], Tt=[], Sm=[];
+  for(let t=0;t<n;t++){
+    const tr=27+trend*t;
+    const s=amp*Math.sin(2*Math.PI*t/12+phase);
+    const noise=randNorm(0,0.5);
+    Yt.push(+(tr+s+noise).toFixed(3));
+    Tt.push(+tr.toFixed(3));
+  }
+  // 12-month moving average (centered)
+  for(let t=0;t<n;t++){
+    if(t<6||t>=n-6){ Sm.push(null); continue; }
+    Sm.push(+(mean(Yt.slice(t-6,t+6)).toFixed(3)));
+  }
+
+  const labels=[];
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  for(let y=0;y<6;y++) for(let m=0;m<12;m++) labels.push(`${months[m]} ${2019+y}`);
+
+  destroyChart('ts1'); destroyChart('ts2');
+  const ctx1=document.getElementById('chart-ts1').getContext('2d');
+  charts['ts1']=new Chart(ctx1,{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'TSM observada',data:Yt,borderColor:'rgba(10,147,150,.9)',borderWidth:1.5,
+        pointRadius:2,backgroundColor:'transparent'},
+      {label:'Tendencia lineal',data:Tt,borderColor:'#ee9b00',borderWidth:2,
+        borderDash:[6,3],pointRadius:0,backgroundColor:'transparent'},
+      {label:'MM 12 meses',data:Sm,borderColor:'#94d2bd',borderWidth:2,
+        pointRadius:0,backgroundColor:'transparent',spanGaps:false}
+    ]},
+    options:{animation:{duration:300},responsive:true,maintainAspectRatio:false,
+      plugins:{title:{display:true,text:'Temperatura Superficial del Mar (°C) — Quepos',font:{size:12}},
+        legend:{labels:{font:{size:10},boxWidth:12}}},
+      scales:{
+        x:{ticks:{font:{size:8},maxTicksLimit:12},grid:{color:'rgba(10,147,150,.1)'}},
+        y:{title:{display:true,text:'TSM (°C)',font:{size:10}},
+          grid:{color:'rgba(10,147,150,.12)'},ticks:{font:{size:10}}}
+      }}
+  });
+
+  // ACF calculation (lags 1-18)
+  const maxLag=18;
+  const ym=mean(Yt), yvar=sum(Yt.map(v=>(v-ym)**2))/n;
+  const acf=[];
+  for(let lag=0;lag<=maxLag;lag++){
+    const c=sum(Array.from({length:n-lag},(_,t)=>(Yt[t]-ym)*(Yt[t+lag]-ym)))/n;
+    acf.push(+(c/yvar).toFixed(4));
+  }
+  const ciLine=1.96/Math.sqrt(n);
+
+  const ctx2=document.getElementById('chart-ts2').getContext('2d');
+  charts['ts2']=new Chart(ctx2,{
+    type:'bar',
+    data:{labels:acf.map((_,i)=>i),datasets:[
+      {label:'ACF',data:acf.map(v=>+v.toFixed(3)),
+        backgroundColor:acf.map(v=>Math.abs(v)>ciLine?'rgba(10,147,150,.8)':'rgba(10,147,150,.35)'),
+        borderWidth:0}
+    ]},
+    options:{animation:{duration:300},responsive:true,maintainAspectRatio:false,
+      plugins:{
+        title:{display:true,text:'Función de Autocorrelación (ACF) — Rezagos 0–18',font:{size:11}},
+        annotation:{
+          annotations:{
+            upper:{type:'line',yMin:ciLine,yMax:ciLine,borderColor:'#ee9b00',borderWidth:1.5,borderDash:[4,3]},
+            lower:{type:'line',yMin:-ciLine,yMax:-ciLine,borderColor:'#ee9b00',borderWidth:1.5,borderDash:[4,3]}
+          }
+        }
+      },
+      scales:{
+        x:{title:{display:true,text:'Rezago (h)',font:{size:10}},ticks:{font:{size:9}}},
+        y:{min:-1,max:1,title:{display:true,text:'Autocorrelación',font:{size:10}},
+          grid:{color:'rgba(10,147,150,.12)'},ticks:{font:{size:9}}}
+      }}
+  });
+
+  // Add CI lines manually as datasets
+  charts['ts2'].data.datasets.push({
+    label:`IC 95% (±${ciLine.toFixed(3)})`,type:'line',
+    data:Array(maxLag+1).fill(+ciLine.toFixed(3)),
+    borderColor:'rgba(238,155,0,.7)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false
+  },{
+    type:'line', data:Array(maxLag+1).fill(-ciLine.toFixed(3)),
+    borderColor:'rgba(238,155,0,.7)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false,showInLegend:false
+  });
+  charts['ts2'].update();
+
+  const sigLags=acf.slice(1).map((v,i)=>Math.abs(v)>ciLine?i+1:-1).filter(i=>i>0);
+  const annualLag=acf[12]>ciLine;
+  document.getElementById('stats-ts').innerHTML=`
+    <h4>Estadísticos descriptivos (n = ${n})</h4>
+    <div class="stat-row"><span class="stat-label">Media de TSM</span><span class="stat-val">${mean(Yt).toFixed(2)} °C</span></div>
+    <div class="stat-row"><span class="stat-label">Desv. estándar</span><span class="stat-val">${std(Yt,true).toFixed(3)} °C</span></div>
+    <div class="stat-row"><span class="stat-label">Tendencia estimada</span><span class="stat-val">${(trend*12).toFixed(3)} °C/año</span></div>
+    <div class="stat-row"><span class="stat-label">ACF(1)</span><span class="stat-val">${acf[1].toFixed(3)} ${Math.abs(acf[1])>ciLine?'<span class="stat-sig">sig.</span>':'<span class="stat-ns">ns</span>'}</span></div>
+    <div class="stat-row"><span class="stat-label">ACF(12) — estacionalidad</span><span class="stat-val">${acf[12].toFixed(3)} ${annualLag?'<span class="stat-sig">sig.</span>':'<span class="stat-ns">ns</span>'}</span></div>
+    <div class="stat-row"><span class="stat-label">Rezagos significativos</span><span class="stat-val">${sigLags.length>0?sigLags.join(', '):'ninguno'}</span></div>
+  `;
+  document.getElementById('interp-ts').innerHTML=
+    `La serie presenta una tendencia positiva de ${(trend*12).toFixed(3)} °C/año. ${annualLag?`La ACF muestra un pico significativo en rezago 12 (ρ<sub>12</sub> = ${acf[12].toFixed(2)}), confirmando estacionalidad anual de período s = 12 — lo que sugiere un modelo SARIMA(p,d,q)(P,D,Q)<sub>12</sub> como punto de partida.`:'No se detecta estacionalidad clara en ACF(12).'} ${sigLags.length>1?'La autocorrelación en rezagos consecutivos sugiere no-estacionariedad; aplicar diferenciación ∇ antes de ajustar ARIMA.':''}`;
+}
+
+/* ═══════════════════ TAB NAVIGATION ═══════════════════ */
+const chartInited = {};
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(!chartInited[id]){ buildChartForSection(id); chartInited[id]=true; }
+}
+function buildChartForSection(id) {
+  if(id==='correlacion') buildCorChart();
+  else if(id==='regresion') buildRegChart();
+  else if(id==='doe') buildDoeChart();
+  else if(id==='ac') buildAcExample();
+  else if(id==='ts') buildTsCharts();
+}
+
+/* Init */
+document.addEventListener('DOMContentLoaded', () => {
+  buildCorChart();
+  chartInited['correlacion'] = true;
+});
+</script>
+</body>
+</html>
